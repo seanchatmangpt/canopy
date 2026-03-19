@@ -44,6 +44,70 @@ Plus OpenCode, HTTP endpoints, shell processes, and any agent that can read file
 
 ---
 
+## The Command Center: OSA
+
+Canopy is the protocol. **OSA** (Open Source Agent) is the visual command center.
+
+While Canopy works perfectly from the terminal, OSA gives you a GUI to manage
+everything — think of it as the control tower for your agent fleet:
+
+- **Workspace Dashboard** — See all your Canopy workspaces in one view. Status,
+  active agents, budget burn, recent activity. Click into any workspace to inspect.
+- **Org Chart** — Visual hierarchy of your agent team. Who reports to whom,
+  current assignments, workload distribution. Drag to reassign. Click to inspect.
+- **Agent Terminal** — Live agent sessions. Watch agents work in real-time,
+  intervene when needed, approve decisions inline. Multiple terminals side by side.
+- **Project Board** — Initiatives → Projects → Milestones → Issues. Kanban or
+  timeline view. Auto-populated from workspace task files.
+- **Budget Console** — Token spend, dollar costs, per-workspace and per-agent
+  breakdowns. Alerts, forecasts, hard ceiling controls.
+- **Skill Library** — Browse, install, and configure skills across workspaces.
+  Preview skill definitions, test runs, version history.
+- **App Integrations** — Connect workspaces to external tools (CRM, email, Slack,
+  calendars, databases). Visual configuration, credential management, webhook setup.
+- **Marketplace** — Browse community workspaces, agent templates, and skill packs.
+  One-click install into any workspace.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  OSA Command Center                                     ▣ ▤ ✕  │
+├──────────┬──────────────────────────────────────────────────────┤
+│          │  ┌─ sales-engine ──────────────────────────────────┐ │
+│ SPACES   │  │  5 agents active  │  $127/$500 budget          │ │
+│          │  │  12 tasks open    │  3 awaiting approval       │ │
+│ ● Sales  │  └────────────────────────────────────────────────┘ │
+│ ○ Dev    │                                                     │
+│ ○ Content│  Org Chart          │  Live Terminals               │
+│ ○ CogOS  │  ┌──────────┐      │  ┌──────────────────────────┐ │
+│          │  │ Director  │      │  │ closer > /qualify ACME   │ │
+│ AGENTS   │  ├────┬─────┤      │  │ Running MEDDPICC...      │ │
+│ 20 total │  │Close│Prosp│      │  │ Score: 7.2/10            │ │
+│ 16 active│  └────┴─────┘      │  │ > Recommending demo call │ │
+│          │                     │  └──────────────────────────┘ │
+│ BUDGET   │  Recent Activity                                    │
+│ $340/$2K │  14:32 closer qualified ACME Corp (7.2)             │
+│ ████░░░░ │  14:28 prospector found 3 new ICP matches           │
+│          │  14:15 director approved Q2 pipeline strategy        │
+├──────────┴──────────────────────────────────────────────────────┤
+│  Budget ▸ $340 / $2,000  │  Tasks ▸ 12 open  │  Approvals ▸ 3 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**OSA is open source too.** The CLI works standalone. The GUI is for people who want
+to see their agent empire at a glance. Both read the same Canopy workspace files.
+
+Want just the protocol? Use Canopy with any terminal agent.
+Want the full experience? Use OSA for the visual layer + Canopy for the workspace.
+Want managed infrastructure? Use [MIOSA](#canopy--miosa) for VMs + scaling + marketplace.
+
+```
+Canopy (protocol)  →  Any agent reads it. Free. MIT license.
+OSA (GUI)          →  Visual command center. Free. Open source.
+MIOSA (platform)   →  Managed VMs, marketplace, enterprise. Paid.
+```
+
+---
+
 ## Canopy is right for you if
 
 - You want to build autonomous AI companies, agencies, or workflows
@@ -54,6 +118,9 @@ Plus OpenCode, HTTP endpoints, shell processes, and any agent that can read file
 - You want to monitor costs and enforce budgets across agent teams
 - You want pre-built workspaces you can download and run in 5 minutes
 - You want a workspace protocol that isn't locked to one vendor's server
+- You want your AI company to actually build apps, products, and integrations — not just chat
+- You want an org chart, project board, and budget console for your agent teams
+- You want to automate RPA workflows, browser tasks, and multi-step processes with natural language
 
 ---
 
