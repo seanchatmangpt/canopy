@@ -197,6 +197,9 @@ sales-engine/
 ├── engine/                        ← Optional software underneath
 │   └── (CRM integration, email API, SQLite pipeline DB,
 │        lead scoring model, sequence automation...)
+│        Pluggable: SQLite FTS5, sqlite-vec, Qdrant, Ollama,
+│        OpenAI, Neo4j, or bring your own backend.
+│        See architecture/engine-layer.md for all options.
 │
 │  ═══════════════════════════════════════════════════════
 │  PROJECT LAYER — What agents BUILD (work product)
@@ -385,6 +388,26 @@ Spawn teams of agents that coordinate via filesystem:
 
 See [`architecture/team-coordination.md`](architecture/team-coordination.md).
 
+### Pluggable Engine Backends
+
+The L3 engine layer is fully pluggable — swap backends without changing skills or agents:
+
+| Function | Options |
+|----------|---------|
+| **Text Search** | SQLite FTS5, Tantivy, Typesense, Elasticsearch, Meilisearch |
+| **Semantic Search** | sqlite-vec, Qdrant, ChromaDB, Pinecone, pgvector, LanceDB |
+| **Embeddings** | Ollama (local), OpenAI, Cohere, Voyage AI, local ONNX |
+| **Knowledge Graph** | SQLite edges, Neo4j, NetworkX, Apache AGE, filesystem |
+| **Memory** | SQLite, Mem0, Zep, Redis, PostgreSQL |
+| **Classification** | LLM-based, rule-based, hybrid, fine-tuned local |
+| **LLM Provider** | Ollama, OpenAI, Anthropic, Google, Groq, local GGUF |
+
+Start with SQLite + Ollama (zero dependencies). Scale to Qdrant + Neo4j + OpenAI
+when you need production throughput. The workspace doesn't change — only the engine config.
+
+See [`architecture/engine-layer.md`](architecture/engine-layer.md) for comparison tables,
+reference configurations, and the OptimalOS reference implementation.
+
 ### Cross-Workspace Signals
 
 Workspaces communicate through signals with universal encoding:
@@ -478,7 +501,7 @@ context and picks up whatever the new workspace provides. Base config persists.
 | `spec-layer.md` | PROCEDURES.md, WORKFLOW.md, MODULES.md formats |
 | `verification.md` | Spec contracts and drift detection |
 
-### [`library/`](library/) — 159 Agents, 83 Skills
+### [`library/`](library/) — 168 Agents, 114 Skills
 
 **`library/agents/`** — 168 agents across 14 categories:
 academic, design, engineering, game-development, marketing, paid-media,
@@ -509,12 +532,13 @@ governance, analysis, workspace
 | `full/` | ~30 | Full operation (4 agents, 8 skills, workflows, spec/) |
 | `enterprise/` | ~50 | Enterprise (governance, budgets, compliance, audit) |
 
-### [`architecture/`](architecture/) — 18 Spec Documents
+### [`architecture/`](architecture/) — 19 Spec Documents
 
 Heartbeat protocol, adapter registry, session persistence, budget enforcement,
 task hierarchy, governance, marketplace format, tiered loading, memory architecture,
 signal integration, cross-workspace signals, proactive agents, processing pipeline,
-three-space model, team coordination, workspaces, and more.
+three-space model, team coordination, workspaces, unified system model, engine layer,
+and more.
 
 ### [`strategy/`](strategy/) — 7-Phase Orchestration
 
@@ -682,7 +706,8 @@ cp -r templates/enterprise/ my-company/
                          │ powered by
 ┌────────────────────────┴────────────────────────────────────┐
 │  L3 — ENGINE (invisible, 0 tokens in context)                │
-│  Search, vectors, knowledge graph, classification, CI/CD     │
+│  Search, vectors, knowledge graph, memory, classification    │
+│  Pluggable backends: SQLite/Qdrant/Neo4j/Ollama/OpenAI/...   │
 └─────────────────────────────────────────────────────────────┘
 ```
 

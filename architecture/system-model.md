@@ -74,6 +74,9 @@ last               for current task    entity match       the context window
 | **Searched** | Variable | Query match, cross-reference | Reference docs, knowledge notes, semantic memory, episodic memory |
 | **Invisible** | 0 tokens | Skill execution calls the engine | SQLite, FTS5, vector search, knowledge graph, integrations |
 
+The invisible layer has pluggable backends — swap SQLite for Qdrant, filesystem edges
+for Neo4j, Ollama for OpenAI. See [`engine-layer.md`](engine-layer.md) for all options.
+
 This is what the old "tiered loading" doc described — but it's one dimension, not the whole system.
 
 ### Dimension 3: Authorship (Origin Axis)
