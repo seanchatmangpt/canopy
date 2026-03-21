@@ -8,6 +8,7 @@ defmodule CanopyWeb.Router do
 
   pipeline :authenticated do
     plug CanopyWeb.Plugs.Auth
+    plug CanopyWeb.Plugs.WorkspaceAuth
     plug CanopyWeb.Plugs.Audit
   end
 
@@ -89,11 +90,13 @@ defmodule CanopyWeb.Router do
       post "/assign", IssueController, :assign, as: :assign
       resources "/comments", CommentController, only: [:index, :create]
       post "/checkout", IssueController, :checkout, as: :checkout
+      post "/dispatch", IssueController, :dispatch, as: :dispatch
     end
 
     # Goals
     resources "/goals", GoalController, except: [:new, :edit] do
       get "/ancestry", GoalController, :ancestry, as: :ancestry
+      post "/decompose", GoalController, :decompose, as: :decompose
     end
 
     # Projects

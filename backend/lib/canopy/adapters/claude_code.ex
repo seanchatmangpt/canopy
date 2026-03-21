@@ -64,13 +64,14 @@ defmodule Canopy.Adapters.ClaudeCode do
       fn ->
         port =
           Port.open(
-            {:spawn_executable, find_claude_binary()},
+            {:spawn_executable, Canopy.ClaudeBinary.find()},
             [
               :binary,
               :exit_status,
               :stderr_to_stdout,
               args: [
                 "--print",
+                "--verbose",
                 "--output-format",
                 "stream-json",
                 "--model",
@@ -115,13 +116,6 @@ defmodule Canopy.Adapters.ClaudeCode do
         end
       end
     )
-  end
-
-  defp find_claude_binary do
-    case System.find_executable("claude") do
-      nil -> "/usr/local/bin/claude"
-      path -> path
-    end
   end
 
   defp parse_stream_json(buffer) do
