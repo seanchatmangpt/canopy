@@ -126,30 +126,16 @@ async function loadBundledTemplate(templateId: string): Promise<CanopyAgent[]> {
 async function registerAgents(agents: CanopyAgent[]): Promise<void> {
   // Inject into store immediately
   agentsStore.agents = agents;
-  agentsStore.lockForDeployment();
 
-  // Persist in mock layer + backend
+  // Persist to real backend if available
   try {
-    const {
-      isMockEnabled,
-      getActiveWorkspaceId,
-      agents: agentsApi,
-    } = await import("$api/client");
-    const wsId = getActiveWorkspaceId();
+    const { agents: agentsApi } = await import("$api/client");
+    const wsId = workspaceStore.activeWorkspaceId;
 
-    // Always store in mock layer as fallback
     if (wsId) {
-      const { setMockWorkspaceAgents } = await import("$api/mock/index");
-      setMockWorkspaceAgents(wsId, agents);
-    }
-
-    // Also persist to real backend if available
-    if (!isMockEnabled() && wsId) {
       await Promise.allSettled(
         agents.map((agent) =>
           agentsApi.create({
-            workspace_id: wsId,
-            slug: agent.name,
             name: agent.display_name || agent.name,
             display_name: agent.display_name,
             avatar_emoji: agent.avatar_emoji,
@@ -164,6 +150,6 @@ async function registerAgents(agents: CanopyAgent[]): Promise<void> {
       );
     }
   } catch {
-    // Store injection is sufficient
+    // Store injection is sufficient — agents visible in UI even if backend persist fails
   }
 }
