@@ -11,6 +11,11 @@ defmodule CanopyWeb.Router do
     plug CanopyWeb.Plugs.Audit
   end
 
+  pipeline :streaming do
+    plug :accepts, ["event-stream", "json"]
+    plug CanopyWeb.Plugs.CORS
+  end
+
   # Health check — no auth
   scope "/api/v1", CanopyWeb do
     pipe_through :api
@@ -113,8 +118,6 @@ defmodule CanopyWeb.Router do
 
     # Activity + Logs
     get "/activity", ActivityController, :index
-    get "/activity/stream", ActivityController, :stream
-    get "/logs/stream", LogController, :stream
 
     # Memory
     get "/memory/search", MemoryController, :search
@@ -223,6 +226,14 @@ defmodule CanopyWeb.Router do
     resources "/plugins", PluginController, except: [:new, :edit] do
       get "/logs", PluginController, :logs, as: :logs
     end
+  end
+
+  # SSE streaming endpoints (accept text/event-stream)
+  scope "/api/v1", CanopyWeb do
+    pipe_through [:streaming, :authenticated]
+
+    get "/activity/stream", ActivityController, :stream
+    get "/logs/stream", LogController, :stream
   end
 
   # Incoming webhook receiver (no JWT — uses webhook secret)
