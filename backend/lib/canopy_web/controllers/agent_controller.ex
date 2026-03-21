@@ -287,8 +287,8 @@ defmodule CanopyWeb.AgentController do
     skill_ids =
       Repo.all(
         from as_ in "agent_skills",
-          where: as_.agent_id == ^a.id,
-          select: as_.skill_id
+          where: as_.agent_id == type(^a.id, :binary_id),
+          select: type(as_.skill_id, :binary_id)
       )
 
     today = Date.utc_today()

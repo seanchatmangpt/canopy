@@ -56,13 +56,17 @@ defmodule CanopyWeb.ActivityController do
           {:error, _} -> conn
         end
 
-      event ->
+      %{} = event ->
         data = Jason.encode!(event)
 
         case Plug.Conn.chunk(conn, "data: #{data}\n\n") do
           {:ok, conn} -> stream_loop(conn)
           {:error, _} -> conn
         end
+
+      _non_map ->
+        # Ignore non-map messages (e.g. {:plug_conn, :sent} from send_chunked)
+        stream_loop(conn)
     after
       30_000 ->
         case Plug.Conn.chunk(conn, ": keepalive\n\n") do

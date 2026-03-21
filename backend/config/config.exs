@@ -27,6 +27,11 @@ config :logger, :default_formatter,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
 
+# Register text/event-stream so Phoenix accepts SSE requests
+config :mime, :types, %{
+  "text/event-stream" => ["event-stream"]
+}
+
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
