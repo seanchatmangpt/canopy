@@ -53,7 +53,21 @@
   {/snippet}
 
   <div class="gp-content">
-    {#if goalsStore.loading && goalsStore.goals.length === 0}
+    {#if !activeProjectId}
+      <div class="gp-no-project" role="status">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" class="gp-no-project-icon" aria-hidden="true">
+          <path d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z"/>
+        </svg>
+        <h3>No project selected</h3>
+        <p>Select a project to view its goals.</p>
+        <a href="/app/projects" class="gp-projects-link" aria-label="Go to Projects">
+          Go to Projects
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/>
+          </svg>
+        </a>
+      </div>
+    {:else if goalsStore.loading && goalsStore.goals.length === 0}
       <div class="gp-loading" role="status" aria-label="Loading goals">
         <div class="gp-spinner" aria-hidden="true"></div>
         <span>Loading goals…</span>
@@ -183,4 +197,53 @@
   }
   .gp-empty-btn:hover { background: rgba(59,130,246,0.1); border-color: rgba(59,130,246,0.3); }
   .gp-empty-btn:focus-visible { outline: 2px solid var(--accent-primary); outline-offset: 2px; }
+
+  .gp-no-project {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: 300px;
+    color: var(--text-tertiary);
+    text-align: center;
+  }
+
+  .gp-no-project-icon {
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+
+  .gp-no-project h3 {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin: 0;
+  }
+
+  .gp-no-project p {
+    font-size: 13px;
+    color: var(--text-tertiary);
+    margin: 0;
+    max-width: 260px;
+  }
+
+  .gp-projects-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    height: 30px;
+    padding: 0 14px;
+    margin-top: 4px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-sm);
+    color: var(--accent-primary);
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 150ms ease;
+  }
+  .gp-projects-link:hover { background: rgba(59,130,246,0.1); border-color: rgba(59,130,246,0.3); }
+  .gp-projects-link:focus-visible { outline: 2px solid var(--accent-primary); outline-offset: 2px; }
 </style>

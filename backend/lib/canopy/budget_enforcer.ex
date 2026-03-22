@@ -101,8 +101,16 @@ defmodule Canopy.BudgetEnforcer do
         :ok
     end
 
-    # 3. Check policies for this agent scope
+    # 3. Check policies for agent scope and workspace scope
     check_policies("agent", agent_id)
+
+    case Repo.get(Agent, agent_id) do
+      %Agent{workspace_id: ws_id} when not is_nil(ws_id) ->
+        check_policies("workspace", ws_id)
+
+      _ ->
+        :ok
+    end
 
     {:noreply, state}
   end

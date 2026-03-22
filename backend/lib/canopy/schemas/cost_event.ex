@@ -2,6 +2,7 @@ defmodule Canopy.Schemas.CostEvent do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
 
   schema "cost_events" do

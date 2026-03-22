@@ -63,6 +63,11 @@ defmodule CanopyWeb.SkillController do
         set: [enabled: true]
       )
 
+    Canopy.EventBus.broadcast(
+      Canopy.EventBus.activity_topic(),
+      %{event: "skill.bulk_toggled", action: "enabled", updated: count}
+    )
+
     json(conn, %{ok: true, updated: count})
   end
 
@@ -72,6 +77,11 @@ defmodule CanopyWeb.SkillController do
         from(s in Skill, where: s.id in ^ids),
         set: [enabled: false]
       )
+
+    Canopy.EventBus.broadcast(
+      Canopy.EventBus.activity_topic(),
+      %{event: "skill.bulk_toggled", action: "disabled", updated: count}
+    )
 
     json(conn, %{ok: true, updated: count})
   end
