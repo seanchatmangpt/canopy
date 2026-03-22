@@ -5,89 +5,133 @@ defmodule CanopyWeb.DashboardController do
   alias Canopy.Schemas.{Agent, Session, ActivityEvent, Issue, BudgetPolicy}
   import Ecto.Query
 
-  def show(conn, _params) do
-    agents = Repo.all(from a in Agent, select: %{status: a.status, id: a.id})
+  def show(conn, params) do
+    workspace_id = params["workspace_id"]
+
+    agents_query = from a in Agent, select: %{status: a.status, id: a.id}
+
+    agents_query =
+      if workspace_id,
+        do: where(agents_query, [a], a.workspace_id == ^workspace_id),
+        else: agents_query
+
+    agents = Repo.all(agents_query)
     active_count = Enum.count(agents, &(&1.status in ["active", "working"]))
     total_count = length(agents)
 
-    live_runs =
-      Repo.all(
-        from s in Session,
-          where: s.status == "active",
-          join: a in Agent,
-          on: s.agent_id == a.id,
-          select: %{
-            id: s.id,
-            agent_id: a.id,
-            agent_name: a.name,
-            model: s.model,
-            started_at: s.started_at,
-            tokens_input: s.tokens_input,
-            tokens_output: s.tokens_output,
-            cost_cents: s.cost_cents
-          },
-          limit: 20,
-          order_by: [desc: s.started_at]
-      )
+    live_runs_query =
+      from s in Session,
+        where: s.status == "active",
+        join: a in Agent,
+        on: s.agent_id == a.id,
+        select: %{
+          id: s.id,
+          agent_id: a.id,
+          agent_name: a.name,
+          model: s.model,
+          started_at: s.started_at,
+          tokens_input: s.tokens_input,
+          tokens_output: s.tokens_output,
+          cost_cents: s.cost_cents
+        },
+        limit: 20,
+        order_by: [desc: s.started_at]
 
-    recent_activity =
-      Repo.all(
-        from e in ActivityEvent,
-          left_join: a in Agent,
-          on: e.agent_id == a.id,
-          order_by: [desc: e.inserted_at],
-          limit: 20,
-          select: %{
-            id: e.id,
-            type: e.event_type,
-            agent_id: e.agent_id,
-            agent_name: a.name,
-            title: e.message,
-            detail: e.message,
-            level: e.level,
-            metadata: e.metadata,
-            created_at: e.inserted_at
-          }
-      )
+    live_runs_query =
+      if workspace_id,
+        do: where(live_runs_query, [s], s.workspace_id == ^workspace_id),
+        else: live_runs_query
+
+    live_runs = Repo.all(live_runs_query)
+
+    recent_activity_query =
+      from e in ActivityEvent,
+        left_join: a in Agent,
+        on: e.agent_id == a.id,
+        order_by: [desc: e.inserted_at],
+        limit: 20,
+        select: %{
+          id: e.id,
+          type: e.event_type,
+          agent_id: e.agent_id,
+          agent_name: a.name,
+          title: e.message,
+          detail: e.message,
+          level: e.level,
+          metadata: e.metadata,
+          created_at: e.inserted_at
+        }
+
+    recent_activity_query =
+      if workspace_id,
+        do: where(recent_activity_query, [e], e.workspace_id == ^workspace_id),
+        else: recent_activity_query
+
+    recent_activity = Repo.all(recent_activity_query)
 
     today = Date.utc_today()
     beginning_of_day = DateTime.new!(today, ~T[00:00:00], "Etc/UTC")
+
     beginning_of_week =
       DateTime.new!(Date.add(today, -Date.day_of_week(today) + 1), ~T[00:00:00], "Etc/UTC")
+
     beginning_of_month =
       DateTime.new!(Date.new!(today.year, today.month, 1), ~T[00:00:00], "Etc/UTC")
 
+    # CostEvent has no workspace_id — join through Agent to scope costs when workspace_id present
+    cost_base_query =
+      if workspace_id do
+        from ce in Canopy.Schemas.CostEvent,
+          join: a in Agent,
+          on: ce.agent_id == a.id,
+          where: a.workspace_id == ^workspace_id
+      else
+        from ce in Canopy.Schemas.CostEvent
+      end
+
     today_cost =
       Repo.one(
-        from ce in Canopy.Schemas.CostEvent,
+        from ce in cost_base_query,
           where: ce.inserted_at >= ^beginning_of_day,
           select: coalesce(sum(ce.cost_cents), 0)
       ) || 0
 
     week_cost =
       Repo.one(
-        from ce in Canopy.Schemas.CostEvent,
+        from ce in cost_base_query,
           where: ce.inserted_at >= ^beginning_of_week,
           select: coalesce(sum(ce.cost_cents), 0)
       ) || 0
 
     month_cost =
       Repo.one(
-        from ce in Canopy.Schemas.CostEvent,
+        from ce in cost_base_query,
           where: ce.inserted_at >= ^beginning_of_month,
           select: coalesce(sum(ce.cost_cents), 0)
       ) || 0
 
-    open_issues = Repo.aggregate(from(i in Issue, where: i.status in ["backlog", "in_progress"]), :count)
+    open_issues_query =
+      from i in Issue, where: i.status in ["backlog", "in_progress"]
 
-    # Workspace-level budget policy for budget_remaining_pct. BudgetPolicy tracks
-    # monthly limits only; daily_limit_cents is not yet in the schema.
-    workspace_policy =
-      Repo.one(
-        from bp in BudgetPolicy,
-          where: bp.scope_type == "workspace",
-          limit: 1
-      )
+    open_issues_query =
+      if workspace_id,
+        do: where(open_issues_query, [i], i.workspace_id == ^workspace_id),
+        else: open_issues_query
+
+    open_issues = Repo.aggregate(open_issues_query, :count)
+
+    # BudgetPolicy uses scope_type/scope_id — match workspace_id via scope_id when present
+    workspace_policy_query =
+      from bp in BudgetPolicy,
+        where: bp.scope_type == "workspace",
+        limit: 1
+
+    workspace_policy_query =
+      if workspace_id,
+        do: where(workspace_policy_query, [bp], bp.scope_id == ^workspace_id),
+        else: workspace_policy_query
+
+    workspace_policy = Repo.one(workspace_policy_query)
 
     {monthly_limit_cents, budget_remaining_pct} =
       case workspace_policy do

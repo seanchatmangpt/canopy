@@ -206,7 +206,7 @@
 
   .cfg-section {
     background: var(--dbg2);
-    border: 1px solid var(--dbr);
+    border: 1px solid var(--dbd);
     border-radius: var(--radius-lg, 12px);
     padding: 20px;
     display: flex; flex-direction: column; gap: 16px;
@@ -231,7 +231,7 @@
 
   .cfg-input, .cfg-select {
     background: var(--dbg3);
-    border: 1px solid var(--dbr);
+    border: 1px solid var(--dbd);
     border-radius: var(--radius-md, 8px);
     padding: 8px 12px;
     font-size: 13px;
@@ -247,7 +247,7 @@
     width: 40px; height: 22px;
     border-radius: 11px;
     background: var(--dbg3);
-    border: 1px solid var(--dbr);
+    border: 1px solid var(--dbd);
     padding: 2px;
     cursor: pointer;
     position: relative;
