@@ -103,17 +103,20 @@ defmodule CanopyWeb.SessionController do
         conn |> put_status(404) |> json(%{error: "not_found"})
 
       session ->
-        {:ok, updated} =
-          session
-          |> Ecto.Changeset.change(status: "cancelled", completed_at: DateTime.utc_now() |> DateTime.truncate(:second))
-          |> Repo.update()
+        case session
+             |> Ecto.Changeset.change(status: "cancelled", completed_at: DateTime.utc_now() |> DateTime.truncate(:second))
+             |> Repo.update() do
+          {:ok, updated} ->
+            Canopy.EventBus.broadcast(
+              Canopy.EventBus.session_topic(id),
+              %{event: "run.cancelled", session_id: id}
+            )
 
-        Canopy.EventBus.broadcast(
-          Canopy.EventBus.session_topic(id),
-          %{event: "run.cancelled", session_id: id}
-        )
+            json(conn, %{session: %{id: updated.id, status: updated.status}})
 
-        json(conn, %{session: %{id: updated.id, status: updated.status}})
+          {:error, _changeset} ->
+            conn |> put_status(500) |> json(%{error: "update_failed"})
+        end
     end
   end
 

@@ -51,12 +51,15 @@ defmodule CanopyWeb.ExecutionWorkspaceController do
       ew ->
         now = DateTime.utc_now() |> DateTime.truncate(:second)
 
-        {:ok, updated} =
-          ew
-          |> Ecto.Changeset.change(status: "cleaned_up", cleaned_up_at: now)
-          |> Repo.update()
+        case ew
+             |> Ecto.Changeset.change(status: "cleaned_up", cleaned_up_at: now)
+             |> Repo.update() do
+          {:ok, updated} ->
+            json(conn, %{execution_workspace: serialize(updated)})
 
-        json(conn, %{execution_workspace: serialize(updated)})
+          {:error, _changeset} ->
+            conn |> put_status(500) |> json(%{error: "update_failed"})
+        end
     end
   end
 

@@ -105,21 +105,24 @@ defmodule CanopyWeb.GatewayController do
               {"error", nil}
           end
 
-        {:ok, updated} =
-          gateway
-          |> Ecto.Changeset.change(
-            status: new_status,
-            latency_ms: latency,
-            last_probe_at: DateTime.utc_now()
-          )
-          |> Repo.update()
+        case gateway
+             |> Ecto.Changeset.change(
+               status: new_status,
+               latency_ms: latency,
+               last_probe_at: DateTime.utc_now()
+             )
+             |> Repo.update() do
+          {:ok, updated} ->
+            Canopy.EventBus.broadcast(
+              Canopy.EventBus.activity_topic(),
+              %{event: "gateway.probed", gateway_id: id, status: new_status, latency_ms: latency}
+            )
 
-        Canopy.EventBus.broadcast(
-          Canopy.EventBus.activity_topic(),
-          %{event: "gateway.probed", gateway_id: id, status: new_status, latency_ms: latency}
-        )
+            json(conn, %{gateway: serialize(updated)})
 
-        json(conn, %{gateway: serialize(updated)})
+          {:error, _changeset} ->
+            conn |> put_status(500) |> json(%{error: "update_failed"})
+        end
     end
   end
 

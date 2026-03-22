@@ -72,17 +72,20 @@ defmodule CanopyWeb.IntegrationController do
         conn |> put_status(404) |> json(%{error: "not_found"})
 
       integration ->
-        {:ok, updated} =
-          integration
-          |> Ecto.Changeset.change(connected: false)
-          |> Repo.update()
+        case integration
+             |> Ecto.Changeset.change(connected: false)
+             |> Repo.update() do
+          {:ok, updated} ->
+            Canopy.EventBus.broadcast(
+              Canopy.EventBus.workspace_topic(updated.workspace_id),
+              %{event: "integration.disconnected", slug: slug}
+            )
 
-        Canopy.EventBus.broadcast(
-          Canopy.EventBus.workspace_topic(updated.workspace_id),
-          %{event: "integration.disconnected", slug: slug}
-        )
+            json(conn, %{integration: serialize(updated)})
 
-        json(conn, %{integration: serialize(updated)})
+          {:error, _changeset} ->
+            conn |> put_status(500) |> json(%{error: "update_failed"})
+        end
     end
   end
 

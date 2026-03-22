@@ -60,12 +60,15 @@ defmodule CanopyWeb.SpawnController do
         conn |> put_status(404) |> json(%{error: "not_found"})
 
       session ->
-        {:ok, _} =
-          session
-          |> Ecto.Changeset.change(status: "cancelled", completed_at: DateTime.utc_now() |> DateTime.truncate(:second))
-          |> Repo.update()
+        case session
+             |> Ecto.Changeset.change(status: "cancelled", completed_at: DateTime.utc_now() |> DateTime.truncate(:second))
+             |> Repo.update() do
+          {:ok, _} ->
+            json(conn, %{ok: true})
 
-        json(conn, %{ok: true})
+          {:error, _changeset} ->
+            conn |> put_status(500) |> json(%{error: "update_failed"})
+        end
     end
   end
 

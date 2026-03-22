@@ -89,16 +89,19 @@ defmodule CanopyWeb.ApprovalController do
         conn |> put_status(404) |> json(%{error: "not_found"})
 
       approval ->
-        {:ok, updated} =
-          approval
-          |> Ecto.Changeset.change(
-            status: "approved",
-            decision: "approved",
-            decision_comment: params["decision_comment"]
-          )
-          |> Repo.update()
+        case approval
+             |> Ecto.Changeset.change(
+               status: "approved",
+               decision: "approved",
+               decision_comment: params["decision_comment"]
+             )
+             |> Repo.update() do
+          {:ok, updated} ->
+            json(conn, %{approval: serialize(updated)})
 
-        json(conn, %{approval: serialize(updated)})
+          {:error, _changeset} ->
+            conn |> put_status(500) |> json(%{error: "update_failed"})
+        end
     end
   end
 
@@ -108,16 +111,19 @@ defmodule CanopyWeb.ApprovalController do
         conn |> put_status(404) |> json(%{error: "not_found"})
 
       approval ->
-        {:ok, updated} =
-          approval
-          |> Ecto.Changeset.change(
-            status: "rejected",
-            decision: "rejected",
-            decision_comment: params["decision_comment"]
-          )
-          |> Repo.update()
+        case approval
+             |> Ecto.Changeset.change(
+               status: "rejected",
+               decision: "rejected",
+               decision_comment: params["decision_comment"]
+             )
+             |> Repo.update() do
+          {:ok, updated} ->
+            json(conn, %{approval: serialize(updated)})
 
-        json(conn, %{approval: serialize(updated)})
+          {:error, _changeset} ->
+            conn |> put_status(500) |> json(%{error: "update_failed"})
+        end
     end
   end
 

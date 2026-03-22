@@ -179,13 +179,16 @@ defmodule CanopyWeb.AgentController do
           set: [enabled: false]
         )
 
-        {:ok, updated} =
-          agent
-          |> Ecto.Changeset.change(status: "sleeping")
-          |> Repo.update()
+        case agent
+             |> Ecto.Changeset.change(status: "sleeping")
+             |> Repo.update() do
+          {:ok, updated} ->
+            broadcast_status(updated, "agent.sleeping")
+            json(conn, %{agent: serialize_with_skills(updated)})
 
-        broadcast_status(updated, "agent.sleeping")
-        json(conn, %{agent: serialize_with_skills(updated)})
+          {:error, _changeset} ->
+            conn |> put_status(500) |> json(%{error: "update_failed"})
+        end
     end
   end
 
@@ -312,13 +315,16 @@ defmodule CanopyWeb.AgentController do
         conn |> put_status(404) |> json(%{error: "not_found"})
 
       agent ->
-        {:ok, updated} =
-          agent
-          |> Ecto.Changeset.change(status: new_status)
-          |> Repo.update()
+        case agent
+             |> Ecto.Changeset.change(status: new_status)
+             |> Repo.update() do
+          {:ok, updated} ->
+            broadcast_status(updated, event_type)
+            json(conn, %{agent: serialize_with_skills(updated)})
 
-        broadcast_status(updated, event_type)
-        json(conn, %{agent: serialize_with_skills(updated)})
+          {:error, _changeset} ->
+            conn |> put_status(500) |> json(%{error: "update_failed"})
+        end
     end
   end
 

@@ -130,17 +130,20 @@ defmodule CanopyWeb.IssueController do
         conn |> put_status(404) |> json(%{error: "not_found"})
 
       issue ->
-        {:ok, updated} =
-          issue
-          |> Ecto.Changeset.change(assignee_id: agent_id)
-          |> Repo.update()
+        case issue
+             |> Ecto.Changeset.change(assignee_id: agent_id)
+             |> Repo.update() do
+          {:ok, updated} ->
+            Canopy.EventBus.broadcast(
+              Canopy.EventBus.workspace_topic(updated.workspace_id),
+              %{event: "issue.assigned", issue_id: id, agent_id: agent_id}
+            )
 
-        Canopy.EventBus.broadcast(
-          Canopy.EventBus.workspace_topic(updated.workspace_id),
-          %{event: "issue.assigned", issue_id: id, agent_id: agent_id}
-        )
+            json(conn, %{issue: serialize(updated)})
 
-        json(conn, %{issue: serialize(updated)})
+          {:error, _changeset} ->
+            conn |> put_status(500) |> json(%{error: "update_failed"})
+        end
     end
   end
 
@@ -157,12 +160,15 @@ defmodule CanopyWeb.IssueController do
         |> json(%{error: "already_checked_out", checked_out_by: existing})
 
       issue ->
-        {:ok, updated} =
-          issue
-          |> Ecto.Changeset.change(checked_out_by: agent_id, status: "in_progress")
-          |> Repo.update()
+        case issue
+             |> Ecto.Changeset.change(checked_out_by: agent_id, status: "in_progress")
+             |> Repo.update() do
+          {:ok, updated} ->
+            json(conn, %{issue: serialize(updated)})
 
-        json(conn, %{issue: serialize(updated)})
+          {:error, _changeset} ->
+            conn |> put_status(500) |> json(%{error: "update_failed"})
+        end
     end
   end
 

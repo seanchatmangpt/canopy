@@ -74,17 +74,20 @@ defmodule CanopyWeb.BudgetController do
         conn |> put_status(404) |> json(%{error: "not_found"})
 
       incident ->
-        {:ok, updated} =
-          incident
-          |> Ecto.Changeset.change(resolved: true, resolved_at: DateTime.utc_now() |> DateTime.truncate(:second))
-          |> Repo.update()
+        case incident
+             |> Ecto.Changeset.change(resolved: true, resolved_at: DateTime.utc_now() |> DateTime.truncate(:second))
+             |> Repo.update() do
+          {:ok, updated} ->
+            Canopy.EventBus.broadcast(
+              Canopy.EventBus.activity_topic(),
+              %{event: "budget.incident_resolved", incident_id: id}
+            )
 
-        Canopy.EventBus.broadcast(
-          Canopy.EventBus.activity_topic(),
-          %{event: "budget.incident_resolved", incident_id: id}
-        )
+            json(conn, %{incident: serialize_incident(updated)})
 
-        json(conn, %{incident: serialize_incident(updated)})
+          {:error, _changeset} ->
+            conn |> put_status(500) |> json(%{error: "update_failed"})
+        end
     end
   end
 

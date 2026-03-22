@@ -119,24 +119,27 @@ defmodule CanopyWeb.ScheduleController do
       schedule ->
         now = DateTime.utc_now() |> DateTime.truncate(:second)
 
-        {:ok, updated} =
-          schedule
-          |> Ecto.Changeset.change(last_run_at: now, last_run_status: "triggered")
-          |> Repo.update()
+        case schedule
+             |> Ecto.Changeset.change(last_run_at: now, last_run_status: "triggered")
+             |> Repo.update() do
+          {:ok, updated} ->
+            Canopy.EventBus.broadcast(
+              Canopy.EventBus.agent_topic(schedule.agent_id),
+              %{event: "agent.heartbeat_started", schedule_id: id, agent_id: schedule.agent_id}
+            )
 
-        Canopy.EventBus.broadcast(
-          Canopy.EventBus.agent_topic(schedule.agent_id),
-          %{event: "agent.heartbeat_started", schedule_id: id, agent_id: schedule.agent_id}
-        )
+            Task.Supervisor.start_child(Canopy.HeartbeatRunner, fn ->
+              Canopy.Heartbeat.run(schedule.agent_id,
+                schedule_id: schedule.id,
+                context: schedule.context || "Scheduled heartbeat: #{schedule.name}"
+              )
+            end)
 
-        Task.Supervisor.start_child(Canopy.HeartbeatRunner, fn ->
-          Canopy.Heartbeat.run(schedule.agent_id,
-            schedule_id: schedule.id,
-            context: schedule.context || "Scheduled heartbeat: #{schedule.name}"
-          )
-        end)
+            json(conn, %{schedule: serialize(updated, run_count_for(updated.id)), triggered: true})
 
-        json(conn, %{schedule: serialize(updated, run_count_for(updated.id)), triggered: true})
+          {:error, _changeset} ->
+            conn |> put_status(500) |> json(%{error: "update_failed"})
+        end
     end
   end
 

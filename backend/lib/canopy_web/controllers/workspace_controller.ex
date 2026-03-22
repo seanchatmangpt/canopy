@@ -143,13 +143,16 @@ defmodule CanopyWeb.WorkspaceController do
           set: [status: "archived"]
         )
 
-        {:ok, updated} =
-          workspace
-          |> Ecto.Changeset.change(status: "active")
-          |> Repo.update()
+        case workspace
+             |> Ecto.Changeset.change(status: "active")
+             |> Repo.update() do
+          {:ok, updated} ->
+            Canopy.EventBus.broadcast("workspace:global", {:workspace_activated, updated.id})
+            json(conn, %{workspace: serialize(updated)})
 
-        Canopy.EventBus.broadcast("workspace:global", {:workspace_activated, updated.id})
-        json(conn, %{workspace: serialize(updated)})
+          {:error, _changeset} ->
+            conn |> put_status(500) |> json(%{error: "update_failed"})
+        end
     end
   end
 

@@ -62,12 +62,15 @@ defmodule CanopyWeb.InboxController do
       event ->
         updated_metadata = Map.put(event.metadata || %{}, "read", true)
 
-        {:ok, updated} =
-          event
-          |> Ecto.Changeset.change(metadata: updated_metadata)
-          |> Repo.update()
+        case event
+             |> Ecto.Changeset.change(metadata: updated_metadata)
+             |> Repo.update() do
+          {:ok, updated} ->
+            json(conn, %{item: serialize(updated)})
 
-        json(conn, %{item: serialize(updated)})
+          {:error, _changeset} ->
+            conn |> put_status(500) |> json(%{error: "update_failed"})
+        end
     end
   end
 
@@ -113,17 +116,20 @@ defmodule CanopyWeb.InboxController do
           |> Map.put("action", action_type)
           |> Map.put("actioned_at", DateTime.to_iso8601(DateTime.utc_now()))
 
-        {:ok, updated} =
-          event
-          |> Ecto.Changeset.change(metadata: updated_metadata)
-          |> Repo.update()
+        case event
+             |> Ecto.Changeset.change(metadata: updated_metadata)
+             |> Repo.update() do
+          {:ok, updated} ->
+            Canopy.EventBus.broadcast(
+              Canopy.EventBus.activity_topic(),
+              %{event: "inbox.actioned", message_id: id, action: action_type}
+            )
 
-        Canopy.EventBus.broadcast(
-          Canopy.EventBus.activity_topic(),
-          %{event: "inbox.actioned", message_id: id, action: action_type}
-        )
+            json(conn, %{ok: true, item: serialize(updated), action: action_type})
 
-        json(conn, %{ok: true, item: serialize(updated), action: action_type})
+          {:error, _changeset} ->
+            conn |> put_status(500) |> json(%{error: "update_failed"})
+        end
     end
   end
 

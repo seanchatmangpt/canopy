@@ -58,24 +58,34 @@ defmodule CanopyWeb.InvitationController do
 
           user_id = conn.assigns[:current_user_id]
 
-          Repo.transaction(fn ->
-            {:ok, _} =
-              invitation
-              |> Ecto.Changeset.change(accepted_at: now)
-              |> Repo.update()
+          result =
+            Repo.transaction(fn ->
+              case invitation
+                   |> Ecto.Changeset.change(accepted_at: now)
+                   |> Repo.update() do
+                {:ok, _} ->
+                  if user_id do
+                    %OrganizationMembership{}
+                    |> OrganizationMembership.changeset(%{
+                      "organization_id" => invitation.organization_id,
+                      "user_id" => user_id,
+                      "role" => invitation.role
+                    })
+                    |> Repo.insert(on_conflict: :nothing)
+                  end
 
-            if user_id do
-              %OrganizationMembership{}
-              |> OrganizationMembership.changeset(%{
-                "organization_id" => invitation.organization_id,
-                "user_id" => user_id,
-                "role" => invitation.role
-              })
-              |> Repo.insert(on_conflict: :nothing)
-            end
-          end)
+                {:error, changeset} ->
+                  Repo.rollback(changeset)
+              end
+            end)
 
-          json(conn, %{ok: true, organization_id: invitation.organization_id, role: invitation.role})
+          case result do
+            {:ok, _} ->
+              json(conn, %{ok: true, organization_id: invitation.organization_id, role: invitation.role})
+
+            {:error, _} ->
+              conn |> put_status(500) |> json(%{error: "accept_failed"})
+          end
         end
     end
   end

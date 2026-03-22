@@ -39,17 +39,20 @@ defmodule CanopyWeb.SkillController do
         conn |> put_status(404) |> json(%{error: "not_found"})
 
       skill ->
-        {:ok, updated} =
-          skill
-          |> Ecto.Changeset.change(enabled: !skill.enabled)
-          |> Repo.update()
+        case skill
+             |> Ecto.Changeset.change(enabled: !skill.enabled)
+             |> Repo.update() do
+          {:ok, updated} ->
+            Canopy.EventBus.broadcast(
+              Canopy.EventBus.workspace_topic(updated.workspace_id),
+              %{event: "skill.toggled", skill_id: updated.id, enabled: updated.enabled}
+            )
 
-        Canopy.EventBus.broadcast(
-          Canopy.EventBus.workspace_topic(updated.workspace_id),
-          %{event: "skill.toggled", skill_id: updated.id, enabled: updated.enabled}
-        )
+            json(conn, %{skill: serialize(updated)})
 
-        json(conn, %{skill: serialize(updated)})
+          {:error, _changeset} ->
+            conn |> put_status(500) |> json(%{error: "update_failed"})
+        end
     end
   end
 
