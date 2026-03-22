@@ -2,19 +2,24 @@ defmodule CanopyWeb.SpawnController do
   use CanopyWeb, :controller
 
   alias Canopy.Repo
-  alias Canopy.Schemas.Session
+  alias Canopy.Schemas.{Agent, Session}
   import Ecto.Query
 
   def create(conn, params) do
     agent_id = params["agent_id"]
-    model = params["model"] || "claude-sonnet-4-20250514"
-    context = params["context"] || ""
+    # Fix 4: accept both "context" and "prompt" as the initial context
+    context = params["context"] || params["prompt"] || ""
+
+    # Fix 5: look up the agent to propagate workspace_id onto the session
+    agent = Repo.get!(Agent, agent_id)
 
     session_params = %{
-      agent_id: agent_id,
-      model: model,
-      status: "active",
-      started_at: DateTime.utc_now() |> DateTime.truncate(:second)
+      "agent_id" => agent_id,
+      "workspace_id" => agent.workspace_id,
+      "model" => params["model"] || agent.model,
+      "started_at" => DateTime.utc_now() |> DateTime.truncate(:second),
+      "context" => context,
+      "status" => "active"
     }
 
     changeset = Session.changeset(%Session{}, session_params)
@@ -34,7 +39,7 @@ defmodule CanopyWeb.SpawnController do
       {:error, cs} ->
         conn
         |> put_status(422)
-        |> json(%{error: "validation_failed", details: inspect(cs.errors)})
+        |> json(%{error: "validation_failed", details: format_errors(cs)})
     end
   end
 
@@ -97,5 +102,15 @@ defmodule CanopyWeb.SpawnController do
           }
         end)
     })
+  end
+
+  # --- Private helpers ---
+
+  defp format_errors(changeset) do
+    Ecto.Changeset.traverse_errors(changeset, fn {msg, opts} ->
+      Regex.replace(~r"%{(\w+)}", msg, fn _, key ->
+        opts |> Keyword.get(String.to_existing_atom(key), key) |> to_string()
+      end)
+    end)
   end
 end

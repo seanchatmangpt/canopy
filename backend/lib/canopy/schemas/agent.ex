@@ -31,7 +31,7 @@ defmodule Canopy.Schemas.Agent do
     agent
     |> cast(attrs, [:slug, :name, :role, :adapter, :model, :temperature, :max_concurrent_runs, :status, :config, :system_prompt, :workspace_id, :reports_to, :avatar_emoji])
     |> validate_required([:slug, :name, :role, :adapter, :model, :workspace_id])
-    |> validate_inclusion(:status, ~w(active idle working sleeping error paused))
+    |> validate_inclusion(:status, ~w(active idle working running sleeping error paused))
     |> validate_inclusion(:adapter, ~w(osa claude-code codex bash http openclaw cursor gemini))
     |> unique_constraint([:workspace_id, :slug])
   end

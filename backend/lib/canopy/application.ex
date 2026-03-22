@@ -19,7 +19,14 @@ defmodule Canopy.Application do
     ]
 
     opts = [strategy: :one_for_one, name: Canopy.Supervisor]
-    Supervisor.start_link(children, opts)
+    result = Supervisor.start_link(children, opts)
+
+    case result do
+      {:ok, _pid} -> Canopy.Scheduler.load_schedules()
+      _ -> :ok
+    end
+
+    result
   end
 
   @impl true

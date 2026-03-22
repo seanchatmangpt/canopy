@@ -57,7 +57,6 @@ defmodule CanopyWeb.Router do
     resources "/sessions", SessionController, only: [:index, :show, :delete] do
       get "/transcript", SessionController, :transcript, as: :transcript
       post "/message", SessionController, :message, as: :message
-      get "/stream", SessionController, :stream, as: :stream
     end
 
     # Schedules
@@ -91,6 +90,8 @@ defmodule CanopyWeb.Router do
       resources "/comments", CommentController, only: [:index, :create]
       post "/checkout", IssueController, :checkout, as: :checkout
       post "/dispatch", IssueController, :dispatch, as: :dispatch
+      post "/labels", IssueController, :add_label, as: :add_label
+      delete "/labels/:label_id", IssueController, :remove_label, as: :remove_label
     end
 
     # Goals
@@ -239,6 +240,7 @@ defmodule CanopyWeb.Router do
 
     get "/activity/stream", ActivityController, :stream
     get "/logs/stream", LogController, :stream
+    get "/sessions/:session_id/stream", SessionController, :stream
   end
 
   # Incoming webhook receiver (no JWT — uses webhook secret)

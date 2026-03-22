@@ -109,7 +109,7 @@ defmodule CanopyWeb.GoalController do
 
     opts = [
       max_issues: max_issues,
-      auto_assign: params["auto_assign"] != "false"
+      auto_assign: params["auto_assign"] not in [false, "false"]
     ]
 
     # Validate goal exists before accepting the request

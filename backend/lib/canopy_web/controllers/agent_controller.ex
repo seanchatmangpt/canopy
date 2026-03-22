@@ -135,6 +135,11 @@ defmodule CanopyWeb.AgentController do
 
         case Repo.update(changeset) do
           {:ok, updated} ->
+            Canopy.EventBus.broadcast(
+              Canopy.EventBus.workspace_topic(updated.workspace_id),
+              %{event: "agent.updated", agent_id: updated.id}
+            )
+
             json(conn, %{agent: serialize_with_skills(updated)})
 
           {:error, changeset} ->
@@ -165,6 +170,16 @@ defmodule CanopyWeb.AgentController do
   # --- Lifecycle actions ---
 
   def wake(conn, %{"agent_id" => id}) do
+    # Re-enable schedules that were disabled by sleep
+    from(s in Schedule, where: s.agent_id == ^id)
+    |> Repo.update_all(set: [enabled: true, updated_at: DateTime.utc_now()])
+
+    # Re-sync with Quantum scheduler
+    agent_schedules =
+      Repo.all(from s in Schedule, where: s.agent_id == ^id and s.enabled == true)
+
+    Enum.each(agent_schedules, &Canopy.Scheduler.add_schedule/1)
+
     transition_status(conn, id, "idle", "agent.heartbeat_started")
   end
 
@@ -285,8 +300,11 @@ defmodule CanopyWeb.AgentController do
     })
   end
 
-  def hierarchy(conn, _params) do
-    agents = Repo.all(from a in Agent, order_by: [asc: a.name])
+  def hierarchy(conn, params) do
+    workspace_id = params["workspace_id"]
+    query = from a in Agent, order_by: [asc: a.name]
+    query = if workspace_id, do: where(query, [a], a.workspace_id == ^workspace_id), else: query
+    agents = Repo.all(query)
 
     json(conn, %{
       agents:

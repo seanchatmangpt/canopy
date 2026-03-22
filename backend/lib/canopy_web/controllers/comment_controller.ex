@@ -2,7 +2,7 @@ defmodule CanopyWeb.CommentController do
   use CanopyWeb, :controller
 
   alias Canopy.Repo
-  alias Canopy.Schemas.Comment
+  alias Canopy.Schemas.{Comment, Issue}
   import Ecto.Query
 
   def index(conn, %{"issue_id" => issue_id}) do
@@ -23,9 +23,11 @@ defmodule CanopyWeb.CommentController do
 
     case Repo.insert(changeset) do
       {:ok, comment} ->
+        issue = Repo.get!(Issue, issue_id)
+
         Canopy.EventBus.broadcast(
-          "issue:#{issue_id}",
-          %{event: "issue.commented", issue_id: issue_id, comment_id: comment.id}
+          Canopy.EventBus.workspace_topic(issue.workspace_id),
+          %{event: "comment.created", issue_id: issue_id, comment_id: comment.id}
         )
 
         conn |> put_status(201) |> json(%{comment: serialize(comment)})

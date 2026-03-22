@@ -64,6 +64,7 @@ defmodule CanopyWeb.ScheduleController do
 
     case Repo.insert(changeset) do
       {:ok, schedule} ->
+        if schedule.enabled, do: Canopy.Scheduler.add_schedule(schedule)
         conn |> put_status(201) |> json(%{schedule: serialize(schedule, 0)})
 
       {:error, changeset} ->
@@ -90,6 +91,8 @@ defmodule CanopyWeb.ScheduleController do
 
         case Repo.update(changeset) do
           {:ok, updated} ->
+            Canopy.Scheduler.remove_schedule(updated.id)
+            if updated.enabled, do: Canopy.Scheduler.add_schedule(updated)
             json(conn, %{schedule: serialize(updated, run_count_for(updated.id))})
 
           {:error, changeset} ->
@@ -106,6 +109,7 @@ defmodule CanopyWeb.ScheduleController do
         conn |> put_status(404) |> json(%{error: "not_found"})
 
       schedule ->
+        Canopy.Scheduler.remove_schedule(schedule.id)
         Repo.delete!(schedule)
         json(conn, %{ok: true})
     end

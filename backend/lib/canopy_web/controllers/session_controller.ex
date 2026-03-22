@@ -51,8 +51,12 @@ defmodule CanopyWeb.SessionController do
     query = if agent_id, do: where(query, [s], s.agent_id == ^agent_id), else: query
     query = if status, do: where(query, [s], s.status == ^status), else: query
 
+    count_query = from s in Session
+    count_query = if agent_id, do: where(count_query, [s], s.agent_id == ^agent_id), else: count_query
+    count_query = if status, do: where(count_query, [s], s.status == ^status), else: count_query
+
     sessions = Repo.all(query)
-    total = Repo.aggregate(Session, :count)
+    total = Repo.aggregate(count_query, :count)
     json(conn, %{sessions: sessions, total: total})
   end
 

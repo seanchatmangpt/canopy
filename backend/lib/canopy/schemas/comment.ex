@@ -9,9 +9,10 @@ defmodule Canopy.Schemas.Comment do
     field :author_type, :string
     field :author_id, :binary_id
     field :body, :string
-    field :inserted_at, :utc_datetime
 
     belongs_to :issue, Canopy.Schemas.Issue
+
+    timestamps(updated_at: false)
   end
 
   def changeset(comment, attrs) do

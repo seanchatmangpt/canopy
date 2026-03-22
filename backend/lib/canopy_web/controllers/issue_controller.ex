@@ -2,12 +2,19 @@ defmodule CanopyWeb.IssueController do
   use CanopyWeb, :controller
 
   alias Canopy.Repo
-  alias Canopy.Schemas.{Issue, Comment}
+  alias Canopy.Schemas.{Issue, Comment, Agent, Label, IssueLabel}
   import Ecto.Query
 
   def index(conn, params) do
     limit = min(String.to_integer(params["limit"] || "50"), 100)
     offset = String.to_integer(params["offset"] || "0")
+
+    workspace_id = params["workspace_id"]
+    status = params["status"]
+    priority = params["priority"]
+    project_id = params["project_id"]
+    assignee_id = params["assignee_id"]
+    goal_id = params["goal_id"]
 
     query =
       from i in Issue,
@@ -15,33 +22,23 @@ defmodule CanopyWeb.IssueController do
         limit: ^limit,
         offset: ^offset
 
-    query =
-      if params["workspace_id"],
-        do: where(query, [i], i.workspace_id == ^params["workspace_id"]),
-        else: query
+    query = if workspace_id, do: where(query, [i], i.workspace_id == ^workspace_id), else: query
+    query = if status, do: where(query, [i], i.status == ^status), else: query
+    query = if priority, do: where(query, [i], i.priority == ^priority), else: query
+    query = if project_id, do: where(query, [i], i.project_id == ^project_id), else: query
+    query = if assignee_id, do: where(query, [i], i.assignee_id == ^assignee_id), else: query
+    query = if goal_id, do: where(query, [i], i.goal_id == ^goal_id), else: query
 
-    query =
-      if params["status"],
-        do: where(query, [i], i.status == ^params["status"]),
-        else: query
+    count_query = from i in Issue
+    count_query = if workspace_id, do: where(count_query, [i], i.workspace_id == ^workspace_id), else: count_query
+    count_query = if status, do: where(count_query, [i], i.status == ^status), else: count_query
+    count_query = if priority, do: where(count_query, [i], i.priority == ^priority), else: count_query
+    count_query = if project_id, do: where(count_query, [i], i.project_id == ^project_id), else: count_query
+    count_query = if assignee_id, do: where(count_query, [i], i.assignee_id == ^assignee_id), else: count_query
+    count_query = if goal_id, do: where(count_query, [i], i.goal_id == ^goal_id), else: count_query
 
-    query =
-      if params["priority"],
-        do: where(query, [i], i.priority == ^params["priority"]),
-        else: query
-
-    query =
-      if params["project_id"],
-        do: where(query, [i], i.project_id == ^params["project_id"]),
-        else: query
-
-    query =
-      if params["assignee_id"],
-        do: where(query, [i], i.assignee_id == ^params["assignee_id"]),
-        else: query
-
-    issues = Repo.all(query)
-    total = Repo.aggregate(from(i in Issue), :count)
+    issues = Repo.all(query) |> Repo.preload(:labels)
+    total = Repo.aggregate(count_query, :count)
     json(conn, %{issues: Enum.map(issues, &serialize/1), total: total})
   end
 
@@ -65,7 +62,7 @@ defmodule CanopyWeb.IssueController do
   end
 
   def show(conn, %{"id" => id}) do
-    case Repo.get(Issue, id) |> Repo.preload(:comments) do
+    case Repo.get(Issue, id) |> Repo.preload([:comments, :labels]) do
       nil ->
         conn |> put_status(404) |> json(%{error: "not_found"})
 
@@ -125,25 +122,24 @@ defmodule CanopyWeb.IssueController do
   def assign(conn, %{"issue_id" => id} = params) do
     agent_id = params["agent_id"]
 
-    case Repo.get(Issue, id) do
-      nil ->
-        conn |> put_status(404) |> json(%{error: "not_found"})
+    with %Issue{} = issue <- Repo.get(Issue, id),
+         %Agent{} <- Repo.get(Agent, agent_id) do
+      case issue
+           |> Ecto.Changeset.change(assignee_id: agent_id)
+           |> Repo.update() do
+        {:ok, updated} ->
+          Canopy.EventBus.broadcast(
+            Canopy.EventBus.workspace_topic(updated.workspace_id),
+            %{event: "issue.assigned", issue_id: id, agent_id: agent_id}
+          )
 
-      issue ->
-        case issue
-             |> Ecto.Changeset.change(assignee_id: agent_id)
-             |> Repo.update() do
-          {:ok, updated} ->
-            Canopy.EventBus.broadcast(
-              Canopy.EventBus.workspace_topic(updated.workspace_id),
-              %{event: "issue.assigned", issue_id: id, agent_id: agent_id}
-            )
+          json(conn, %{issue: serialize(updated)})
 
-            json(conn, %{issue: serialize(updated)})
-
-          {:error, _changeset} ->
-            conn |> put_status(500) |> json(%{error: "update_failed"})
-        end
+        {:error, _changeset} ->
+          conn |> put_status(500) |> json(%{error: "update_failed"})
+      end
+    else
+      nil -> conn |> put_status(404) |> json(%{error: "not_found"})
     end
   end
 
@@ -194,6 +190,29 @@ defmodule CanopyWeb.IssueController do
     end
   end
 
+  def add_label(conn, %{"id" => issue_id, "label_id" => label_id}) do
+    with %Issue{} <- Repo.get(Issue, issue_id),
+         %Label{} <- Repo.get(Label, label_id) do
+      case Repo.insert(%IssueLabel{issue_id: issue_id, label_id: label_id}, on_conflict: :nothing) do
+        {:ok, _} -> json(conn, %{ok: true})
+        {:error, cs} -> conn |> put_status(422) |> json(%{error: "failed", details: format_errors(cs)})
+      end
+    else
+      nil -> conn |> put_status(404) |> json(%{error: "not_found"})
+    end
+  end
+
+  def remove_label(conn, %{"id" => issue_id, "label_id" => label_id}) do
+    query = from il in IssueLabel, where: il.issue_id == ^issue_id and il.label_id == ^label_id
+    {count, _} = Repo.delete_all(query)
+
+    if count > 0 do
+      json(conn, %{ok: true})
+    else
+      conn |> put_status(404) |> json(%{error: "not_found"})
+    end
+  end
+
   # --- Private helpers ---
 
   defp serialize(%Issue{} = i) do
@@ -208,7 +227,7 @@ defmodule CanopyWeb.IssueController do
       goal_id: i.goal_id,
       assignee_id: i.assignee_id,
       assignee_name: nil,
-      labels: [],
+      labels: Enum.map(i.labels || [], fn l -> %{id: l.id, name: l.name, color: l.color} end),
       comments_count: 0,
       created_by: nil,
       checked_out_by: i.checked_out_by,
