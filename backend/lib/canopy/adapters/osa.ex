@@ -167,6 +167,81 @@ defmodule Canopy.Adapters.OSA do
     )
   end
 
+  # ── Temporal Workflow Support ────────────────────────────────────────
+
+  @doc """
+  Signal a running Temporal workflow.
+
+  Supports signals: pause, skip_stage, abort
+  """
+  def signal_workflow(workflow_id, signal, params \\ %{}) do
+    base_url = params["url"] || @default_url
+    headers = build_headers(params)
+
+    body =
+      %{
+        "signal" => signal,
+        "input" => params
+      }
+
+    case Req.post("#{base_url}/api/v1/workflows/#{workflow_id}/signal", json: body, headers: headers) do
+      {:ok, %{status: status}} when status in 200..204 ->
+        Logger.info("[OSA Adapter] Sent signal '#{signal}' to workflow #{workflow_id}")
+        {:ok, %{workflow_id: workflow_id, signal: signal}}
+
+      {:ok, %{status: status, body: resp_body}} ->
+        {:error, {:osa_error, status, resp_body}}
+
+      {:error, reason} ->
+        {:error, {:connection_failed, reason}}
+    end
+  end
+
+  @doc """
+  Query the status of a Temporal workflow.
+  """
+  def query_workflow(workflow_id, params \\ %{}) do
+    base_url = params["url"] || @default_url
+    headers = build_headers(params)
+
+    case Req.get("#{base_url}/api/v1/workflows/#{workflow_id}", headers: headers) do
+      {:ok, %{status: 200, body: resp_body}} ->
+        {:ok, resp_body}
+
+      {:ok, %{status: status, body: resp_body}} ->
+        {:error, {:osa_error, status, resp_body}}
+
+      {:error, reason} ->
+        {:error, {:connection_failed, reason}}
+    end
+  end
+
+  @doc """
+  Get active Temporal workflows for an agent or workspace.
+  """
+  def get_active_workflows(params \\ %{}) do
+    base_url = params["url"] || @default_url
+    headers = build_headers(params)
+
+    query_params =
+      %{}
+      |> maybe_put("agent_id", params["agent_id"])
+      |> maybe_put("workspace_id", params["workspace_id"])
+      |> maybe_put("status", "running")
+
+    case Req.get("#{base_url}/api/v1/workflows", params: query_params, headers: headers) do
+      {:ok, %{status: 200, body: resp_body}} ->
+        workflows = resp_body["workflows"] || []
+        {:ok, workflows}
+
+      {:ok, %{status: status, body: resp_body}} ->
+        {:error, {:osa_error, status, resp_body}}
+
+      {:error, reason} ->
+        {:error, {:connection_failed, reason}}
+    end
+  end
+
   # ── Private ─────────────────────────────────────────────────────────
 
   defp build_headers(config) do
