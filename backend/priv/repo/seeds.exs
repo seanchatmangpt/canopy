@@ -164,6 +164,176 @@ researcher = Repo.get_by!(Agent, workspace_id: workspace.id, slug: "researcher")
 IO.puts("    6 agents: orchestrator (osa), researcher, developer, reviewer (claude-code), devops (bash), api-monitor (http)")
 
 # ---------------------------------------------------------------------------
+# SECTION 3.5: Autonomic Coordination Agents (Vision 2030)
+# ---------------------------------------------------------------------------
+
+IO.puts("[3.5/10] Autonomic Coordination Agents...")
+
+autonomic_agents = [
+  %{
+    slug: "health-monitor",
+    name: "Health Monitor",
+    role: "health_monitor",
+    adapter: "osa",
+    model: "llama-3.3-70b-versatile",
+    status: "idle",
+    avatar_emoji: "💓",
+    config: %{
+      "url" => "http://localhost:9089",
+      "provider" => "groq",
+      "working_dir" => Path.expand("~/.canopy/default")
+    },
+    system_prompt: """
+    You monitor the health of all system components every 5 minutes.
+
+    ## Systems to Monitor
+    - OSA: GET /health (port 9089)
+    - BusinessOS: GET /api/health (port 8001)
+    - Canopy: GET /health (port 5200)
+
+    ## Procedure
+    1. Call each health endpoint
+    2. If any system is down: log failure, attempt restart via shell_execute
+    3. Report status to autonomic coordinator
+    """,
+    reports_to: orchestrator.id
+  },
+  %{
+    slug: "crm-automation",
+    name: "CRM Automation",
+    role: "crm_automation",
+    adapter: "osa",
+    model: "llama-3.3-70b-versatile",
+    status: "idle",
+    avatar_emoji: "📊",
+    config: %{
+      "url" => "http://localhost:9089",
+      "provider" => "groq",
+      "working_dir" => Path.expand("~/.canopy/default")
+    },
+    system_prompt: """
+    You manage CRM operations autonomously every 15 minutes.
+
+    ## Operations
+    - Pipeline Sync: Fetch deals, update stages based on activity
+    - Lead Scoring: Score new leads by company size, industry, activity
+    - Report Generation: Daily pipeline summary, weekly win/loss analysis
+    - Data Quality: Check duplicates, validate emails, flag incomplete records
+    """,
+    reports_to: orchestrator.id
+  },
+  %{
+    slug: "project-coordinator",
+    name: "Project Coordinator",
+    role: "project_coordinator",
+    adapter: "osa",
+    model: "llama-3.3-70b-versatile",
+    status: "idle",
+    avatar_emoji: "📋",
+    config: %{
+      "url" => "http://localhost:9089",
+      "provider" => "groq",
+      "working_dir" => Path.expand("~/.canopy/default")
+    },
+    system_prompt: """
+    You coordinate project management operations every 30 minutes.
+
+    ## Operations
+    - Progress Tracking: Check task completion, identify blockers
+    - Task Assignment: Match unassigned tasks to team capacity
+    - Status Reports: Generate project summaries with milestones, risks, blockers
+    - Deadline Management: Flag tasks due within 48 hours
+    """,
+    reports_to: orchestrator.id
+  },
+  %{
+    slug: "app-generator",
+    name: "App Generator",
+    role: "app_generator",
+    adapter: "osa",
+    model: "llama-3.3-70b-versatile",
+    status: "sleeping",
+    avatar_emoji: "🚀",
+    config: %{
+      "url" => "http://localhost:9089",
+      "provider" => "groq",
+      "working_dir" => Path.expand("~/.canopy/default")
+    },
+    system_prompt: """
+    You generate BusinessOS apps via OSA templates when triggered by webhook.
+
+    ## Operations
+    - Receive app request via webhook
+    - Generate app structure using templates
+    - Create app via BusinessOS API
+    - Notify stakeholders
+    """,
+    reports_to: orchestrator.id
+  },
+  %{
+    slug: "process-healer",
+    name: "Process Healer",
+    role: "process_healer",
+    adapter: "osa",
+    model: "llama-3.3-70b-versatile",
+    status: "sleeping",
+    avatar_emoji: "🔧",
+    config: %{
+      "url" => "http://localhost:9089",
+      "provider" => "groq",
+      "working_dir" => Path.expand("~/.canopy/default")
+    },
+    system_prompt: """
+    You diagnose and fix broken processes when anomalies are detected.
+
+    ## Operations
+    - Receive anomaly trigger
+    - Diagnose root cause using OSA process intelligence
+    - Apply fix via appropriate tools
+    - Verify resolution
+    """,
+    reports_to: orchestrator.id
+  },
+  %{
+    slug: "compliance-monitor",
+    name: "Compliance Monitor",
+    role: "compliance_monitor",
+    adapter: "osa",
+    model: "llama-3.3-70b-versatile",
+    status: "idle",
+    avatar_emoji: "✅",
+    config: %{
+      "url" => "http://localhost:9089",
+      "provider" => "groq",
+      "working_dir" => Path.expand("~/.canopy/default")
+    },
+    system_prompt: """
+    You perform continuous compliance checking every 6 hours.
+
+    ## Operations
+    - Check audit trail integrity via OSA
+    - Verify compliance gaps for SOC2, HIPAA, GDPR
+    - Collect evidence for compliance domains
+    - Generate remediation tasks for gaps
+    """,
+    reports_to: orchestrator.id
+  }
+]
+
+for attrs <- autonomic_agents do
+  unless Repo.exists?(from a in Agent, where: a.workspace_id == ^workspace.id and a.slug == ^attrs.slug) do
+    Repo.insert!(Agent.changeset(%Agent{}, Map.put(attrs, :workspace_id, workspace.id)))
+  end
+end
+
+health_monitor = Repo.get_by!(Agent, workspace_id: workspace.id, slug: "health-monitor")
+crm_automation = Repo.get_by!(Agent, workspace_id: workspace.id, slug: "crm-automation")
+project_coordinator = Repo.get_by!(Agent, workspace_id: workspace.id, slug: "project-coordinator")
+compliance_monitor = Repo.get_by!(Agent, workspace_id: workspace.id, slug: "compliance-monitor")
+
+IO.puts("    6 autonomic agents: health-monitor, crm-automation, project-coordinator, app-generator, process-healer, compliance-monitor")
+
+# ---------------------------------------------------------------------------
 # SECTION 4: Schedules
 # ---------------------------------------------------------------------------
 
@@ -203,6 +373,54 @@ for attrs <- schedules do
 end
 
 IO.puts("    3 schedules (all disabled): morning standup, nightly code review, infrastructure check")
+
+# Autonomic Coordination Schedules (Vision 2030)
+autonomic_schedules = [
+  %{
+    name: "Health Check",
+    cron_expression: "*/5 * * * *",
+    context: "Check OSA, BusinessOS, Canopy health endpoints. Auto-restart failed services.",
+    enabled: true,
+    timezone: "UTC",
+    workspace_id: workspace.id,
+    agent_id: health_monitor.id
+  },
+  %{
+    name: "CRM Pipeline Sync",
+    cron_expression: "*/15 * * * *",
+    context: "Sync CRM deals, score new leads, generate pipeline summary.",
+    enabled: true,
+    timezone: "UTC",
+    workspace_id: workspace.id,
+    agent_id: crm_automation.id
+  },
+  %{
+    name: "Project Status Check",
+    cron_expression: "*/30 * * * *",
+    context: "Track project progress, assign tasks, generate status reports.",
+    enabled: true,
+    timezone: "UTC",
+    workspace_id: workspace.id,
+    agent_id: project_coordinator.id
+  },
+  %{
+    name: "Compliance Scan",
+    cron_expression: "0 */6 * * *",
+    context: "Verify audit trail integrity, check compliance gaps, collect evidence.",
+    enabled: true,
+    timezone: "UTC",
+    workspace_id: workspace.id,
+    agent_id: compliance_monitor.id
+  }
+]
+
+for attrs <- autonomic_schedules do
+  unless Repo.exists?(from s in Schedule, where: s.workspace_id == ^workspace.id and s.name == ^attrs.name) do
+    Repo.insert!(Schedule.changeset(%Schedule{}, attrs))
+  end
+end
+
+IO.puts("    4 autonomic schedules (enabled): health-check (5min), crm-sync (15min), project-status (30min), compliance-scan (6hr)")
 
 # ---------------------------------------------------------------------------
 # SECTION 5: Projects
@@ -790,22 +1008,22 @@ unless Repo.exists?(from t in Template, where: t.name == "Full-Stack Development
       description: "A complete dev team setup with orchestrator, frontend, backend, reviewer, and devops agents. Includes code generation, PR review, and deployment skills.",
       category: "development",
       is_builtin: true,
-      agents: %{
-        orchestrator: %{role: "orchestrator", adapter: "osa", model: "claude-opus-4-6"},
-        frontend: %{role: "developer", adapter: "claude-code", model: "claude-sonnet-4-6"},
-        backend: %{role: "developer", adapter: "claude-code", model: "claude-sonnet-4-6"},
-        reviewer: %{role: "reviewer", adapter: "claude-code", model: "claude-sonnet-4-6"},
-        devops: %{role: "devops", adapter: "bash", model: "bash"}
-      },
-      skills: %{
-        code_generation: %{enabled: true},
-        pr_review: %{enabled: true},
-        deployment: %{enabled: false},
-        web_search: %{enabled: true}
-      },
-      schedules: %{
-        nightly_review: %{cron: "0 2 * * *", agent: "reviewer", enabled: false}
-      }
+      agents: [
+        %{name: "orchestrator", role: "orchestrator", adapter: "osa", model: "claude-opus-4-6"},
+        %{name: "frontend", role: "developer", adapter: "claude-code", model: "claude-sonnet-4-6"},
+        %{name: "backend", role: "developer", adapter: "claude-code", model: "claude-sonnet-4-6"},
+        %{name: "reviewer", role: "reviewer", adapter: "claude-code", model: "claude-sonnet-4-6"},
+        %{name: "devops", role: "devops", adapter: "bash", model: "bash"}
+      ],
+      skills: [
+        %{name: "code_generation", enabled: true},
+        %{name: "pr_review", enabled: true},
+        %{name: "deployment", enabled: false},
+        %{name: "web_search", enabled: true}
+      ],
+      schedules: [
+        %{name: "nightly_review", cron: "0 2 * * *", agent: "reviewer", enabled: false}
+      ]
     })
   )
 end
@@ -817,16 +1035,16 @@ unless Repo.exists?(from t in Template, where: t.name == "Research Assistant") d
       description: "A focused research team: one orchestrator coordinating a researcher and a writer. Optimised for document synthesis, literature review, and report generation.",
       category: "research",
       is_builtin: true,
-      agents: %{
-        orchestrator: %{role: "orchestrator", adapter: "osa", model: "claude-opus-4-6"},
-        researcher: %{role: "researcher", adapter: "claude-code", model: "claude-sonnet-4-6"},
-        writer: %{role: "writer", adapter: "claude-code", model: "claude-sonnet-4-6"}
-      },
-      skills: %{
-        web_search: %{enabled: true},
-        code_generation: %{enabled: false}
-      },
-      schedules: %{}
+      agents: [
+        %{name: "orchestrator", role: "orchestrator", adapter: "osa", model: "claude-opus-4-6"},
+        %{name: "researcher", role: "researcher", adapter: "claude-code", model: "claude-sonnet-4-6"},
+        %{name: "writer", role: "writer", adapter: "claude-code", model: "claude-sonnet-4-6"}
+      ],
+      skills: [
+        %{name: "web_search", enabled: true},
+        %{name: "code_generation", enabled: false}
+      ],
+      schedules: []
     })
   )
 end
@@ -843,8 +1061,10 @@ IO.puts("""
 
   Users         admin@canopy.dev (admin), dev@canopy.dev (member)
   Workspace     \"OSA Development\"
-  Agents        6  (orchestrator, researcher, developer, reviewer, devops, api-monitor)
-  Schedules     3  (all disabled)
+  Agents        12 (orchestrator, researcher, developer, reviewer, devops, api-monitor,
+               health-monitor, crm-automation, project-coordinator, app-generator,
+               process-healer, compliance-monitor)
+  Schedules     7  (3 disabled + 4 autonomic enabled)
   Projects      2  (Canopy Platform, Infrastructure)
   Goals         4  (Launch MVP + child, Setup CI/CD, Security Audit)
   Issues        6  (todo x2, in_progress x1, in_review x1, backlog x2)
@@ -859,4 +1079,6 @@ IO.puts("""
   Approvals     2  (1 pending, 1 approved)
   Plugins       3  (github enabled, slack enabled, jira disabled)
   Templates     2  (Full-Stack Development Team, Research Assistant)
+
+  Vision 2030   Autonomic Coordination Agents seeded (4 schedules active)
 """)

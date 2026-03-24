@@ -1,15 +1,17 @@
 defmodule Canopy.Adapters.OSA do
   @moduledoc """
-  OSA adapter — direct Elixir function calls to the OptimalSystemAgent.
+  OSA adapter — connects to a running OptimalSystemAgent instance via HTTP API.
 
-  Connects to a running OSA instance via its HTTP API (localhost:9090 by default).
-  Streams SSE events back as adapter events.
+  Streams SSE events back as adapter events. Supports provider configuration
+  (Groq, Anthropic, OpenAI, etc.) and shared secret authentication.
   """
   @behaviour Canopy.Adapter
 
   require Logger
 
-  @default_url "http://127.0.0.1:9090"
+  @default_url "http://127.0.0.1:9089"
+  @default_provider "groq"
+  @default_model "llama-3.3-70b-versatile"
 
   @impl true
   def type, do: "osa"
@@ -26,23 +28,43 @@ defmodule Canopy.Adapters.OSA do
   @impl true
   def capabilities, do: [:chat, :tools, :code_execution, :web_search, :memory, :delegation]
 
+  # ── Public API ──────────────────────────────────────────────────────
+
   @impl true
   def start(config) do
     base_url = config["url"] || @default_url
+    provider = config["provider"] || @default_provider
+    model = config["model"] || @default_model
+    user_id = config["user_id"] || "canopy-agent"
 
-    case Req.post("#{base_url}/api/v1/sessions",
-           json: %{model: config["model"] || "claude-sonnet-4-6"}
-         ) do
-      {:ok, %{status: status, body: body}} when status in 200..201 ->
-        {:ok,
-         %{
-           session_id: body["session"]["id"],
-           base_url: base_url,
-           model: config["model"] || "claude-sonnet-4-6"
-         }}
+    headers = build_headers(config)
 
-      {:ok, %{status: status, body: body}} ->
-        {:error, {:osa_error, status, body}}
+    body =
+      %{}
+      |> maybe_put("user_id", user_id)
+      |> maybe_put("provider", provider)
+      |> maybe_put("model", model)
+
+    case Req.post("#{base_url}/api/v1/sessions", json: body, headers: headers) do
+      {:ok, %{status: status, body: resp_body}} when status in 200..201 ->
+        session_id = resp_body["id"] || get_in(resp_body, ["session", "id"])
+
+        if session_id do
+          Logger.info("[OSA Adapter] Session created: #{session_id} (#{provider}/#{model})")
+
+          {:ok,
+           %{
+             session_id: session_id,
+             base_url: base_url,
+             provider: provider,
+             model: model
+           }}
+        else
+          {:error, {:osa_error, status, resp_body}}
+        end
+
+      {:ok, %{status: status, body: resp_body}} ->
+        {:error, {:osa_error, status, resp_body}}
 
       {:error, reason} ->
         {:error, {:connection_failed, reason}}
@@ -51,7 +73,9 @@ defmodule Canopy.Adapters.OSA do
 
   @impl true
   def stop(%{base_url: base_url, session_id: session_id}) do
-    case Req.delete("#{base_url}/api/v1/sessions/#{session_id}") do
+    headers = build_headers(%{})
+
+    case Req.delete("#{base_url}/api/v1/sessions/#{session_id}", headers: headers) do
       {:ok, _} -> :ok
       {:error, reason} -> {:error, reason}
     end
@@ -61,20 +85,31 @@ defmodule Canopy.Adapters.OSA do
   def execute_heartbeat(params) do
     base_url = params["url"] || @default_url
     agent_context = params["context"] || "Perform your scheduled heartbeat check."
-    model = params["model"] || "claude-sonnet-4-6"
+    provider = params["provider"] || @default_provider
+    model = params["model"] || @default_model
+    user_id = params["agent_id"] || "canopy-heartbeat"
+
+    headers = build_headers(params)
+
+    body =
+      %{}
+      |> maybe_put("user_id", user_id)
+      |> maybe_put("message", agent_context)
+      |> maybe_put("provider", provider)
+      |> maybe_put("model", model)
 
     Stream.resource(
       fn ->
-        case Req.post("#{base_url}/api/v1/sessions", json: %{model: model}) do
-          {:ok, %{status: s, body: body}} when s in 200..201 ->
-            session_id = body["session"]["id"]
+        case Req.post("#{base_url}/api/v1/sessions", json: body, headers: headers) do
+          {:ok, %{status: s, body: resp_body}} when s in 200..201 ->
+            session_id = resp_body["id"] || get_in(resp_body, ["session", "id"])
 
-            Req.post("#{base_url}/api/v1/sessions/#{session_id}/message",
-              json: %{message: agent_context}
-            )
-
-            {:ok, task} = start_sse("#{base_url}/api/v1/sessions/#{session_id}/stream")
-            {task, session_id, base_url}
+            if session_id do
+              {:ok, task} = start_sse("#{base_url}/api/v1/sessions/#{session_id}/stream", headers)
+              {task, session_id, base_url}
+            else
+              {:error, nil, nil}
+            end
 
           _ ->
             {:error, nil, nil}
@@ -101,7 +136,7 @@ defmodule Canopy.Adapters.OSA do
           :ok
 
         {_task, session_id, base_url} ->
-          Req.delete("#{base_url}/api/v1/sessions/#{session_id}")
+          Req.delete("#{base_url}/api/v1/sessions/#{session_id}", headers: headers)
           :ok
       end
     )
@@ -109,13 +144,16 @@ defmodule Canopy.Adapters.OSA do
 
   @impl true
   def send_message(%{base_url: base_url, session_id: session_id}, message) do
+    headers = build_headers(%{})
+
     Req.post("#{base_url}/api/v1/sessions/#{session_id}/message",
-      json: %{message: message}
+      json: %{message: message},
+      headers: headers
     )
 
     Stream.resource(
       fn ->
-        {:ok, task} = start_sse("#{base_url}/api/v1/sessions/#{session_id}/stream")
+        {:ok, task} = start_sse("#{base_url}/api/v1/sessions/#{session_id}/stream", headers)
         task
       end,
       fn task ->
@@ -129,12 +167,27 @@ defmodule Canopy.Adapters.OSA do
     )
   end
 
-  # SSE helpers
+  # ── Private ─────────────────────────────────────────────────────────
 
-  defp start_sse(url) do
+  defp build_headers(config) do
+    base = [{"Content-Type", "application/json"}]
+
+    case config["shared_secret"] || System.get_env("OSA_SHARED_SECRET") do
+      nil -> base
+      secret -> [{"X-Shared-Secret", secret} | base]
+    end
+  end
+
+  defp maybe_put(map, _key, nil), do: map
+  defp maybe_put(map, _key, ""), do: map
+  defp maybe_put(map, key, value), do: Map.put(map, key, value)
+
+  # ── SSE helpers ─────────────────────────────────────────────────────
+
+  defp start_sse(url, headers) do
     task =
       Task.async(fn ->
-        Req.get(url, into: :self, receive_timeout: 120_000)
+        Req.get(url, headers: headers, into: :self, receive_timeout: 120_000)
       end)
 
     {:ok, task}
