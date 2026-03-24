@@ -433,10 +433,10 @@ await invoke('command_name', { arg });
 
 **Knowledge**:
 - **Signal Theory**: S=(M,G,T,F,W) complete theory
-- **S/N scoring**: Signal-to-noise ratio calculation
+- **S/N scoring**: Python implementation in `docs/superpowers/implementation/signal-theory/sn_scorer.py`
 - **Four constraints**: Shannon, Ashby, Beer, Wiener
 - **Genre system**: 11+ genres for different situations
-- **Quality gates**: Phase-based thresholds
+- **Quality gates**: Phase-based thresholds, S/N ≥ 0.7 required
 
 **Key Concepts**:
 ```
