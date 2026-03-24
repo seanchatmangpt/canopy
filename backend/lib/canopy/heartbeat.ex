@@ -18,7 +18,7 @@ defmodule Canopy.Heartbeat do
 
   alias Canopy.Repo
   alias Canopy.Schemas.{Agent, Session, SessionEvent, Workspace, WorkProduct, ActivityEvent}
-  alias Canopy.OCPM.{EventLog, Discovery}
+  alias Canopy.OCPM.EventLog
   import Ecto.Changeset, only: [change: 2]
   import Ecto.Query, only: [from: 2]
 
@@ -523,7 +523,7 @@ defmodule Canopy.Heartbeat do
   end
 
   # Handle Temporal workflow signals
-  defp handle_temporal_workflow_signals(workflow, agent) do
+  defp handle_temporal_workflow_signals(workflow, _agent) do
     # Check for pending signals (pause, skip_stage, abort)
     # This is a placeholder - actual implementation would query Temporal for signals
     Logger.debug("[Heartbeat] Checking signals for workflow #{workflow[:workflow_id]}")

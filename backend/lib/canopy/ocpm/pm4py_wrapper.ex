@@ -27,7 +27,6 @@ defmodule Canopy.OCPM.Pm4pyWrapper do
   require Logger
 
   @pm4py_script Path.join(:code.priv_dir(:canopy), "pm4py_wrapper.py")
-  @timeout 30_000  # 30 seconds
 
   @type event_log :: [
           %{
@@ -133,7 +132,7 @@ defmodule Canopy.OCPM.Pm4pyWrapper do
     case run_pm4py("bottlenecks", input) do
       {:ok, result} when is_map(result) ->
         bottlenecks = Map.get(result, "bottlenecks", [])
-        metadata = Map.get(result, "metadata", %{})
+        _metadata = Map.get(result, "metadata", %{})
 
         Logger.info(
           "[Pm4pyWrapper] Found #{length(bottlenecks)} bottlenecks"
@@ -182,7 +181,7 @@ defmodule Canopy.OCPM.Pm4pyWrapper do
     case run_pm4py("conformance", input) do
       {:ok, result} when is_map(result) ->
         deviations = Map.get(result, "deviations", [])
-        metadata = Map.get(result, "metadata", %{})
+        _metadata = Map.get(result, "metadata", %{})
 
         Logger.info(
           "[Pm4pyWrapper] Found #{length(deviations)} deviations"
@@ -226,7 +225,7 @@ defmodule Canopy.OCPM.Pm4pyWrapper do
         {:error, {:python_error, exit_code, output}}
     end
   rescue
-    e in [:enoent] ->
+    _e in [File.Error] ->
       Logger.error("[Pm4pyWrapper] Python script not found: #{@pm4py_script}")
       {:error, :script_not_found}
 
