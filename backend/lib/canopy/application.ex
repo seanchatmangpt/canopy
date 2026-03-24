@@ -27,7 +27,9 @@ defmodule Canopy.Application do
     result = Supervisor.start_link(children, opts)
 
     case result do
-      {:ok, _pid} -> Canopy.Scheduler.load_schedules()
+      {:ok, _pid} ->
+        # Load schedules asynchronously to avoid startup issues
+        Task.start(fn -> Canopy.Scheduler.load_schedules() end)
       _ -> :ok
     end
 

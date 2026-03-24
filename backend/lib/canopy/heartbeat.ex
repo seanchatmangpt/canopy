@@ -444,7 +444,7 @@ defmodule Canopy.Heartbeat do
       type when type in ["tool.start", "tool.complete", "agent.message", "agent.thinking"] ->
         true
 
-      _ ->
+      type ->
         String.starts_with?(type, "work.") or String.starts_with?(type, "task.")
     end
   end

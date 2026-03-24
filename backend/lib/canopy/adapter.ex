@@ -34,6 +34,7 @@ defmodule Canopy.Adapter do
   def resolve("openclaw"), do: {:ok, Canopy.Adapters.OpenClaw}
   def resolve("cursor"), do: {:ok, Canopy.Adapters.Cursor}
   def resolve("gemini"), do: {:ok, Canopy.Adapters.Gemini}
+  def resolve("mcp"), do: {:ok, Canopy.Adapters.MCP}
   def resolve(type), do: {:error, {:unknown_adapter, type}}
 
   @doc "List all registered adapters with metadata."
@@ -46,7 +47,8 @@ defmodule Canopy.Adapter do
       Canopy.Adapters.HTTP,
       Canopy.Adapters.OpenClaw,
       Canopy.Adapters.Cursor,
-      Canopy.Adapters.Gemini
+      Canopy.Adapters.Gemini,
+      Canopy.Adapters.MCP
     ]
     |> Enum.map(fn mod ->
       %{

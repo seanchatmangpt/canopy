@@ -72,8 +72,8 @@ defmodule Canopy.Adapters.OSA do
   end
 
   @impl true
-  def stop(%{base_url: base_url, session_id: session_id}) do
-    headers = build_headers(%{})
+  def stop(%{base_url: base_url, session_id: session_id} = session) do
+    headers = build_headers(session)
 
     case Req.delete("#{base_url}/api/v1/sessions/#{session_id}", headers: headers) do
       {:ok, _} -> :ok
@@ -143,8 +143,8 @@ defmodule Canopy.Adapters.OSA do
   end
 
   @impl true
-  def send_message(%{base_url: base_url, session_id: session_id}, message) do
-    headers = build_headers(%{})
+  def send_message(%{base_url: base_url, session_id: session_id} = session, message) do
+    headers = build_headers(session)
 
     Req.post("#{base_url}/api/v1/sessions/#{session_id}/message",
       json: %{message: message},
