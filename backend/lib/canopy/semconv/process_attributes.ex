@@ -1499,66 +1499,6 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
   end
 
   @doc """
-  The type of process model used for conformance checking.
-
-  Attribute: `process.mining.model_type`
-  Type: `enum`
-  Stability: `development`
-  Requirement: `recommended`
-  Examples: `petri_net`, `bpmn`
-  """
-  @spec process_mining_model_type() :: :"process.mining.model_type"
-  def process_mining_model_type, do: :"process.mining.model_type"
-
-  @doc """
-  Enumerated values for `process.mining.model_type`.
-
-  | Key | Value | Description |
-  |-----|-------|-------------|
-  | `petri_net` | `"petri_net"` | petri_net |
-  | `bpmn` | `"bpmn"` | bpmn |
-  | `declare` | `"declare"` | declare |
-  | `dfg` | `"dfg"` | dfg |
-  """
-  @spec process_mining_model_type_values() :: %{
-    petri_net: :petri_net,
-    bpmn: :bpmn,
-    declare: :declare,
-    dfg: :dfg
-  }
-  def process_mining_model_type_values do
-    %{
-      petri_net: :petri_net,
-      bpmn: :bpmn,
-      declare: :declare,
-      dfg: :dfg
-    }
-  end
-
-  defmodule ProcessMiningModelTypeValues do
-    @moduledoc """
-    Typed constants for the `process.mining.model_type` attribute.
-    """
-
-    @doc "petri_net"
-    @spec petri_net() :: :petri_net
-    def petri_net, do: :petri_net
-
-    @doc "bpmn"
-    @spec bpmn() :: :bpmn
-    def bpmn, do: :bpmn
-
-    @doc "declare"
-    @spec declare() :: :declare
-    def declare, do: :declare
-
-    @doc "dfg"
-    @spec dfg() :: :dfg
-    def dfg, do: :dfg
-
-  end
-
-  @doc """
   Number of places in the discovered Petri net model.
 
   Attribute: `process.mining.petri_net.place_count`
@@ -1761,18 +1701,6 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
   """
   @spec process_mining_replay_token_count() :: :"process.mining.replay.token_count"
   def process_mining_replay_token_count, do: :"process.mining.replay.token_count"
-
-  @doc """
-  Replay fitness score [0.0, 1.0] measuring how well the log fits the discovered model.
-
-  Attribute: `process.mining.replay_fitness`
-  Type: `double`
-  Stability: `development`
-  Requirement: `recommended`
-  Examples: `0.85`, `0.97`, `1.0`
-  """
-  @spec process_mining_replay_fitness() :: :"process.mining.replay_fitness"
-  def process_mining_replay_fitness, do: :"process.mining.replay_fitness"
 
   @doc """
   Confidence score for the root cause classification [0.0, 1.0].

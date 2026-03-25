@@ -505,18 +505,6 @@ defmodule OpenTelemetry.SemConv.Incubating.ConsensusAttributes do
   def consensus_leader_tenure_ms, do: :"consensus.leader.tenure_ms"
 
   @doc """
-  ID of the leader node for this consensus view.
-
-  Attribute: `consensus.leader_id`
-  Type: `string`
-  Stability: `development`
-  Requirement: `recommended`
-  Examples: `node-1`, `osa-primary`
-  """
-  @spec consensus_leader_id() :: :"consensus.leader_id"
-  def consensus_leader_id, do: :"consensus.leader_id"
-
-  @doc """
   Number of consecutive rounds completed to prove liveness of the protocol.
 
   Attribute: `consensus.liveness.proof_rounds`
