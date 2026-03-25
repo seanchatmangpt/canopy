@@ -17,6 +17,7 @@ defmodule Canopy.Application do
       Canopy.AlertEvaluator,
       Canopy.StaleCleanup,
       Canopy.IdempotencyCleanup,
+      Canopy.Autonomic.Heartbeat,
       CanopyWeb.Endpoint
     ]
 

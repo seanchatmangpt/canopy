@@ -34,6 +34,7 @@ Pre-commit runs: `compile --warnings-as-errors` + `deps.unlock --unused` + `form
 | Phoenix backend | 9089 |
 | SvelteKit desktop | 5200 |
 | OSA integration | 8089 |
+| BusinessOS integration | 8001 |
 
 ## Code Standards
 
@@ -86,9 +87,9 @@ All runtime adapters implement this behavior. Key callbacks:
 @callback capabilities() :: [atom()]
 ```
 
-Implementations: `adapters/osa.ex`, `adapters/claude_code.ex`, `adapters/codex.ex`,
-`adapters/cursor.ex`, `adapters/gemini.ex`, `adapters/mcp.ex`, `adapters/mcp_server.ex`,
-`adapters/bash.ex`, `adapters/http.ex`, `adapters/openclaw.ex`.
+Implementations: `adapters/osa.ex`, `adapters/business_os.ex`, `adapters/claude_code.ex`,
+`adapters/codex.ex`, `adapters/cursor.ex`, `adapters/gemini.ex`, `adapters/mcp.ex`,
+`adapters/mcp_server.ex`, `adapters/bash.ex`, `adapters/http.ex`, `adapters/openclaw.ex`.
 
 ### Key Systems
 
@@ -119,3 +120,66 @@ GUARDIAN_SECRET_KEY=...
 ```
 
 Adapter credentials go in `.env.local` (never committed).
+
+## Cross-System Integration: BusinessOS
+
+### Adapter
+
+**File:** `backend/lib/canopy/adapters/business_os.ex`
+
+Implements `Canopy.Adapter` behavior. Stateless (no sessions), supports concurrency.
+
+**Capabilities:** `[:process_mining, :model_analysis, :conformance_checking]`
+
+**API Endpoints (called on BusinessOS at port 8001):**
+
+| Operation | Method | Path | Purpose |
+|-----------|--------|------|---------|
+| Process discovery | POST | `/api/bos/discover` | Discover process models from event logs |
+| Conformance check | POST | `/api/bos/conformance` | Check fitness/precision against a model |
+| Compliance verify | POST | `/api/bos/compliance/verify` | Verify SOC2/HIPAA/GDPR compliance |
+| Health check | GET | `/api/health` | Server availability |
+| Discovery status | GET | `/api/bos/status` | Discovery engine status |
+
+**Auth:** Bearer token via `BUSINESSOS_API_TOKEN` env var. Set in `backend/.env` or deployment secrets.
+
+**Message types** (JSON via `send_message/2`):
+
+```json
+{"type": "process_mining", "payload": {"event_log": "..."}}
+{"type": "conformance", "payload": {"model": "...", "event_log": "..."}}
+{"type": "compliance", "payload": {"framework": "SOC2"}}
+```
+
+### Webhook: Discovery Completion
+
+BusinessOS posts discovery results back to Canopy:
+
+```
+POST /api/v1/hooks/{webhook_id}
+```
+
+Handled by `CanopyWeb.WebhookController.receive/2`. Webhook module:
+`backend/lib/canopy/webhooks/businessos_discovery_webhook.ex`.
+
+### Seed Agents
+
+Seed file: `backend/priv/repo/seeds/20260325_businessos_agents.exs`
+
+Creates 2 agents in a "BusinessOS Integration" workspace:
+
+| Agent | Slug | Schedule | Purpose |
+|-------|------|----------|---------|
+| Process Mining Monitor | `process-mining-monitor` | `*/10 * * * *` | Discovers process models, detects drift, generates summaries |
+| BusinessOS Conformance Checker | `bos-conformance-checker` | `0 */6 * * *` | Runs conformance checks, verifies SOC2/HIPAA/GDPR compliance |
+
+Run seed: `mix run priv/repo/seeds/20260325_businessos_agents.exs`
+
+After seeding, restart the app or call `Canopy.Scheduler.load_schedules/0` to register cron jobs.
+
+### Connected Systems
+
+| System | Port | Integration |
+|--------|------|-------------|
+| BusinessOS | 8001 | Adapter + webhook (this section) |
+| OSA | 8089 | Adapter (`adapters/osa.ex`) |
