@@ -476,7 +476,7 @@ defmodule Canopy.Workflows.ProcessDiscoveryTest do
 
     # Check intermediate state
     {:ok, state1} = ProcessDiscovery.get_state(workflow_id)
-    assert is_non_neg_integer(state1.retry_count)
+    assert is_integer(state1.retry_count) and state1.retry_count >= 0
 
     # Try to wait for completion
     result = ProcessDiscovery.wait_for_completion(workflow_id, 5000)
