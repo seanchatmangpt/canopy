@@ -72,7 +72,10 @@ defmodule Canopy.MixProject do
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
-      precommit: ["compile --warnings-as-errors", "deps.unlock --unused", "format", "test"]
+      precommit: ["compile --warnings-as-errors", "deps.unlock --unused", "format", "test"],
+      "weaver.live_check": [
+        "cmd WEAVER_LIVE_CHECK=true WEAVER_OTLP_ENDPOINT=http://localhost:4317 mix test"
+      ]
     ]
   end
 end

@@ -29,3 +29,11 @@ config :phoenix, :plug_init_mode, :runtime
 # Sort query params output of verified routes for robust url comparisons
 config :phoenix,
   sort_verified_routes_query_params: true
+
+# Disable OTel processors by default in test — re-enabled by weaver.exs when WEAVER_LIVE_CHECK=true
+config :opentelemetry, :processors, []
+
+# Conditionally import weaver.exs for live-check validation
+if System.get_env("WEAVER_LIVE_CHECK") == "true" do
+  import_config("weaver.exs")
+end
