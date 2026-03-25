@@ -52,7 +52,11 @@ defmodule Canopy.MixProject do
       {:bcrypt_elixir, "~> 3.0"},
       {:cors_plug, "~> 3.0"},
       {:req, "~> 0.5"},
-      {:quantum, "~> 3.5"}
+      {:quantum, "~> 3.5"},
+      {:opentelemetry_api, "~> 1.2"},
+      {:opentelemetry, "~> 1.2"},
+      {:opentelemetry_exporter, "~> 1.6"},
+      {:opentelemetry_phoenix, "~> 1.1"}
     ]
   end
 

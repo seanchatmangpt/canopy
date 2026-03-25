@@ -187,6 +187,9 @@ defmodule CanopyWeb.WebhookController do
             }
           )
 
+          # Route to handler based on webhook name
+          _result = route_webhook_handler(webhook, body)
+
           json(conn, %{ok: true, delivery_id: delivery.id})
         else
           {:error, :invalid_secret} ->
@@ -196,6 +199,15 @@ defmodule CanopyWeb.WebhookController do
   end
 
   # --- Private helpers ---
+
+  defp route_webhook_handler(%Webhook{name: "BusinessOS Discovery Complete", workspace_id: ws_id}, payload) do
+    Canopy.Webhooks.BusinessosDiscoveryWebhook.handle_discovery_complete(ws_id, payload)
+  end
+
+  defp route_webhook_handler(_webhook, _payload) do
+    # Unknown webhook type — no handler registered
+    :ok
+  end
 
   defp verify_secret(_conn, %Webhook{secret: nil}), do: :ok
 

@@ -36,11 +36,14 @@ defmodule Canopy.Scheduler do
     case Crontab.CronExpression.Parser.parse(schedule.cron_expression) do
       {:ok, cron} ->
         job =
-          Quantum.Job.new(__MODULE__)
-          |> Quantum.Job.set_name(job_name)
-          |> Quantum.Job.set_schedule(cron)
-          |> Quantum.Job.set_timezone(schedule.timezone || "UTC")
-          |> Quantum.Job.set_task(fn -> execute_schedule(schedule.id) end)
+          Quantum.Job.new(
+            name: job_name,
+            schedule: cron,
+            timezone: schedule.timezone || "UTC",
+            task: fn -> execute_schedule(schedule.id) end,
+            overlap: false,
+            run_strategy: Quantum.RunStrategy.Local
+          )
 
         # Remove existing if any, then add
         delete_job(job_name)

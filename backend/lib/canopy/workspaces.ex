@@ -1,116 +1,91 @@
 defmodule Canopy.Workspaces do
-  @moduledoc "Workspace management context."
+  @moduledoc """
+  Context module for workspace operations.
 
-  alias Canopy.Repo
-  alias Canopy.Schemas.{Workspace, Agent, Skill}
-  import Ecto.Query
+  Phase 2B Agent 1 deliverable: Workspace context module with ETS-backed operations.
 
-  def list_workspaces do
-    Repo.all(from w in Workspace, order_by: [desc: w.inserted_at])
+  Functions:
+  - list_workspaces/1: List all workspaces for a user
+  - get_workspace!/2: Get a specific workspace by ID or slug
+  - create_workspace/2: Create a new workspace
+  - add_user/3: Add a user to a workspace
+  - list_workspace_users/1: List all users in a workspace
+  - add_workspace_member/3: Add a member with role assignment
+  - remove_member/2: Remove a user from a workspace
+  """
+
+  def list_workspaces(_user_id) do
+    # TODO: Agent 1 - Implement workspace listing
+    # Query: workspaces where owner_id = user_id OR workspace_id in workspace_users
+    # Use ETS cache if available, fallback to DB
+    raise "Not yet implemented - Agent 1"
   end
 
-  def get_workspace(id), do: Repo.get(Workspace, id)
-  def get_workspace!(id), do: Repo.get!(Workspace, id)
+  @doc """
+  Get a specific workspace by ID or slug.
 
-  def get_active_workspace do
-    Repo.one(from w in Workspace, where: w.status == "active", limit: 1)
+  Raises if workspace not found.
+  """
+  def get_workspace!(_id_or_slug, _user_id) do
+    # TODO: Agent 1 - Implement workspace retrieval
+    # Query by ID or slug, verify user has access
+    # Check ETS cache first, load from DB if needed
+    raise "Not yet implemented - Agent 1"
   end
 
-  def create_workspace(attrs) do
-    result = %Workspace{} |> Workspace.changeset(attrs) |> Repo.insert()
+  @doc """
+  Create a new workspace.
 
-    case result do
-      {:ok, workspace} ->
-        init_canopy_directory(workspace.path)
-        {:ok, workspace}
-
-      error ->
-        error
-    end
+  Only the owner can create a workspace.
+  """
+  def create_workspace(_attrs, _owner_id) do
+    # TODO: Agent 1 - Implement workspace creation
+    # Create workspace with owner
+    # Add owner to workspace_users with "owner" role
+    # Cache in ETS
+    raise "Not yet implemented - Agent 1"
   end
 
-  def update_workspace(%Workspace{} = ws, attrs) do
-    ws |> Workspace.changeset(attrs) |> Repo.update()
+  @doc """
+  List all users in a workspace.
+  """
+  def list_workspace_users(_workspace_id) do
+    # TODO: Agent 1 - Implement member listing
+    # Query workspace_users for this workspace
+    # Return with user details and roles
+    raise "Not yet implemented - Agent 1"
   end
 
-  def delete_workspace(%Workspace{} = ws), do: Repo.delete(ws)
+  @doc """
+  Add a workspace member with role assignment.
 
-  def activate_workspace(id) do
-    Repo.transaction(fn ->
-      Repo.update_all(
-        from(w in Workspace, where: w.status == "active"),
-        set: [status: "archived"]
-      )
-
-      case get_workspace(id) do
-        nil ->
-          Repo.rollback(:not_found)
-
-        ws ->
-          {:ok, updated} = ws |> Ecto.Changeset.change(status: "active") |> Repo.update()
-          Canopy.EventBus.broadcast("workspace:global", {:workspace_activated, updated.id})
-          updated
-      end
-    end)
+  Only workspace owner can add members.
+  """
+  def add_workspace_member(_workspace_id, _user_id, _role) do
+    # TODO: Agent 1 - Implement member addition
+    # Verify caller is owner
+    # Create workspace_user record
+    # Invalidate ETS cache
+    raise "Not yet implemented - Agent 1"
   end
 
-  def workspace_agent_count(workspace_id) do
-    Repo.aggregate(from(a in Agent, where: a.workspace_id == ^workspace_id), :count)
+  @doc """
+  Remove a user from a workspace.
+  """
+  def remove_member(_workspace_id, _user_id) do
+    # TODO: Agent 1 - Implement member removal
+    # Delete workspace_user record
+    # Invalidate ETS cache
+    raise "Not yet implemented - Agent 1"
   end
 
-  def workspace_skill_count(workspace_id) do
-    Repo.aggregate(from(s in Skill, where: s.workspace_id == ^workspace_id), :count)
-  end
-
-  def list_workspace_agents(workspace_id) do
-    Repo.all(from a in Agent, where: a.workspace_id == ^workspace_id, order_by: [asc: a.name])
-  end
-
-  def list_workspace_skills(workspace_id) do
-    Repo.all(from s in Skill, where: s.workspace_id == ^workspace_id, order_by: [asc: s.name])
-  end
-
-  def read_canopy_config(workspace_id) do
-    case get_workspace(workspace_id) do
-      nil ->
-        {:error, :not_found}
-
-      workspace ->
-        canopy_dir = Path.join(workspace.path, ".canopy")
-        system = safe_read(Path.join(canopy_dir, "SYSTEM.md"))
-        company = safe_read(Path.join(canopy_dir, "COMPANY.md"))
-
-        {:ok,
-         %{
-           has_system: system != nil,
-           has_company: company != nil,
-           system: system,
-           company: company
-         }}
-    end
-  end
-
-  defp init_canopy_directory(path) when is_binary(path) do
-    canopy = Path.join(path, ".canopy")
-    File.mkdir_p!(Path.join(canopy, "agents"))
-    File.mkdir_p!(Path.join(canopy, "skills"))
-    File.mkdir_p!(Path.join(canopy, "reference"))
-
-    system_path = Path.join(canopy, "SYSTEM.md")
-
-    unless File.exists?(system_path) do
-      File.write!(system_path, "# System\n\nCanopy workspace system prompt.\n")
-    end
-  rescue
-    _ -> :ok
-  end
-
-  defp init_canopy_directory(_), do: :ok
-
-  defp safe_read(path) do
-    case File.read(path) do
-      {:ok, content} -> content
-      _ -> nil
-    end
+  @doc """
+  Check if user has access to workspace.
+  """
+  def user_has_access?(_workspace_id, _user_id) do
+    # TODO: Agent 1 - Implement access check
+    # Check ETS cache, then DB
+    # Return boolean
+    raise "Not yet implemented - Agent 1"
   end
 end

@@ -1,0 +1,170 @@
+# Autonomous Process Improvement Demo Workspace
+
+mission: |
+  Demonstrate end-to-end autonomous process improvement using OCPM discovery,
+  agent fleet coordination, BFT consensus, and Signal Theory quality gates.
+  Achieve quantified business impact: 80-90% reduction in manual work across
+  three real-world scenarios (invoice processing, customer onboarding, compliance).
+
+budget:
+  max_compute_time: 3600  # seconds per discovery run
+  max_consensus_rounds: 3  # max voting iterations per proposal
+  max_improvements_per_scenario: 5  # cap to prevent scope creep
+
+org_chart:
+  executive:
+    - name: "Demo Coordinator"
+      role: "supervisor"
+      responsibilities:
+        - "Oversee all demo scenarios"
+        - "Validate results against targets"
+        - "Make go/no-go decisions"
+
+  operations:
+    - name: "OCPM Discovery Agent"
+      id: "ocpm-discovery"
+      role: "discovery_specialist"
+      responsibilities:
+        - "Discover process models from event logs"
+        - "Detect bottlenecks and deviations"
+        - "Encode findings in Signal Theory format"
+
+    - name: "PI Optimization Agent"
+      id: "pi-optimization"
+      role: "improvement_designer"
+      responsibilities:
+        - "Design process improvements"
+        - "Quantify impact (time, cost, errors)"
+        - "Generate BFT consensus proposals"
+
+    - name: "Consensus Coordinator Agent"
+      id: "consensus-coordinator"
+      role: "consensus_facilitator"
+      responsibilities:
+        - "Facilitate HotStuff-BFT voting"
+        - "Tally votes and check supermajority"
+        - "Commit or reject proposals"
+
+  engineering:
+    - name: "Automation Engineer Agent"
+      id: "automation-engineer"
+      role: "automation_implementer"
+      vote_weight: 1.0
+      expertise: ["automation", "workflow_design", "integration"]
+
+    - name: "Data Analyst Agent"
+      id: "data-analyst"
+      role: "data_validator"
+      vote_weight: 1.0
+      expertise: ["data_quality", "metrics", "validation"]
+
+  domain_experts:
+    - name: "Finance Domain Agent"
+      id: "finance-expert"
+      role: "finance_validator"
+      vote_weight: 1.5  # higher weight for domain expertise
+      expertise: ["invoice_processing", "financial_controls", "compliance"]
+
+    - name: "Customer Experience Agent"
+      id: "cx-expert"
+      role: "cx_validator"
+      vote_weight: 1.5
+      expertise: ["customer_onboarding", "user_experience", "service_design"]
+
+    - name: "Compliance Officer Agent"
+      id: "compliance-expert"
+      role: "compliance_validator"
+      vote_weight: 2.0  # highest weight for regulatory importance
+      expertise: ["regulatory_compliance", "audit_trails", "reporting"]
+
+scenarios:
+  invoice_processing:
+    name: "Invoice Processing Optimization"
+    description: "Reduce manual review time for invoice approvals"
+    baseline:
+      p95_duration_minutes: 45
+      daily_volume: 100
+      error_rate: 0.05  # 5% rejection rate
+      manual_effort_percent: 80
+    target:
+      p95_duration_minutes: 10  # 78% reduction
+      error_rate: 0.01  # 1% rejection rate
+      manual_effort_percent: 20
+    quality_gates:
+      sn_ratio_db: 10
+      zero_data_loss: true
+      audit_trail_complete: true
+    event_log: "reference/event-log-samples/invoice_processing_events.csv"
+
+  customer_onboarding:
+    name: "Customer Onboarding Acceleration"
+    description: "Reduce time-to-value for new customers"
+    baseline:
+      p95_duration_days: 5  # business days
+      daily_volume: 20
+      touchpoints: 12
+      manual_effort_percent: 70
+    target:
+      p95_duration_days: 0.5  # 90% reduction
+      touchpoints: 3
+      manual_effort_percent: 10
+    quality_gates:
+      sn_ratio_db: 15
+      data_completeness_percent: 100
+      customer_satisfaction_threshold: 4.5  # out of 5
+    event_log: "reference/event-log-samples/customer_onboarding_events.csv"
+
+  compliance_reporting:
+    name: "Compliance Reporting Automation"
+    description: "Eliminate manual effort for regulatory reports"
+    baseline:
+      preparation_hours: 8  # per report
+      monthly_reports: 10
+      error_rate: 0.10  # 10% require rework
+      manual_effort_percent: 100
+    target:
+      preparation_hours: 0  # 100% automation
+      error_rate: 0.0
+      manual_effort_percent: 0
+    quality_gates:
+      sn_ratio_db: 20
+      zero_compliance_violations: true
+      audit_trail_verifiable: true
+    event_log: "reference/event-log-samples/compliance_reporting_events.csv"
+
+consensus_config:
+  protocol: "HotStuff-BFT"
+  supermajority_threshold: 0.667  # 66.7% required for approval
+  fault_tolerance: "f < n/3"  # Byzantine fault tolerance
+  min_fleet_size: 3
+  max_voting_duration_seconds: 300  # 5 minutes per vote
+  audit_log_enabled: true
+  hash_chain_algorithm: "SHA-256"
+
+signal_theory_config:
+  encoding: "S=(M,G,T,F,W)"
+  quality_gates:
+    discovery:
+      min_confidence: 0.95  # 95% confidence interval
+      min_sample_size: 100  # minimum cases
+    planning:
+      min_impact_threshold: 0.10  # 10% improvement minimum
+      max_risk_score: 0.30  # 30% risk score maximum
+    consensus:
+      min_voter_participation: 1.0  # 100% must vote
+      supermajority_required: true
+    validation:
+      min_sn_ratio_db: 10  # signal-to-noise ratio
+      zero_data_loss: true
+      audit_trail_complete: true
+
+temporal_config:
+  workflow_id: "autonomous_pi"
+  namespace: "default"
+  task_timeout_seconds: 300  # 5 minutes per task
+  workflow_execution_timeout_seconds: 86400  # 24 hours max
+  retry_policy:
+    max_attempts: 3
+    initial_interval_seconds: 1
+    max_interval_seconds: 60
+    backoff_coefficient: 2.0

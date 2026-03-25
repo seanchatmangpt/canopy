@@ -18,6 +18,7 @@ defmodule Canopy.Heartbeat do
 
   alias Canopy.Repo
   alias Canopy.Schemas.{Agent, Session, SessionEvent, Workspace, WorkProduct, ActivityEvent}
+  alias Canopy.OCPM.EventLog
   import Ecto.Changeset, only: [change: 2]
   import Ecto.Query, only: [from: 2]
 
@@ -265,10 +266,16 @@ defmodule Canopy.Heartbeat do
   end
 
   defp execute_and_stream(adapter_mod, params, session, agent) do
+    # Check for active Temporal workflows before execution
+    check_temporal_workflows(agent)
+
     try do
       adapter_mod.execute_heartbeat(params)
       |> Enum.reduce(%{input: 0, output: 0, cache: 0, cost: 0}, fn event, acc ->
         persist_event!(event, session)
+
+        # Transform heartbeat events to OCPM format for process mining
+        transform_to_ocpm_event(event, session, agent)
 
         Canopy.EventBus.broadcast(
           Canopy.EventBus.session_topic(session.id),
@@ -379,5 +386,153 @@ defmodule Canopy.Heartbeat do
         created_at: now
       }
     )
+  end
+
+  # Transform heartbeat events to OCPM format for process mining
+  defp transform_to_ocpm_event(event, session, agent) do
+    # Only transform work-related events for OCPM discovery
+    if should_track_for_ocpm?(event.event_type) do
+      case_id = "session-#{session.id}"
+
+      # Map event types to OCPM activities
+      activity = map_event_to_activity(event.event_type)
+
+      # Extract attributes from event data
+      attributes = extract_ocpm_attributes(event.data, agent)
+
+      # Create OCPM event log entry
+      changeset =
+        %EventLog{}
+        |> EventLog.changeset(%{
+          case_id: case_id,
+          activity: activity,
+          timestamp: DateTime.utc_now() |> DateTime.truncate(:second),
+          resource: agent.name,
+          attributes: attributes,
+          workspace_id: agent.workspace_id,
+          agent_id: agent.id
+        })
+
+      case Repo.insert(changeset) do
+        {:ok, ocpm_event} ->
+          Logger.debug("[Heartbeat] Created OCPM event: #{ocpm_event.activity} for case #{case_id}")
+
+          # Broadcast OCPM event for process mining consumption
+          Canopy.EventBus.broadcast(
+            "ocpm:events",
+            %{
+              event: "ocpm.event.created",
+              ocpm_event_id: ocpm_event.id,
+              case_id: ocpm_event.case_id,
+              activity: ocpm_event.activity
+            }
+          )
+
+        {:error, changeset} ->
+          Logger.warning("[Heartbeat] Failed to create OCPM event: #{inspect(changeset.errors)}")
+      end
+    end
+  end
+
+  # Determine if event should be tracked for OCPM discovery
+  defp should_track_for_ocpm?(event_type) do
+    # Track work-related events, skip system events
+    case event_type do
+      type when type in ["run.started", "run.completed", "run.failed"] ->
+        false
+
+      type when type in ["tool.start", "tool.complete", "agent.message", "agent.thinking"] ->
+        true
+
+      type ->
+        String.starts_with?(type, "work.") or String.starts_with?(type, "task.")
+    end
+  end
+
+  # Map heartbeat event types to OCPM activities
+  defp map_event_to_activity(event_type) do
+    case event_type do
+      "tool.start" -> "execute_tool"
+      "tool.complete" -> "complete_tool"
+      "agent.message" -> "generate_response"
+      "agent.thinking" -> "process_thought"
+      type -> String.replace(type, ".", "_")
+    end
+  end
+
+  # Extract OCPM attributes from event data
+  defp extract_ocpm_attributes(data, agent) do
+    base_attrs = %{
+      "agent_id" => agent.id,
+      "agent_name" => agent.name,
+      "model" => agent.model
+    }
+
+    # Extract relevant attributes from event data
+    additional_attrs =
+      data
+      |> Enum.filter(fn {k, _} ->
+        # Include structured attributes, exclude large text blobs
+        is_binary(k) and
+          not String.contains?(k, ["content", "message", "text", "output"]) and
+          (is_number(elem({k, data}, 1)) or is_binary(elem({k, data}, 1)) or is_boolean(elem({k, data}, 1)))
+      end)
+      |> Map.new()
+
+    Map.merge(base_attrs, additional_attrs)
+  end
+
+  # Check for active Temporal workflows and handle signals
+  defp check_temporal_workflows(agent) do
+    # Check if there are any active Temporal workflows for this agent/workspace
+    # This is a placeholder - actual implementation would query Temporal
+    case get_active_temporal_workflows(agent.id) do
+      [] ->
+        :ok
+
+      workflows ->
+        Logger.info("[Heartbeat] Found #{length(workflows)} active Temporal workflows for agent #{agent.name}")
+
+        # Process workflow signals (pause, skip_stage, abort)
+        Enum.each(workflows, fn workflow ->
+          handle_temporal_workflow_signals(workflow, agent)
+        end)
+    end
+  end
+
+  # Get active Temporal workflows for an agent
+  defp get_active_temporal_workflows(agent_id) do
+    # Query active Temporal workflows from OSA via adapter
+    try do
+      case Canopy.Adapters.OSA.get_active_workflows(%{agent_id: agent_id}) do
+        {:ok, workflows} when is_list(workflows) ->
+          workflows
+
+        {:error, reason} ->
+          Logger.warning("[Heartbeat] Failed to query Temporal workflows: #{inspect(reason)}")
+          []
+
+        _ ->
+          []
+      end
+    rescue
+      e ->
+        Logger.debug("[Heartbeat] Temporal query not available: #{Exception.message(e)}")
+        []
+    end
+  end
+
+  # Handle Temporal workflow signals
+  defp handle_temporal_workflow_signals(workflow, _agent) do
+    # Check for pending signals (pause, skip_stage, abort)
+    # This is a placeholder - actual implementation would query Temporal for signals
+    Logger.debug("[Heartbeat] Checking signals for workflow #{workflow[:workflow_id]}")
+
+    # Example signal handling:
+    # - pause: Stop current heartbeat, wait for manual intervention
+    # - skip_stage: Skip current stage in multi-stage workflow
+    # - abort: Terminate the workflow
+
+    :ok
   end
 end

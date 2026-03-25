@@ -9,7 +9,6 @@ defmodule CanopyWeb.Plugs.Idempotency do
 
   @table :canopy_idempotency_cache
   @ttl_seconds 86_400
-  @cleanup_interval :timer.hours(1)
 
   def init(opts), do: opts
 
@@ -56,6 +55,6 @@ defmodule CanopyWeb.Plugs.Idempotency do
       {{:"$1", {:"$2", :"$3", :"$4"}}, [{:<, :"$4", cutoff}], [true]}
     ])
   rescue
-    _ -> :ok
+    _e -> :ok
   end
 end

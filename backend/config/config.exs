@@ -41,7 +41,10 @@ config :canopy, Canopy.Guardian,
   secret_key: "dev-secret-key-change-in-production"
 
 # Quantum scheduler — jobs loaded from DB at runtime
-config :canopy, Canopy.Scheduler, jobs: []
+config :canopy, Canopy.Scheduler, name: Canopy.Scheduler
+
+# Import OpenTelemetry config
+import_config "otel.exs"
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
