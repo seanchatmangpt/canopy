@@ -9,6 +9,8 @@ defmodule Canopy.Schemas.Workspace do
     field :name, :string
     field :path, :string
     field :status, :string, default: "active"
+    field :is_active, :boolean, default: true
+    field :isolation_level, :string, default: "full"
 
     belongs_to :owner, Canopy.Schemas.User
     belongs_to :organization, Canopy.Schemas.Organization
@@ -16,14 +18,17 @@ defmodule Canopy.Schemas.Workspace do
     has_many :projects, Canopy.Schemas.Project
     has_many :issues, Canopy.Schemas.Issue
     has_many :skills, Canopy.Schemas.Skill
+    has_many :workspace_users, Canopy.Schemas.WorkspaceUser, on_delete: :delete_all
+    has_many :users, through: [:workspace_users, :user]
 
     timestamps()
   end
 
   def changeset(workspace, attrs) do
     workspace
-    |> cast(attrs, [:name, :path, :status, :owner_id, :organization_id])
+    |> cast(attrs, [:name, :path, :status, :owner_id, :organization_id, :is_active, :isolation_level])
     |> validate_required([:name, :path])
     |> validate_inclusion(:status, ~w(active archived))
+    |> validate_inclusion(:isolation_level, ~w(full shared public))
   end
 end

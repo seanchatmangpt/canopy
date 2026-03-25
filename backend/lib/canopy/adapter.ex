@@ -36,6 +36,7 @@ defmodule Canopy.Adapter do
   def resolve("gemini"), do: {:ok, Canopy.Adapters.Gemini}
   def resolve("mcp"), do: {:ok, Canopy.Adapters.MCP}
   def resolve("pm4py-rust"), do: {:ok, Canopy.Adapters.PM4pyRust}
+  def resolve("businessos"), do: {:ok, Canopy.Adapters.BusinessOS}
   def resolve(type), do: {:error, {:unknown_adapter, type}}
 
   @doc "List all registered adapters with metadata."
@@ -50,7 +51,8 @@ defmodule Canopy.Adapter do
       Canopy.Adapters.Cursor,
       Canopy.Adapters.Gemini,
       Canopy.Adapters.MCP,
-      Canopy.Adapters.PM4pyRust
+      Canopy.Adapters.PM4pyRust,
+      Canopy.Adapters.BusinessOS
     ]
     |> Enum.map(fn mod ->
       %{
