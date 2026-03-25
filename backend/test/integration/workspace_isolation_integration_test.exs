@@ -63,12 +63,13 @@ defmodule Integration.WorkspaceIsolationIntegrationTest do
   end
 
   describe "cross-workspace access control" do
-    test "workspace owner cannot access another owner's workspace", %{
-      user1: user1,
-      user2: user2,
-      ws1_org1: ws1,
-      ws2_org1: ws2
-    } do
+    test "workspace owner cannot access another owner's workspace" do
+      # Create isolated users and workspaces for this test
+      user1 = insert_user()
+      user2 = insert_user()
+      ws1 = insert_workspace(%{owner_id: user1.id})
+      ws2 = insert_workspace(%{owner_id: user2.id})
+
       # user1 owns ws1, user2 owns ws2
       assert WorkspaceIsolation.can_access_workspace?(user1.id, ws1.id)
       refute WorkspaceIsolation.can_access_workspace?(user1.id, ws2.id)
@@ -207,7 +208,7 @@ defmodule Integration.WorkspaceIsolationIntegrationTest do
       slug: "agent#{System.unique_integer([:positive])}",
       name: "Test Agent #{System.unique_integer([:positive])}",
       role: "worker",
-      adapter: "claude_code",
+      adapter: "claude-code",
       model: "claude-3-5-sonnet-20241022"
     }, attrs)
 
