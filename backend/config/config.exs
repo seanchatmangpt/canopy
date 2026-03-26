@@ -43,8 +43,10 @@ config :canopy, Canopy.Guardian,
 # Quantum scheduler — jobs loaded from DB at runtime
 config :canopy, Canopy.Scheduler, name: Canopy.Scheduler
 
-# Import OpenTelemetry config
-import_config "otel.exs"
+# OpenTelemetry — `test.exs` defines the test stack (avoids merging batch export with :none).
+if config_env() != :test do
+  import_config "otel.exs"
+end
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

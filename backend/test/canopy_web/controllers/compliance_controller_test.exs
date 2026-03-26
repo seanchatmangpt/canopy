@@ -2,6 +2,8 @@ defmodule CanopyWeb.ComplianceControllerTest do
   use CanopyWeb.ConnCase
 
   alias Canopy.Compliance.FrameworkConfig
+  alias Canopy.Repo
+  alias Canopy.Schemas.User
 
   @moduletag :skip
 
@@ -467,5 +469,32 @@ defmodule CanopyWeb.ComplianceControllerTest do
         is_list(control["evidence_required"]) && length(control["evidence_required"]) > 0
       end)
     end
+  end
+
+  defp insert_user(attrs \\ %{}) do
+    user_attrs =
+      Map.merge(
+        %{
+          name: "Test User #{System.unique_integer([:positive])}",
+          email: "test#{System.unique_integer([:positive])}@test.com",
+          password: "password123",
+          role: "member",
+          provider: "local"
+        },
+        attrs
+      )
+
+    {:ok, user} =
+      Repo.insert(Ecto.Changeset.cast(%User{}, user_attrs, [:name, :email, :password, :role, :provider]))
+
+    user
+  end
+
+  defp build_authenticated_conn(user) do
+    {:ok, token, _claims} = Canopy.Guardian.encode_and_sign(user)
+
+    build_conn()
+    |> put_req_header("authorization", "Bearer #{token}")
+    |> Map.put(:assigns, %{current_user: user})
   end
 end

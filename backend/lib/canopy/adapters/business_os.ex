@@ -364,4 +364,70 @@ defmodule Canopy.Adapters.BusinessOS do
   end
 
   defp parse_message(_), do: {:error, "Invalid message format"}
+
+  # ── LinkedIn RevOps API ──────────────────────────────────────────────
+
+  @doc """
+  Score qualified contacts for ICP (Ideal Customer Profile).
+
+  Calls BusinessOS LinkedIn integration to score all contacts and return count
+  of those meeting the minimum score threshold.
+
+  Returns {:ok, %{"qualified" => count, "total_contacts" => count}} or {:error, reason}
+  """
+  def icp_score_contacts(min_score \\ 0.7, params \\ %{}) do
+    url = params["url"] || @default_url
+    timeout = params["timeout"] || @default_timeout
+
+    case make_request("POST", "#{url}/api/linkedin/icp-score?min_score=#{min_score}", nil, params, timeout) do
+      {:ok, %{status: status, body: resp_body}} when status in 200..201 ->
+        Logger.info("[BusinessOS] ICP scoring completed: qualified=#{resp_body["qualified"]}")
+        {:ok, resp_body}
+
+      {:ok, %{status: 400, body: resp_body}} ->
+        {:error, {:invalid_params, resp_body["error"]}}
+
+      {:ok, %{status: 500, body: resp_body}} ->
+        {:error, {:scoring_failed, resp_body["error"]}}
+
+      {:error, reason} ->
+        Logger.error("[BusinessOS] ICP scoring failed: #{inspect(reason)}")
+        {:error, {:connection_failed, reason}}
+    end
+  end
+
+  @doc """
+  Queue outreach steps for qualified contacts.
+
+  Calls BusinessOS LinkedIn integration to enroll contacts in an outreach
+  sequence, respecting rate limits (max 5 messages per contact per day).
+
+  Returns {:ok, %{"queued" => count, "skipped" => count}} or {:error, reason}
+  """
+  def queue_outreach_step(sequence_id, min_score \\ 0.7, params \\ %{}) do
+    url = params["url"] || @default_url
+    timeout = params["timeout"] || @default_timeout
+
+    payload = %{
+      "sequence_id" => sequence_id,
+      "min_score" => min_score,
+      "target_count" => params["target_count"] || 100
+    }
+
+    case make_request("POST", "#{url}/api/linkedin/outreach/enroll", payload, params, timeout) do
+      {:ok, %{status: status, body: resp_body}} when status in 200..201 ->
+        Logger.info("[BusinessOS] Outreach queued: enrolled=#{resp_body["enrolled"]}, skipped=#{resp_body["skipped"]}")
+        {:ok, resp_body}
+
+      {:ok, %{status: 400, body: resp_body}} ->
+        {:error, {:invalid_params, resp_body["error"]}}
+
+      {:ok, %{status: 500, body: resp_body}} ->
+        {:error, {:enrollment_failed, resp_body["error"]}}
+
+      {:error, reason} ->
+        Logger.error("[BusinessOS] Outreach enrollment failed: #{inspect(reason)}")
+        {:error, {:connection_failed, reason}}
+    end
+  end
 end

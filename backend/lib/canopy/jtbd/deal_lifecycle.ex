@@ -26,6 +26,7 @@ defmodule Canopy.JTBD.DealLifecycle do
       :ok ->
         # Start root span
         root_ctx = Tracer.start_span("jtbd.a2a.deal.create")
+        Canopy.Telemetry.WeaverLiveCheck.put_correlation_attribute()
 
         try do
           # Create deal
@@ -72,7 +73,7 @@ defmodule Canopy.JTBD.DealLifecycle do
         end
 
       {:error, reason} ->
-        Logger.warn("Deal creation validation failed: #{inspect(reason)}")
+        Logger.warning("Deal creation validation failed: #{inspect(reason)}")
         {:error, reason}
     end
   end

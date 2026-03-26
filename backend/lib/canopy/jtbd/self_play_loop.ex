@@ -2,7 +2,7 @@ defmodule Canopy.JTBD.SelfPlayLoop do
   @moduledoc """
   Self-Play Loop Orchestrator for Wave 12 Integration Testing
 
-  Coordinates execution of 10 JTBD scenarios across all ChatmanGPT systems in sequence:
+  Coordinates execution of 17 JTBD scenarios across all ChatmanGPT systems in sequence:
   1. agent_decision_loop (OSA)
   2. process_discovery (pm4py-rust)
   3. compliance_check (BusinessOS)
@@ -13,10 +13,17 @@ defmodule Canopy.JTBD.SelfPlayLoop do
   8. a2a_deal_lifecycle (Canopy A2A)
   9. mcp_tool_execution (OSA MCP)
   10. conformance_drift (pm4py-rust Petri net fitness)
+  11. yawl_v6_checkpoint (YAWL v6 process engine)
+  12. icp_qualification (Revenue gen ICP)
+  13. retrofit_complexity_scoring (Process analysis)
+  14. outreach_sequence_execution (Marketing automation)
+  15. deal_progression (Sales pipeline)
+  16. contract_closure (Legal/Finance)
+  17. process_intelligence_query (pm4py-rust LLM grounding)
 
   After each iteration completes:
   - Publishes result to PubSub topic `jtbd:wave12`
-  - After all 10 complete, resets state and restarts
+  - After all 17 complete, resets state and restarts
   - Supports bounded execution (finite iterations) for CI or infinite for monitoring
 
   GenServer Behavior:
@@ -60,7 +67,8 @@ defmodule Canopy.JTBD.SelfPlayLoop do
     :retrofit_complexity_scoring,
     :outreach_sequence_execution,
     :deal_progression,
-    :contract_closure
+    :contract_closure,
+    :process_intelligence_query
   ]
 
   # Client API
@@ -72,12 +80,16 @@ defmodule Canopy.JTBD.SelfPlayLoop do
   @doc "Start the self-play loop with options"
   @spec start(keyword()) :: {:ok, pid()} | {:error, term()}
   def start(opts \\ []) do
-    case GenServer.call(__MODULE__, {:start_loop, opts}) do
+    case GenServer.call(__MODULE__, {:start_loop, opts}, 30000) do
       :ok -> {:ok, self()}
       error -> error
     end
   rescue
     _e -> {:error, :not_started}
+  catch
+    :exit, {:timeout, _} ->
+      Logger.error("[SelfPlayLoop] start_loop timeout after 30000ms")
+      {:error, :timeout}
   end
 
   @doc "Stop the self-play loop gracefully"
@@ -91,9 +103,13 @@ defmodule Canopy.JTBD.SelfPlayLoop do
   @doc "Get current loop state"
   @spec get_state() :: map()
   def get_state do
-    GenServer.call(__MODULE__, :get_state)
+    GenServer.call(__MODULE__, :get_state, 5000)
   rescue
     _e -> %{status: :not_running}
+  catch
+    :exit, {:timeout, _} ->
+      Logger.error("[SelfPlayLoop] get_state timeout after 5000ms")
+      %{status: :timeout}
   end
 
   # Server Callbacks
@@ -407,6 +423,8 @@ defmodule Canopy.JTBD.SelfPlayLoop do
         }
       end)
 
+    pass_rate = passes / (passes + fails)
+
     payload = %{
       iteration: iteration,
       timestamp: DateTime.utc_now(),
@@ -415,14 +433,23 @@ defmodule Canopy.JTBD.SelfPlayLoop do
       pass_count: passes,
       fail_count: fails,
       total_latency_ms: latency_ms,
-      pass_rate: passes / (passes + fails)
+      pass_rate: pass_rate
+    }
+
+    # Add metadata for DMAIC dashboard processing
+    metadata = %{
+      iteration: iteration,
+      pass_count: passes,
+      fail_count: fails,
+      pass_rate: pass_rate,
+      latency_ms: latency_ms
     }
 
     Logger.debug(
       "Wave 12 publishing iteration #{iteration} to PubSub | topic=jtbd:wave12 | pass_count=#{passes} | fail_count=#{fails} | workspace=#{workspace_id}"
     )
 
-    case PubSub.broadcast(Canopy.PubSub, "jtbd:wave12", {:scenario_result, payload}) do
+    case PubSub.broadcast(Canopy.PubSub, "jtbd:wave12", {:wave12_update, metadata, payload}) do
       :ok ->
         Logger.debug(
           "Wave 12 PubSub broadcast succeeded | iteration=#{iteration} | topic=jtbd:wave12 | workspace=#{workspace_id}"

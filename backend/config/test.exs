@@ -29,3 +29,32 @@ config :phoenix, :plug_init_mode, :runtime
 # Sort query params output of verified routes for robust url comparisons
 config :phoenix,
   sort_verified_routes_query_params: true
+
+# OpenTelemetry (test): no export by default — avoids connection errors to :4317 when no collector.
+# Weaver live-check: gRPC OTLP to WEAVER_OTLP_ENDPOINT (same receiver as OSA / pm4py-rust).
+config :opentelemetry, :resource,
+  service: [name: "canopy", version: "1.0.0"]
+
+config :opentelemetry, tracer: :global
+
+if System.get_env("WEAVER_LIVE_CHECK") == "true" do
+  config :opentelemetry,
+    traces_exporter: :otlp,
+    processors: [
+      otel_simple_processor: %{
+        exporter: {:opentelemetry_exporter, %{}}
+      }
+    ]
+
+  config :opentelemetry_exporter,
+    otlp_protocol: :grpc,
+    otlp_endpoint: System.get_env("WEAVER_OTLP_ENDPOINT", "http://localhost:4317")
+else
+  config :opentelemetry,
+    traces_exporter: :none,
+    processors: [
+      otel_batch_processor: %{
+        exporter: {:opentelemetry_exporter, %{}}
+      }
+    ]
+end

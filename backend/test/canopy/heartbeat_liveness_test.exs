@@ -44,22 +44,22 @@ defmodule Canopy.HeartbeatLivenessTest do
       #
       # This documents the expected liveness property:
 
-      @max_retries = 5
-      @retry_delay_ms = 100
+      max_retries = 5
+      retry_delay_ms = 100
 
       # Simulate OSA unreachable (mock returns error)
-      retries = 0
+      _retries = 0
 
       result =
         try do
           # Attempt to contact OSA with bounded retry count
-          Enum.reduce_while(1..@max_retries, {:error, :unreachable}, fn attempt, _acc ->
+          Enum.reduce_while(1..max_retries, {:error, :unreachable}, fn attempt, _acc ->
             case attempt_osa_contact() do
               {:ok, _} = success -> {:halt, success}
               {:error, :unreachable} ->
-                if attempt < @max_retries do
+                if attempt < max_retries do
                   # Retry with backoff
-                  Process.sleep(@retry_delay_ms)
+                  Process.sleep(retry_delay_ms)
                   {:cont, {:error, :unreachable}}
                 else
                   # Max retries exhausted → escalate
@@ -67,8 +67,6 @@ defmodule Canopy.HeartbeatLivenessTest do
                 end
             end
           end)
-
-          result
         rescue
           _ -> {:error, :exception}
         end
@@ -80,15 +78,15 @@ defmodule Canopy.HeartbeatLivenessTest do
     test "heartbeat dispatch should use exponential backoff" do
       # GREEN: Verify retry delay increases to avoid thrashing
 
-      @initial_backoff_ms = 100
-      @max_backoff_ms = 10_000
-      @backoff_multiplier = 2.0
+      initial_backoff_ms = 100
+      max_backoff_ms = 10_000
+      backoff_multiplier = 2.0
 
       delays =
         for attempt <- 1..5 do
           backoff = min(
-            trunc(@initial_backoff_ms * @backoff_multiplier ** (attempt - 1)),
-            @max_backoff_ms
+            trunc(initial_backoff_ms * backoff_multiplier ** (attempt - 1)),
+            max_backoff_ms
           )
 
           backoff
@@ -101,7 +99,7 @@ defmodule Canopy.HeartbeatLivenessTest do
       assert Enum.at(delays, 3) == 800
 
       # Verify cap at max_backoff_ms
-      assert Enum.at(delays, 4) <= @max_backoff_ms
+      assert Enum.at(delays, 4) <= max_backoff_ms
     end
   end
 
@@ -127,8 +125,6 @@ defmodule Canopy.HeartbeatLivenessTest do
                 end
             end
           end)
-
-          result
         rescue
           _ -> {:error, :exception}
         end
@@ -155,8 +151,6 @@ defmodule Canopy.HeartbeatLivenessTest do
               {:cont, acc}
             end
           end)
-
-          result
         rescue
           _ -> {:error, :exception}
         end
@@ -247,8 +241,6 @@ defmodule Canopy.HeartbeatLivenessTest do
                 end
             end
           end)
-
-          result
         rescue
           _ -> {:error, :exception}
         end
@@ -282,8 +274,6 @@ defmodule Canopy.HeartbeatLivenessTest do
                 end
             end
           end)
-
-          result
         rescue
           _ -> {:error, :exception}
         end

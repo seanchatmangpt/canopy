@@ -22,7 +22,6 @@ defmodule Canopy.Autonomic.HeartbeatOntologyService do
   - Armstrong fault tolerance: let-it-crash on ontology errors, restart cleanly
   """
   require Logger
-  require OpenTelemetry.Tracer
 
   alias Canopy.Ontology.Service
 
@@ -58,49 +57,42 @@ defmodule Canopy.Autonomic.HeartbeatOntologyService do
     # Convert agent type to class name (e.g. :health_agent -> "HealthAgent")
     class_name = agent_type_to_class_name(agent_type)
 
-    OpenTelemetry.Tracer.with_span "heartbeat_ontology.enrich_agent", %{
-      "agent_type" => inspect(agent_type),
-      "class_name" => class_name,
-      "ontology_id" => ontology_id,
-      "timeout_ms" => timeout_ms
-    } do
-      # Bounded operation: timeout wrapper
-      case Task.yield(
-             Task.async(fn ->
-               fetch_task_metadata(ontology_id, class_name, use_cache)
-             end),
-             timeout_ms
-           ) do
-        {:ok, {:ok, metadata}} ->
-          # Enrich context with metadata
-          enriched = %{
-            agent_type: agent_type,
-            class_name: class_name,
-            task_metadata: metadata,
-            hierarchy: extract_hierarchy(metadata),
-            constraints: extract_constraints(metadata),
-            retrieved_from: metadata[:cache_hit] || false,
-            timestamp: DateTime.utc_now()
-          }
+    # Bounded operation: timeout wrapper
+    case Task.yield(
+           Task.async(fn ->
+             fetch_task_metadata(ontology_id, class_name, use_cache)
+           end),
+           timeout_ms
+         ) do
+      {:ok, {:ok, metadata}} ->
+        # Enrich context with metadata
+        enriched = %{
+          agent_type: agent_type,
+          class_name: class_name,
+          task_metadata: metadata,
+          hierarchy: extract_hierarchy(metadata),
+          constraints: extract_constraints(metadata),
+          retrieved_from: metadata[:cache_hit] || false,
+          timestamp: DateTime.utc_now()
+        }
 
-          Logger.info(
-            "[HeartbeatOntology] Enriched #{inspect(agent_type)}: metadata retrieved, hierarchy extracted"
-          )
+        Logger.info(
+          "[HeartbeatOntology] Enriched #{inspect(agent_type)}: metadata retrieved, hierarchy extracted"
+        )
 
-          {:ok, enriched}
+        {:ok, enriched}
 
-        {:ok, {:error, reason}} ->
-          Logger.warning("[HeartbeatOntology] Failed to fetch metadata for #{class_name}: #{inspect(reason)}")
-          # Fallback: return minimal context with no metadata
-          {:ok, minimal_context(agent_type)}
+      {:ok, {:error, reason}} ->
+        Logger.warning("[HeartbeatOntology] Failed to fetch metadata for #{class_name}: #{inspect(reason)}")
+        # Fallback: return minimal context with no metadata
+        {:ok, minimal_context(agent_type)}
 
-        nil ->
-          # Timeout after timeout_ms
-          Logger.warning("[HeartbeatOntology] Metadata fetch for #{class_name} timed out after #{timeout_ms}ms")
-          Task.shutdown(Task.async(fn -> nil end), :brutal_kill)
-          # Fallback: return minimal context
-          {:ok, minimal_context(agent_type)}
-      end
+      nil ->
+        # Timeout after timeout_ms
+        Logger.warning("[HeartbeatOntology] Metadata fetch for #{class_name} timed out after #{timeout_ms}ms")
+        Task.shutdown(Task.async(fn -> nil end), :brutal_kill)
+        # Fallback: return minimal context
+        {:ok, minimal_context(agent_type)}
     end
   end
 
@@ -134,39 +126,34 @@ defmodule Canopy.Autonomic.HeartbeatOntologyService do
       Logger.error("[HeartbeatOntology] Too many agents: #{length(agent_types)} > #{max_agents}")
       {:error, :max_agents_exceeded}
     else
-      OpenTelemetry.Tracer.with_span "heartbeat_ontology.enrich_agents_batch", %{
-        "agent_count" => length(agent_types),
-        "max_agents" => max_agents
-      } do
-        # Enrich all agents concurrently with timeout
-        tasks =
-          agent_types
-          |> Enum.map(fn agent_type ->
-            Task.async(fn ->
-              enrich_agent(agent_type, timeout_ms: timeout_ms, ontology_id: ontology_id)
-            end)
+      # Enrich all agents concurrently with timeout
+      tasks =
+        agent_types
+        |> Enum.map(fn agent_type ->
+          Task.async(fn ->
+            enrich_agent(agent_type, timeout_ms: timeout_ms, ontology_id: ontology_id)
           end)
+        end)
 
-        # Bounded collection: timeout after max(all tasks) + buffer
-        results =
-          tasks
-          |> Enum.map(&Task.yield(&1, timeout_ms + 1000))
-          |> Enum.map(fn result ->
-            case result do
-              {:ok, enriched} -> enriched
-              nil -> {:error, :timeout}
-            end
-          end)
+      # Bounded collection: timeout after max(all tasks) + buffer
+      results =
+        tasks
+        |> Enum.map(&Task.yield(&1, timeout_ms + 1000))
+        |> Enum.map(fn result ->
+          case result do
+            {:ok, enriched} -> enriched
+            nil -> {:error, :timeout}
+          end
+        end)
 
-        # Sort by agent priority
-        priority_ordered = sort_by_priority(results)
+      # Sort by agent priority
+      priority_ordered = sort_by_priority(results)
 
-        Logger.info(
-          "[HeartbeatOntology] Batch enriched #{length(results)} agents, priority ordered"
-        )
+      Logger.info(
+        "[HeartbeatOntology] Batch enriched #{length(results)} agents, priority ordered"
+      )
 
-        {:ok, results, priority_ordered}
-      end
+      {:ok, results, priority_ordered}
     end
   end
 
@@ -184,17 +171,12 @@ defmodule Canopy.Autonomic.HeartbeatOntologyService do
     {:error, reason}
   """
   def get_task_hierarchy(agent_type, opts \\ []) do
-    case enrich_agent(agent_type, opts) do
-      {:ok, enriched} ->
-        {:ok, %{
-          hierarchy: enriched.hierarchy,
-          constraints: enriched.constraints,
-          class_name: enriched.class_name
-        }}
-
-      {:error, reason} ->
-        {:error, reason}
-    end
+    {:ok, enriched} = enrich_agent(agent_type, opts)
+    {:ok, %{
+      hierarchy: enriched.hierarchy,
+      constraints: enriched.constraints,
+      class_name: enriched.class_name
+    }}
   end
 
   @doc """

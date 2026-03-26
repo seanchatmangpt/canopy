@@ -20,7 +20,7 @@ defmodule Canopy.MixProject do
   def application do
     [
       mod: {Canopy.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+      extra_applications: [:logger, :runtime_tools, :opentelemetry, :opentelemetry_exporter]
     ]
   end
 

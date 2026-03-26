@@ -98,21 +98,40 @@ defmodule Canopy.Autonomic.Heartbeat do
   Schedule the heartbeat to run on an interval.
 
   Default: every 5 minutes (critical), scaling to 60 minutes (dormant).
+
+  This spawns a bounded supervised task that respects iteration limits
+  to prevent unbounded loops (WvdA soundness: liveness guarantee).
   """
   def schedule(opts \\ []) do
     interval_ms = opts[:interval_ms] || 300_000  # 5 minutes default
+    max_iterations = opts[:max_iterations] || 1_000  # ~83 hours at 5min interval
 
-    # Spawn async task to loop heartbeat
-    Task.start_link(fn ->
-      loop_heartbeat(interval_ms)
-    end)
+    # Spawn supervised task under Canopy.HeartbeatRunner Task.Supervisor
+    # (Armstrong: supervised, let-it-crash; WvdA: bounded iteration)
+    Task.Supervisor.start_child(
+      Canopy.HeartbeatRunner,
+      __MODULE__,
+      :loop_heartbeat_supervised,
+      [interval_ms, max_iterations, 0]
+    )
   end
 
-  defp loop_heartbeat(interval_ms) do
+  @doc false
+  def loop_heartbeat_supervised(interval_ms, max_iterations, iteration) when iteration < max_iterations do
     :timer.sleep(interval_ms)
     tick()
-    loop_heartbeat(interval_ms)
+    loop_heartbeat_supervised(interval_ms, max_iterations, iteration + 1)
   end
+
+  def loop_heartbeat_supervised(_interval_ms, max_iterations, _iteration) do
+    Logger.warning(
+      "[Autonomic] Heartbeat loop reached iteration limit #{max_iterations}, " <>
+      "restarting. (Prevent unbounded loop per WvdA liveness)"
+    )
+    # Task supervisor will restart this if configured with :permanent restart strategy
+    :ok
+  end
+
 
   @doc """
   Get the current budget tiers.

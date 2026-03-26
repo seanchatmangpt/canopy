@@ -219,14 +219,26 @@ defmodule Canopy.Ontology.ToolRegistry do
   Clear tool cache for a specific ontology or all.
   """
   def clear_cache(ontology_id \\ :all) do
-    GenServer.call(__MODULE__, {:clear_cache, ontology_id})
+    try do
+      GenServer.call(__MODULE__, {:clear_cache, ontology_id}, 5000)
+    catch
+      :exit, {:timeout, _} ->
+        Logger.error("[ToolRegistry] clear_cache timeout for #{inspect(ontology_id)}")
+        :timeout
+    end
   end
 
   @doc """
   Get cache statistics.
   """
   def cache_stats do
-    GenServer.call(__MODULE__, :cache_stats)
+    try do
+      GenServer.call(__MODULE__, :cache_stats, 5000)
+    catch
+      :exit, {:timeout, _} ->
+        Logger.error("[ToolRegistry] cache_stats timeout")
+        %{hits: 0, misses: 0, entries: 0}
+    end
   end
 
   # GenServer Callbacks

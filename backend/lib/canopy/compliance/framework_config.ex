@@ -16,7 +16,6 @@ defmodule Canopy.Compliance.FrameworkConfig do
   require Logger
 
   @supported_frameworks ["SOC2", "HIPAA", "GDPR", "ISO27001", "SOX"]
-  @framework_config_dir "priv/compliance/frameworks"
 
   defstruct [
     :framework_name,

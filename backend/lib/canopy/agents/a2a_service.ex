@@ -58,21 +58,69 @@ defmodule Canopy.Agents.A2AService do
 
     Logger.debug("[A2AService] Calling agent at #{agent_url}")
 
+    start_time = System.monotonic_time(:millisecond)
+
     case Req.post(agent_url,
            json: payload,
            headers: req_headers,
            receive_timeout: timeout
          ) do
       {:ok, %{status: status, body: resp_body}} when status in 200..299 ->
-        Logger.debug("[A2AService] Received response from #{agent_url}")
+        latency_ms = System.monotonic_time(:millisecond) - start_time
+        Logger.debug("[A2AService] Received response from #{agent_url} in #{latency_ms}ms")
+
+        # Emit OTEL span for successful A2A call
+        tracer = :opentelemetry.get_tracer(:canopy)
+
+        :otel_tracer.with_span(tracer, "jtbd.a2a.call", %{}, fn span_ctx ->
+          :otel_span.set_attributes(span_ctx, %{
+            "agent_url" => agent_url,
+            "status" => "ok",
+            "duration_ms" => latency_ms,
+            "message_type" => Map.get(message, "type", "unknown")
+          })
+        end)
+
         {:ok, normalize_response(resp_body)}
 
       {:ok, %{status: status, body: resp_body}} ->
+        latency_ms = System.monotonic_time(:millisecond) - start_time
         Logger.warning("[A2AService] Agent #{agent_url} returned #{status}: #{inspect(resp_body)}")
+
+        # Emit error OTEL span
+        tracer = :opentelemetry.get_tracer(:canopy)
+
+        :otel_tracer.with_span(tracer, "jtbd.a2a.call", %{}, fn span_ctx ->
+          :otel_span.set_attributes(span_ctx, %{
+            "agent_url" => agent_url,
+            "status" => "error",
+            "http_status" => status,
+            "duration_ms" => latency_ms
+          })
+
+          :otel_span.set_status(span_ctx, :error, "HTTP #{status}")
+        end)
+
         {:error, {:agent_error, status, resp_body}}
 
       {:error, reason} ->
+        latency_ms = System.monotonic_time(:millisecond) - start_time
         Logger.error("[A2AService] Failed to reach agent #{agent_url}: #{inspect(reason)}")
+
+        # Emit timeout/connection error OTEL span
+        tracer = :opentelemetry.get_tracer(:canopy)
+
+        :otel_tracer.with_span(tracer, "jtbd.a2a.call", %{}, fn span_ctx ->
+          :otel_span.set_attributes(span_ctx, %{
+            "agent_url" => agent_url,
+            "status" => "error",
+            "error_type" => inspect(reason),
+            "duration_ms" => latency_ms
+          })
+
+          :otel_span.set_status(span_ctx, :error, "Connection failed")
+        end)
+
         {:error, {:connection_failed, reason}}
     end
   end
