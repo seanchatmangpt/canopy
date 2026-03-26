@@ -14,10 +14,15 @@ defmodule Canopy.Application do
       {DynamicSupervisor, name: Canopy.AdapterSupervisor, strategy: :one_for_one},
       {Task.Supervisor, name: Canopy.HeartbeatRunner},
       {Task.Supervisor, name: Canopy.TaskSupervisor},
+      {Task.Supervisor, name: :canopy_jtbd_loop_supervisor},
       Canopy.AlertEvaluator,
       Canopy.StaleCleanup,
       Canopy.IdempotencyCleanup,
       Canopy.Autonomic.Heartbeat,
+      Canopy.Ontology.Loader,
+      Canopy.Ontology.Service,
+      Canopy.Ontology.ToolRegistry,
+      Canopy.JTBD.SelfPlayLoop,
       CanopyWeb.Endpoint
     ]
 

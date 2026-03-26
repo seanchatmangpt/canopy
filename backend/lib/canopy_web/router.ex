@@ -110,6 +110,15 @@ defmodule CanopyWeb.Router do
       get "/workspaces", ProjectController, :workspaces, as: :workspaces
     end
 
+    # Deals (FIBO Contracts)
+    get "/deals/templates", DealsController, :templates
+    post "/deals/render-contract", DealsController, :render_contract
+    post "/deals/validate-contract", DealsController, :validate_contract
+    resources "/deals", DealsController, except: [:new, :edit] do
+      post "/sign", DealsController, :sign, as: :sign
+      post "/complete", DealsController, :complete, as: :complete
+    end
+
     # Documents
     get "/documents", DocumentController, :index
     get "/document-revisions", DocumentController, :revisions
@@ -174,6 +183,13 @@ defmodule CanopyWeb.Router do
     post "/integrations/:slug/connect", IntegrationController, :connect
     delete "/integrations/:slug", IntegrationController, :disconnect
     get "/integrations/:slug/status", IntegrationController, :status
+
+    # Ontologies
+    get "/ontologies", OntologyController, :index
+    get "/ontologies/statistics/global", OntologyController, :statistics
+    get "/ontologies/:id", OntologyController, :show
+    post "/ontologies/:id/search", OntologyController, :search
+    get "/ontologies/:id/classes/:class_id", OntologyController, :get_class
 
     # Admin
     resources "/users", UserController, except: [:new, :edit]
@@ -260,6 +276,31 @@ defmodule CanopyWeb.Router do
     resources "/plugins", PluginController, except: [:new, :edit] do
       get "/logs", PluginController, :logs, as: :logs
     end
+
+    # Healthcare & HIPAA
+    post "/healthcare/phi/track", HealthcareController, :track_phi
+    post "/healthcare/consent/verify", HealthcareController, :verify_consent
+    get "/healthcare/audit/trail", HealthcareController, :audit_trail
+    post "/healthcare/hipaa/verify", HealthcareController, :verify_hipaa
+    post "/healthcare/consent/grant", HealthcareController, :grant_consent
+    post "/healthcare/consent/revoke", HealthcareController, :revoke_consent
+
+    # Compliance
+    get "/compliance/frameworks", ComplianceController, :index
+    get "/compliance/frameworks/:framework", ComplianceController, :show
+    post "/compliance/verify", ComplianceController, :verify
+    post "/compliance/report", ComplianceController, :report
+    get "/compliance/controls/:control_id", ComplianceController, :show_control
+    get "/compliance/status", ComplianceController, :status
+    post "/compliance/reload", ComplianceController, :reload
+
+    # Data Mesh
+    post "/mesh/domains/register", MeshController, :register_domain
+    post "/mesh/discover", MeshController, :discover
+    post "/mesh/lineage", MeshController, :lineage
+    post "/mesh/quality", MeshController, :quality
+    get "/mesh/cache/status", MeshController, :cache_status
+    post "/mesh/cache/invalidate", MeshController, :invalidate_cache
   end
 
   # SSE streaming endpoints (accept text/event-stream)
