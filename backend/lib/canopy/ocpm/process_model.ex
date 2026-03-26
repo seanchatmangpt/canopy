@@ -34,7 +34,9 @@ defmodule Canopy.OCPM.ProcessModel do
     process_model
     |> cast(attrs, [:nodes, :edges, :version, :discovered_at, :workspace_id, :agent_id])
     |> validate_required([:nodes, :edges, :version, :discovered_at, :workspace_id])
-    |> validate_format(:version, ~r/^\d+\.\d+\.\d+(-[a-zA-Z0-9.]+)?(\+[a-zA-Z0-9.]+)?$/, message: "must be a valid SemVer string")
+    |> validate_format(:version, ~r/^\d+\.\d+\.\d+(-[a-zA-Z0-9.]+)?(\+[a-zA-Z0-9.]+)?$/,
+      message: "must be a valid SemVer string"
+    )
     |> validate_nodes()
     |> validate_edges()
   end

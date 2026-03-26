@@ -32,15 +32,18 @@ defmodule Canopy.BudgetEnforcerTest do
     test "returns 0 when key is not found in ETS" do
       # Simulating the lookup logic
       result = []
+
       case result do
         [{_, cents}] -> cents
         [] -> 0
       end
+
       assert 0 == 0
     end
 
     test "returns stored value when key exists" do
       result = [{{"agent", "a1"}, 500}]
+
       case result do
         [{_, cents}] -> assert cents == 500
         [] -> flunk("Should have found value")
@@ -80,14 +83,15 @@ defmodule Canopy.BudgetEnforcerTest do
         organization_id: nil
       }
 
-      non_nil = [
-        chain.workspace_id,
-        chain.team_id,
-        chain.department_id,
-        chain.division_id,
-        chain.organization_id
-      ]
-      |> Enum.reject(&is_nil/1)
+      non_nil =
+        [
+          chain.workspace_id,
+          chain.team_id,
+          chain.department_id,
+          chain.division_id,
+          chain.organization_id
+        ]
+        |> Enum.reject(&is_nil/1)
 
       assert length(non_nil) == 1
     end

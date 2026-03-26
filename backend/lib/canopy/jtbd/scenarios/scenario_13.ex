@@ -219,8 +219,9 @@ defmodule Canopy.JTBD.Scenarios.Scenario13 do
         result = %{
           "tool" => "analysis",
           "resource" => resource_uri,
-          "analysis_type" => Map.get(parameters, :type) ||
-                               Map.get(parameters, "type", "general"),
+          "analysis_type" =>
+            Map.get(parameters, :type) ||
+              Map.get(parameters, "type", "general"),
           "status" => "analyzed"
         }
 

@@ -21,15 +21,16 @@ defmodule Canopy.Compliance.OntologyEvaluatorTest do
       criticalities = Enum.map(violations, & &1.criticality)
 
       # Verify sort order: critical > high > medium > low
-      assert criticalities == Enum.sort_by(criticalities, fn crit ->
-        case crit do
-          "critical" -> 0
-          "high" -> 1
-          "medium" -> 2
-          "low" -> 3
-          _ -> 99
-        end
-      end)
+      assert criticalities ==
+               Enum.sort_by(criticalities, fn crit ->
+                 case crit do
+                   "critical" -> 0
+                   "high" -> 1
+                   "medium" -> 2
+                   "low" -> 3
+                   _ -> 99
+                 end
+               end)
     end
 
     test "includes required fields in violations" do
@@ -62,7 +63,7 @@ defmodule Canopy.Compliance.OntologyEvaluatorTest do
       result = OntologyEvaluator.evaluate_all_policies()
 
       assert match?({:error, _reason}, result) or
-             match?({:ok, _violations, _elapsed}, result)
+               match?({:ok, _violations, _elapsed}, result)
     end
   end
 
@@ -104,7 +105,7 @@ defmodule Canopy.Compliance.OntologyEvaluatorTest do
 
       # Either returns empty list or error, depending on implementation
       assert match?({:ok, _violations, _elapsed}, result) or
-             match?({:error, _reason}, result)
+               match?({:error, _reason}, result)
     end
 
     test "framework evaluation completes within time bound" do
@@ -364,7 +365,7 @@ defmodule Canopy.Compliance.OntologyEvaluatorTest do
 
       # Either succeeds or returns error, both valid
       assert match?({:ok, _violations, _elapsed}, result) or
-             match?({:error, _reason}, result)
+               match?({:error, _reason}, result)
     end
 
     test "error messages are descriptive" do

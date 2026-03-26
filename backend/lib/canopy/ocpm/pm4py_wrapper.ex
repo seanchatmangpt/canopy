@@ -87,9 +87,7 @@ defmodule Canopy.OCPM.Pm4pyWrapper do
           metadata: Map.get(result, "metadata", %{})
         }
 
-        Logger.info(
-          "[Pm4pyWrapper] Discovered model with #{length(model.nodes)} nodes"
-        )
+        Logger.info("[Pm4pyWrapper] Discovered model with #{length(model.nodes)} nodes")
 
         {:ok, model}
 
@@ -134,9 +132,7 @@ defmodule Canopy.OCPM.Pm4pyWrapper do
         bottlenecks = Map.get(result, "bottlenecks", [])
         _metadata = Map.get(result, "metadata", %{})
 
-        Logger.info(
-          "[Pm4pyWrapper] Found #{length(bottlenecks)} bottlenecks"
-        )
+        Logger.info("[Pm4pyWrapper] Found #{length(bottlenecks)} bottlenecks")
 
         {:ok, bottlenecks}
 
@@ -170,7 +166,8 @@ defmodule Canopy.OCPM.Pm4pyWrapper do
     {:ok, []}
   end
 
-  def find_deviations(event_log, process_model) when is_list(event_log) and is_map(process_model) do
+  def find_deviations(event_log, process_model)
+      when is_list(event_log) and is_map(process_model) do
     Logger.info("[Pm4pyWrapper] Checking conformance of #{length(event_log)} events")
 
     input = %{
@@ -183,9 +180,7 @@ defmodule Canopy.OCPM.Pm4pyWrapper do
         deviations = Map.get(result, "deviations", [])
         _metadata = Map.get(result, "metadata", %{})
 
-        Logger.info(
-          "[Pm4pyWrapper] Found #{length(deviations)} deviations"
-        )
+        Logger.info("[Pm4pyWrapper] Found #{length(deviations)} deviations")
 
         {:ok, deviations}
 

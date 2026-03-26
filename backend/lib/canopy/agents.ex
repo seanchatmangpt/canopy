@@ -70,7 +70,12 @@ defmodule Canopy.Agents do
       }
     )
 
-    persist_activity_event(updated, "agent.status_changed", "Agent #{updated.name} status changed from #{old_status} to #{new_status}", %{from: old_status, to: new_status})
+    persist_activity_event(
+      updated,
+      "agent.status_changed",
+      "Agent #{updated.name} status changed from #{old_status} to #{new_status}",
+      %{from: old_status, to: new_status}
+    )
 
     {:ok, updated}
   end

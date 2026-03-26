@@ -127,6 +127,7 @@ defmodule Canopy.JTBD.SelfPlayLoop do
       start_time: nil,
       workspace_id: Keyword.get(opts, :workspace_id, "wave12-self-play")
     }
+
     {:ok, state}
   end
 
@@ -220,6 +221,7 @@ defmodule Canopy.JTBD.SelfPlayLoop do
       | iteration: iteration,
         results: results
     }
+
     {:noreply, new_state}
   end
 
@@ -238,8 +240,8 @@ defmodule Canopy.JTBD.SelfPlayLoop do
     )
 
     case Task.Supervisor.async_nolink(:canopy_jtbd_loop_supervisor, fn ->
-      run_loop(state)
-    end) do
+           run_loop(state)
+         end) do
       %Task{pid: pid} ->
         Logger.info("Wave 12 loop task spawned successfully | pid=#{inspect(pid)}")
 
@@ -292,7 +294,9 @@ defmodule Canopy.JTBD.SelfPlayLoop do
       start_time = System.monotonic_time(:millisecond)
 
       # Run all 10 scenarios sequentially
-      Logger.debug("Wave 12 iteration #{iteration}: running 10 scenarios | workspace=#{state.workspace_id}")
+      Logger.debug(
+        "Wave 12 iteration #{iteration}: running 10 scenarios | workspace=#{state.workspace_id}"
+      )
 
       results = run_all_scenarios(state.workspace_id, iteration)
 
@@ -320,14 +324,20 @@ defmodule Canopy.JTBD.SelfPlayLoop do
       })
 
       # Publish results to PubSub
-      Logger.debug("Wave 12 publishing iteration #{iteration} results to PubSub | workspace=#{state.workspace_id}")
+      Logger.debug(
+        "Wave 12 publishing iteration #{iteration} results to PubSub | workspace=#{state.workspace_id}"
+      )
+
       publish_iteration_result(iteration, results, passes, fails, latency_ms, state.workspace_id)
 
       # Update state via message (GenServer call)
       GenServer.cast(__MODULE__, {:loop_update, iteration, results, passes, fails})
 
       # Wait before next iteration (configurable backoff)
-      Logger.debug("Wave 12 iteration #{iteration} backoff starting (100ms) | workspace=#{state.workspace_id}")
+      Logger.debug(
+        "Wave 12 iteration #{iteration} backoff starting (100ms) | workspace=#{state.workspace_id}"
+      )
+
       Process.sleep(100)
 
       # Recurse for next iteration
@@ -343,7 +353,9 @@ defmodule Canopy.JTBD.SelfPlayLoop do
   defp run_all_scenarios(workspace_id, iteration) do
     # Run scenarios sequentially (one after another)
     # This ensures proper ordering and allows dashboard to update per-scenario
-    Logger.debug("Wave 12 iteration #{iteration}: executing 10 scenarios in sequence | workspace=#{workspace_id}")
+    Logger.debug(
+      "Wave 12 iteration #{iteration}: executing 10 scenarios in sequence | workspace=#{workspace_id}"
+    )
 
     results =
       @scenarios
@@ -356,7 +368,10 @@ defmodule Canopy.JTBD.SelfPlayLoop do
         Map.put(acc, scenario_id, result)
       end)
 
-    Logger.debug("Wave 12 iteration #{iteration}: all 10 scenarios completed | workspace=#{workspace_id}")
+    Logger.debug(
+      "Wave 12 iteration #{iteration}: all 10 scenarios completed | workspace=#{workspace_id}"
+    )
+
     results
   end
 
@@ -367,7 +382,10 @@ defmodule Canopy.JTBD.SelfPlayLoop do
       "Wave 12 scenario starting | scenario=#{inspect(scenario_id)} | iteration=#{iteration} | workspace=#{workspace_id}"
     )
 
-    case Canopy.JTBD.Runner.run_scenario(scenario_id, workspace_id: workspace_id, iteration: iteration) do
+    case Canopy.JTBD.Runner.run_scenario(scenario_id,
+           workspace_id: workspace_id,
+           iteration: iteration
+         ) do
       {:ok, result} ->
         latency_ms = System.monotonic_time(:millisecond) - start_time
 
@@ -484,6 +502,7 @@ defmodule Canopy.JTBD.SelfPlayLoop do
         pass_count: state.pass_count + passes,
         fail_count: state.fail_count + fails
     }
+
     {:noreply, new_state}
   end
 

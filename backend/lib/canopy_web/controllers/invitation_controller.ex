@@ -51,7 +51,8 @@ defmodule CanopyWeb.InvitationController do
         conn |> put_status(404) |> json(%{error: "not_found"})
 
       invitation ->
-        if invitation.expires_at && DateTime.compare(invitation.expires_at, DateTime.utc_now()) == :lt do
+        if invitation.expires_at &&
+             DateTime.compare(invitation.expires_at, DateTime.utc_now()) == :lt do
           conn |> put_status(422) |> json(%{error: "invitation_expired"})
         else
           now = DateTime.utc_now() |> DateTime.truncate(:second)
@@ -81,7 +82,11 @@ defmodule CanopyWeb.InvitationController do
 
           case result do
             {:ok, _} ->
-              json(conn, %{ok: true, organization_id: invitation.organization_id, role: invitation.role})
+              json(conn, %{
+                ok: true,
+                organization_id: invitation.organization_id,
+                role: invitation.role
+              })
 
             {:error, _} ->
               conn |> put_status(500) |> json(%{error: "accept_failed"})

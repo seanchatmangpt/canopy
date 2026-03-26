@@ -18,32 +18,36 @@ defmodule Canopy.Integration.WeaverE2ETraceTest do
     unless System.get_env("WEAVER_E2E_TRACE") in ["1", "true"] do
       assert true
     else
-    base = System.get_env("PM4PY_URL", "http://localhost:8090") |> String.trim_trailing("/")
-    url = base <> "/health"
+      base = System.get_env("PM4PY_URL", "http://localhost:8090") |> String.trim_trailing("/")
+      url = base <> "/health"
 
-    tracer = :opentelemetry.get_tracer(:canopy)
+      tracer = :opentelemetry.get_tracer(:canopy)
 
-    :otel_tracer.with_span(tracer, "weaver.e2e.pm4py_handshake", %{}, fn _ ->
-      # Default text-map injector (W3C traceparent) — see otel_propagator_text_map:inject/1
-      carrier = :otel_propagator_text_map.inject([])
+      :otel_tracer.with_span(tracer, "weaver.e2e.pm4py_handshake", %{}, fn _ ->
+        # Default text-map injector (W3C traceparent) — see otel_propagator_text_map:inject/1
+        carrier = :otel_propagator_text_map.inject([])
 
-      header_list =
-        Enum.map(carrier, fn {k, v} ->
-          {String.downcase(to_string(k)), to_string(v)}
-        end)
+        header_list =
+          Enum.map(carrier, fn {k, v} ->
+            {String.downcase(to_string(k)), to_string(v)}
+          end)
 
-      case Req.get(url, headers: header_list, receive_timeout: 3_000) do
-        {:ok, %{status: 200}} ->
-          assert Enum.any?(header_list, fn {k, _} -> k == "traceparent" end)
+        case Req.get(url, headers: header_list, receive_timeout: 3_000) do
+          {:ok, %{status: 200}} ->
+            assert Enum.any?(header_list, fn {k, _} -> k == "traceparent" end)
 
-        {:ok, other} ->
-          flunk("unexpected HTTP status from pm4py: #{inspect(other)}")
+          {:ok, other} ->
+            flunk("unexpected HTTP status from pm4py: #{inspect(other)}")
 
-        {:error, reason} ->
-          IO.puts(:stderr, "[weaver_e2e] skip: pm4py not reachable (#{inspect(reason)}) at #{url}")
-          assert true
-      end
-    end)
+          {:error, reason} ->
+            IO.puts(
+              :stderr,
+              "[weaver_e2e] skip: pm4py not reachable (#{inspect(reason)}) at #{url}"
+            )
+
+            assert true
+        end
+      end)
     end
   end
 end

@@ -36,7 +36,8 @@ defmodule Canopy.JTBD.Scenarios.Scenario10Test do
       }
 
       # Act: Call scenario implementation (doesn't exist yet — RED)
-      {:ok, result} = Canopy.JTBD.Scenarios.Scenario10.execute(conformance_request, timeout_ms: 15_000)
+      {:ok, result} =
+        Canopy.JTBD.Scenarios.Scenario10.execute(conformance_request, timeout_ms: 15_000)
 
       # Assert: Conformance check completed
       assert result.model_id == "petri_net_v2"
@@ -57,7 +58,8 @@ defmodule Canopy.JTBD.Scenarios.Scenario10Test do
         ]
       }
 
-      {:ok, result} = Canopy.JTBD.Scenarios.Scenario10.execute(conformance_request, timeout_ms: 15_000)
+      {:ok, result} =
+        Canopy.JTBD.Scenarios.Scenario10.execute(conformance_request, timeout_ms: 15_000)
 
       # Assert: Span emitted with correct attributes per semconv
       # - jtbd.scenario.id: "conformance_drift"
@@ -73,21 +75,25 @@ defmodule Canopy.JTBD.Scenarios.Scenario10Test do
     test "conformance_drift validates model_id is non-empty" do
       conformance_request = %{
         "agent_id" => "discovery-agent-1",
-        "model_id" => "",  # Invalid: empty
+        # Invalid: empty
+        "model_id" => "",
         "event_log" => []
       }
 
-      assert {:error, :invalid_model_id} = Canopy.JTBD.Scenarios.Scenario10.execute(conformance_request, timeout_ms: 15_000)
+      assert {:error, :invalid_model_id} =
+               Canopy.JTBD.Scenarios.Scenario10.execute(conformance_request, timeout_ms: 15_000)
     end
 
     test "conformance_drift validates event_log is non-empty list" do
       conformance_request = %{
         "agent_id" => "discovery-agent-1",
         "model_id" => "petri_net_v2",
-        "event_log" => []  # Invalid: empty log
+        # Invalid: empty log
+        "event_log" => []
       }
 
-      assert {:error, :empty_event_log} = Canopy.JTBD.Scenarios.Scenario10.execute(conformance_request, timeout_ms: 15_000)
+      assert {:error, :empty_event_log} =
+               Canopy.JTBD.Scenarios.Scenario10.execute(conformance_request, timeout_ms: 15_000)
     end
 
     test "conformance_drift returns error on 15s timeout" do
@@ -97,7 +103,9 @@ defmodule Canopy.JTBD.Scenarios.Scenario10Test do
         "event_log" => [%{"activity" => "start"}]
       }
 
-      {:error, reason} = Canopy.JTBD.Scenarios.Scenario10.execute(conformance_request, timeout_ms: 1)
+      {:error, reason} =
+        Canopy.JTBD.Scenarios.Scenario10.execute(conformance_request, timeout_ms: 1)
+
       assert reason == :timeout
     end
 
@@ -109,14 +117,15 @@ defmodule Canopy.JTBD.Scenarios.Scenario10Test do
       }
 
       # Queue 21 conformance checks (exceeds max 20)
-      tasks = Enum.map(1..21, fn i ->
-        Task.async(fn ->
-          Canopy.JTBD.Scenarios.Scenario10.execute(
-            Map.put(conformance_template, "check_id", "check-#{i}"),
-            timeout_ms: 15_000
-          )
+      tasks =
+        Enum.map(1..21, fn i ->
+          Task.async(fn ->
+            Canopy.JTBD.Scenarios.Scenario10.execute(
+              Map.put(conformance_template, "check_id", "check-#{i}"),
+              timeout_ms: 15_000
+            )
+          end)
         end)
-      end)
 
       results = Task.await_many(tasks, 30_000)
 
@@ -137,7 +146,8 @@ defmodule Canopy.JTBD.Scenarios.Scenario10Test do
         ]
       }
 
-      {:ok, result} = Canopy.JTBD.Scenarios.Scenario10.execute(conformance_request, timeout_ms: 15_000)
+      {:ok, result} =
+        Canopy.JTBD.Scenarios.Scenario10.execute(conformance_request, timeout_ms: 15_000)
 
       # Assert: Fitness score is valid probability
       assert result.fitness_score >= 0.0
@@ -150,12 +160,14 @@ defmodule Canopy.JTBD.Scenarios.Scenario10Test do
         "model_id" => "petri_net_v2",
         "event_log" => [
           %{"activity" => "start"},
-          %{"activity" => "anomaly"},  # Activity not in model
+          # Activity not in model
+          %{"activity" => "anomaly"},
           %{"activity" => "end"}
         ]
       }
 
-      {:ok, result} = Canopy.JTBD.Scenarios.Scenario10.execute(conformance_request, timeout_ms: 15_000)
+      {:ok, result} =
+        Canopy.JTBD.Scenarios.Scenario10.execute(conformance_request, timeout_ms: 15_000)
 
       # Assert: Drift detected (fitness < 0.8 indicates deviation)
       if result.fitness_score < 0.8 do
@@ -177,7 +189,10 @@ defmodule Canopy.JTBD.Scenarios.Scenario10Test do
       }
 
       start_ms = System.monotonic_time(:millisecond)
-      {:ok, result} = Canopy.JTBD.Scenarios.Scenario10.execute(conformance_request, timeout_ms: 15_000)
+
+      {:ok, result} =
+        Canopy.JTBD.Scenarios.Scenario10.execute(conformance_request, timeout_ms: 15_000)
+
       end_ms = System.monotonic_time(:millisecond)
 
       actual_latency = end_ms - start_ms

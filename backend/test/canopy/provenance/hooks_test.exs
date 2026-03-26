@@ -96,13 +96,18 @@ defmodule Canopy.Provenance.HooksTest do
 
     test "accepts confidence and reasoning" do
       result =
-        Hooks.on_decision("compliance_agent", "compliance_action", %{
-          framework: "SOC2",
-          action: "require_mfa"
-        }, %{
-          confidence: 0.95,
-          reasoning: "Detected weak authentication patterns"
-        })
+        Hooks.on_decision(
+          "compliance_agent",
+          "compliance_action",
+          %{
+            framework: "SOC2",
+            action: "require_mfa"
+          },
+          %{
+            confidence: 0.95,
+            reasoning: "Detected weak authentication patterns"
+          }
+        )
 
       assert result == :ok
     end
@@ -148,24 +153,34 @@ defmodule Canopy.Provenance.HooksTest do
 
     test "accepts duration and status" do
       result =
-        Hooks.on_workflow_complete("workspace_2", "workflow_2", %{
-          result: "success"
-        }, %{
-          duration_ms: 45000,
-          status: "ok"
-        })
+        Hooks.on_workflow_complete(
+          "workspace_2",
+          "workflow_2",
+          %{
+            result: "success"
+          },
+          %{
+            duration_ms: 45000,
+            status: "ok"
+          }
+        )
 
       assert result == :ok
     end
 
     test "handles workflow with errors" do
       result =
-        Hooks.on_workflow_complete("workspace_3", "workflow_3", %{
-          errors: ["agent_timeout", "missing_config"]
-        }, %{
-          duration_ms: 30000,
-          status: "error"
-        })
+        Hooks.on_workflow_complete(
+          "workspace_3",
+          "workflow_3",
+          %{
+            errors: ["agent_timeout", "missing_config"]
+          },
+          %{
+            duration_ms: 30000,
+            status: "error"
+          }
+        )
 
       assert result == :ok
     end
@@ -269,9 +284,10 @@ defmodule Canopy.Provenance.HooksTest do
       task_id = "task_1"
 
       # Workflow starts
-      ws_start = Hooks.on_workflow_start(workspace_id, workflow_id, %{
-        description: "Healing workflow"
-      })
+      ws_start =
+        Hooks.on_workflow_start(workspace_id, workflow_id, %{
+          description: "Healing workflow"
+        })
 
       # Agent executes task
       task_start = Hooks.on_task_start(agent_id, task_id, "healing")
@@ -287,12 +303,17 @@ defmodule Canopy.Provenance.HooksTest do
 
       # Workflow completes
       ws_complete =
-        Hooks.on_workflow_complete(workspace_id, workflow_id, %{
-          agents_run: 1,
-          tasks_completed: 1
-        }, %{
-          duration_ms: 2500
-        })
+        Hooks.on_workflow_complete(
+          workspace_id,
+          workflow_id,
+          %{
+            agents_run: 1,
+            tasks_completed: 1
+          },
+          %{
+            duration_ms: 2500
+          }
+        )
 
       assert ws_start == :ok
       assert task_start == :ok
@@ -309,14 +330,16 @@ defmodule Canopy.Provenance.HooksTest do
         })
 
       # Canopy analyzes the model
-      analysis = Hooks.on_task_complete("agent_analysis", "task_1", %{model: "order_proc"}, %{
-        artifact_type: "analysis_report"
-      })
+      analysis =
+        Hooks.on_task_complete("agent_analysis", "task_1", %{model: "order_proc"}, %{
+          artifact_type: "analysis_report"
+        })
 
       # Compliance checks the model
-      compliance = Hooks.on_compliance_check("SOC2", "check_1", true, %{
-        gaps: []
-      })
+      compliance =
+        Hooks.on_compliance_check("SOC2", "check_1", true, %{
+          gaps: []
+        })
 
       assert discovery == :ok
       assert analysis == :ok

@@ -80,13 +80,15 @@ defmodule Canopy.JTBD.Scenarios.Scenario8Test do
 
     test "a2a_deal_lifecycle validates agent_id is non-empty" do
       deal_params = %{
-        "agent_id" => "",  # Invalid: empty
+        # Invalid: empty
+        "agent_id" => "",
         "counterparty_agent_id" => "buyer-agent-2",
         "item_name" => "workflow",
         "price_usd" => 100.0
       }
 
-      assert {:error, :invalid_agent_id} = Canopy.JTBD.Scenarios.Scenario8.execute(deal_params, timeout_ms: 5000)
+      assert {:error, :invalid_agent_id} =
+               Canopy.JTBD.Scenarios.Scenario8.execute(deal_params, timeout_ms: 5000)
     end
 
     test "a2a_deal_lifecycle validates price_usd is positive" do
@@ -94,10 +96,12 @@ defmodule Canopy.JTBD.Scenarios.Scenario8Test do
         "agent_id" => "seller-agent-1",
         "counterparty_agent_id" => "buyer-agent-2",
         "item_name" => "workflow",
-        "price_usd" => -50.0  # Invalid: negative
+        # Invalid: negative
+        "price_usd" => -50.0
       }
 
-      assert {:error, :invalid_price} = Canopy.JTBD.Scenarios.Scenario8.execute(deal_params, timeout_ms: 5000)
+      assert {:error, :invalid_price} =
+               Canopy.JTBD.Scenarios.Scenario8.execute(deal_params, timeout_ms: 5000)
     end
 
     test "a2a_deal_lifecycle returns error on timeout" do
@@ -121,14 +125,15 @@ defmodule Canopy.JTBD.Scenarios.Scenario8Test do
       }
 
       # Queue 101 deals (exceeds max 100)
-      tasks = Enum.map(1..101, fn i ->
-        Task.async(fn ->
-          Canopy.JTBD.Scenarios.Scenario8.execute(
-            Map.put(deal_template, "item_id", "workflow-#{i}"),
-            timeout_ms: 5000
-          )
+      tasks =
+        Enum.map(1..101, fn i ->
+          Task.async(fn ->
+            Canopy.JTBD.Scenarios.Scenario8.execute(
+              Map.put(deal_template, "item_id", "workflow-#{i}"),
+              timeout_ms: 5000
+            )
+          end)
         end)
-      end)
 
       results = Task.await_many(tasks, 10_000)
 

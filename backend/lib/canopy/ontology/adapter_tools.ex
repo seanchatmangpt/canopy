@@ -71,7 +71,8 @@ defmodule Canopy.Ontology.AdapterTools do
   def find_tools_by_capability(adapter_type, capability, opts \\ []) do
     ontology_id = adapter_ontology_id(adapter_type)
 
-    ToolRegistry.find_by_capability(capability,
+    ToolRegistry.find_by_capability(
+      capability,
       Keyword.merge(opts, ontology_id: ontology_id)
     )
   end
@@ -92,9 +93,7 @@ defmodule Canopy.Ontology.AdapterTools do
   def get_adapter_capabilities(adapter_type, opts \\ []) do
     ontology_id = adapter_ontology_id(adapter_type)
 
-    ToolRegistry.get_capabilities_index(
-      Keyword.merge(opts, ontology_id: ontology_id)
-    )
+    ToolRegistry.get_capabilities_index(Keyword.merge(opts, ontology_id: ontology_id))
   end
 
   @doc """

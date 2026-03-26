@@ -170,11 +170,13 @@ defmodule Canopy.Deals.ContractTemplate do
     end
   end
 
-  defp validate_field(field_name, _field_type, terms, false) when not is_map_key(terms, field_name) do
+  defp validate_field(field_name, _field_type, terms, false)
+       when not is_map_key(terms, field_name) do
     :ok
   end
 
-  defp validate_field(field_name, _field_type, terms, true) when not is_map_key(terms, field_name) do
+  defp validate_field(field_name, _field_type, terms, true)
+       when not is_map_key(terms, field_name) do
     {:error, "Required field missing: #{field_name}"}
   end
 

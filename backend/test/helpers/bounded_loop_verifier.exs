@@ -17,7 +17,7 @@ defmodule Canopy.Test.Helpers.BoundedLoopVerifier do
       end
   """
 
-  @spec assert_max_recursion_depth(integer, (() -> any)) :: any
+  @spec assert_max_recursion_depth(integer, (-> any)) :: any
   def assert_max_recursion_depth(max_depth, operation) when is_function(operation, 0) do
     try do
       operation.()
@@ -32,7 +32,7 @@ defmodule Canopy.Test.Helpers.BoundedLoopVerifier do
     end
   end
 
-  @spec assert_iteration_count(integer, (() -> integer)) :: integer
+  @spec assert_iteration_count(integer, (-> integer)) :: integer
   def assert_iteration_count(max_iterations, operation) when is_function(operation, 0) do
     count = operation.()
 

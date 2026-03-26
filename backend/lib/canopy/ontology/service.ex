@@ -310,12 +310,12 @@ defmodule Canopy.Ontology.Service do
     case :ets.whereis(:ontology_cache_stats) do
       :undefined ->
         :ets.new(:ontology_cache_stats, [:set, :public, :named_table])
-        :ets.insert(:ontology_cache_stats, [cache_hits: 0, cache_misses: 0])
+        :ets.insert(:ontology_cache_stats, cache_hits: 0, cache_misses: 0)
 
       _ ->
         # Reset counters
         :ets.delete_all_objects(:ontology_cache_stats)
-        :ets.insert(:ontology_cache_stats, [cache_hits: 0, cache_misses: 0])
+        :ets.insert(:ontology_cache_stats, cache_hits: 0, cache_misses: 0)
     end
   end
 
@@ -340,7 +340,7 @@ defmodule Canopy.Ontology.Service do
   def handle_call(:clear_cache, _from, state) do
     :ets.delete_all_objects(:ontology_cache)
     :ets.delete_all_objects(:ontology_cache_stats)
-    :ets.insert(:ontology_cache_stats, [cache_hits: 0, cache_misses: 0])
+    :ets.insert(:ontology_cache_stats, cache_hits: 0, cache_misses: 0)
 
     Logger.info("Ontology cache cleared")
     {:reply, :ok, state}

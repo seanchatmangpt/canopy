@@ -18,25 +18,62 @@ defmodule Canopy.JTBD.Runner do
 
     result =
       case scenario_id do
-        :agent_decision_loop -> run_agent_decision_loop(workspace_id, iteration)
-        :process_discovery -> run_process_discovery(workspace_id, iteration)
-        :compliance_check -> run_compliance_check(workspace_id, iteration)
-        :cross_system_handoff -> run_cross_system_handoff(workspace_id, iteration)
-        :workspace_sync -> run_workspace_sync(workspace_id, iteration)
-        :consensus_round -> run_consensus_round(workspace_id, iteration)
-        :healing_recovery -> run_healing_recovery(workspace_id, iteration)
-        :a2a_deal_lifecycle -> run_a2a_deal_lifecycle(workspace_id, iteration)
-        :mcp_tool_execution -> run_mcp_tool_execution(workspace_id, iteration)
-        :conformance_drift -> run_conformance_drift(workspace_id, iteration)
-        :yawl_v6_checkpoint -> run_yawl_v6_checkpoint(workspace_id, iteration)
-        :icp_qualification -> run_icp_qualification(workspace_id, iteration)
-        :retrofit_complexity_scoring -> run_retrofit_complexity_scoring(workspace_id, iteration)
-        :outreach_sequence_execution -> run_outreach_sequence_execution(workspace_id, iteration)
-        :deal_progression -> run_deal_progression(workspace_id, iteration)
-        :contract_closure -> run_contract_closure(workspace_id, iteration)
-        :process_intelligence_query -> run_process_intelligence_query(workspace_id, iteration)
+        :agent_decision_loop ->
+          run_agent_decision_loop(workspace_id, iteration)
+
+        :process_discovery ->
+          run_process_discovery(workspace_id, iteration)
+
+        :compliance_check ->
+          run_compliance_check(workspace_id, iteration)
+
+        :cross_system_handoff ->
+          run_cross_system_handoff(workspace_id, iteration)
+
+        :workspace_sync ->
+          run_workspace_sync(workspace_id, iteration)
+
+        :consensus_round ->
+          run_consensus_round(workspace_id, iteration)
+
+        :healing_recovery ->
+          run_healing_recovery(workspace_id, iteration)
+
+        :a2a_deal_lifecycle ->
+          run_a2a_deal_lifecycle(workspace_id, iteration)
+
+        :mcp_tool_execution ->
+          run_mcp_tool_execution(workspace_id, iteration)
+
+        :conformance_drift ->
+          run_conformance_drift(workspace_id, iteration)
+
+        :yawl_v6_checkpoint ->
+          run_yawl_v6_checkpoint(workspace_id, iteration)
+
+        :icp_qualification ->
+          run_icp_qualification(workspace_id, iteration)
+
+        :retrofit_complexity_scoring ->
+          run_retrofit_complexity_scoring(workspace_id, iteration)
+
+        :outreach_sequence_execution ->
+          run_outreach_sequence_execution(workspace_id, iteration)
+
+        :deal_progression ->
+          run_deal_progression(workspace_id, iteration)
+
+        :contract_closure ->
+          run_contract_closure(workspace_id, iteration)
+
+        :process_intelligence_query ->
+          run_process_intelligence_query(workspace_id, iteration)
+
         _ ->
-          Logger.error("Runner unknown scenario | scenario=#{inspect(scenario_id)} | iteration=#{iteration}")
+          Logger.error(
+            "Runner unknown scenario | scenario=#{inspect(scenario_id)} | iteration=#{iteration}"
+          )
+
           {:error, {:unknown_scenario, scenario_id}}
       end
 
@@ -89,17 +126,28 @@ defmodule Canopy.JTBD.Runner do
 
     try do
       transitions = [:canopy_initiate]
-      Logger.debug("Runner cross_system_handoff transition | step=canopy_initiate | iteration=#{iteration}")
+
+      Logger.debug(
+        "Runner cross_system_handoff transition | step=canopy_initiate | iteration=#{iteration}"
+      )
 
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.id", "cross_system_handoff")
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.iteration", iteration)
 
       transitions = transitions ++ [:osa_accept]
-      Logger.debug("Runner cross_system_handoff transition | step=osa_accept | iteration=#{iteration}")
+
+      Logger.debug(
+        "Runner cross_system_handoff transition | step=osa_accept | iteration=#{iteration}"
+      )
+
       Process.sleep(100)
 
       transitions = transitions ++ [:businessos_complete]
-      Logger.debug("Runner cross_system_handoff transition | step=businessos_complete | iteration=#{iteration}")
+
+      Logger.debug(
+        "Runner cross_system_handoff transition | step=businessos_complete | iteration=#{iteration}"
+      )
+
       Process.sleep(100)
 
       latency_ms = System.monotonic_time(:millisecond) - start_time
@@ -109,22 +157,23 @@ defmodule Canopy.JTBD.Runner do
         "Runner cross_system_handoff scenario succeeded | iteration=#{iteration} | latency_ms=#{latency_ms} | transitions=#{Enum.count(transitions)} | workspace=#{workspace_id}"
       )
 
-      {:ok, %{
-        outcome: :success,
-        system: :businessos,
-        span_emitted: true,
-        span_attributes: %{
-          source_service: "canopy",
-          intermediate_service: "osa",
-          target_service: "businessos",
-          workspace_id: workspace_id,
-          trace_id: trace_id,
-          span_id: span_id,
-          parent_span_id: parent_span_id
-        },
-        transitions: transitions,
-        latency_ms: latency_ms
-      }}
+      {:ok,
+       %{
+         outcome: :success,
+         system: :businessos,
+         span_emitted: true,
+         span_attributes: %{
+           source_service: "canopy",
+           intermediate_service: "osa",
+           target_service: "businessos",
+           workspace_id: workspace_id,
+           trace_id: trace_id,
+           span_id: span_id,
+           parent_span_id: parent_span_id
+         },
+         transitions: transitions,
+         latency_ms: latency_ms
+       }}
     catch
       type, reason ->
         Logger.error(
@@ -150,7 +199,10 @@ defmodule Canopy.JTBD.Runner do
 
     try do
       transitions = [:prepare_sync]
-      Logger.debug("Runner workspace_sync transition | step=prepare_sync | iteration=#{iteration}")
+
+      Logger.debug(
+        "Runner workspace_sync transition | step=prepare_sync | iteration=#{iteration}"
+      )
 
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.id", "workspace_sync")
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.iteration", iteration)
@@ -181,21 +233,22 @@ defmodule Canopy.JTBD.Runner do
         "Runner workspace_sync scenario succeeded | iteration=#{iteration} | latency_ms=#{latency_ms} | delta_count=#{delta_count} | consistency=passed | workspace=#{workspace_id}"
       )
 
-      {:ok, %{
-        outcome: :success,
-        system: :osa,
-        span_emitted: true,
-        span_attributes: %{
-          workspace_id: workspace_id,
-          state_hash: source_state_hash,
-          delta_count: delta_count,
-          consistency_check: :passed,
-          source_state_hash: source_state_hash,
-          target_state_hash: target_state_hash
-        },
-        transitions: transitions,
-        latency_ms: latency_ms
-      }}
+      {:ok,
+       %{
+         outcome: :success,
+         system: :osa,
+         span_emitted: true,
+         span_attributes: %{
+           workspace_id: workspace_id,
+           state_hash: source_state_hash,
+           delta_count: delta_count,
+           consistency_check: :passed,
+           source_state_hash: source_state_hash,
+           target_state_hash: target_state_hash
+         },
+         transitions: transitions,
+         latency_ms: latency_ms
+       }}
     catch
       type, reason ->
         Logger.error(
@@ -250,22 +303,23 @@ defmodule Canopy.JTBD.Runner do
         "Runner consensus_round scenario succeeded | iteration=#{iteration} | latency_ms=#{latency_ms} | quorum=#{quorum_size} | agreement=#{agreement_count} | bft_safety=satisfied | workspace=#{workspace_id}"
       )
 
-      {:ok, %{
-        outcome: :success,
-        system: :osa,
-        span_emitted: true,
-        span_attributes: %{
-          quorum_size: quorum_size,
-          agreement_count: agreement_count,
-          block_hash: block_hash,
-          round_number: iteration,
-          bft_safety: :satisfied,
-          faulty_validators_tolerated: faulty_tolerance,
-          consensus_proof: consensus_proof
-        },
-        transitions: transitions,
-        latency_ms: latency_ms
-      }}
+      {:ok,
+       %{
+         outcome: :success,
+         system: :osa,
+         span_emitted: true,
+         span_attributes: %{
+           quorum_size: quorum_size,
+           agreement_count: agreement_count,
+           block_hash: block_hash,
+           round_number: iteration,
+           bft_safety: :satisfied,
+           faulty_validators_tolerated: faulty_tolerance,
+           consensus_proof: consensus_proof
+         },
+         transitions: transitions,
+         latency_ms: latency_ms
+       }}
     catch
       type, reason ->
         Logger.error(
@@ -292,7 +346,9 @@ defmodule Canopy.JTBD.Runner do
     try do
       transitions = [:observe, :think, :act, :conclude]
 
-      Logger.debug("Runner agent_decision_loop transitions | steps=#{Enum.count(transitions)} | iteration=#{iteration}")
+      Logger.debug(
+        "Runner agent_decision_loop transitions | steps=#{Enum.count(transitions)} | iteration=#{iteration}"
+      )
 
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.id", "agent_decision_loop")
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.iteration", iteration)
@@ -308,19 +364,20 @@ defmodule Canopy.JTBD.Runner do
         "Runner agent_decision_loop scenario succeeded | iteration=#{iteration} | latency_ms=#{latency_ms} | agent_id=agent_#{iteration} | workspace=#{workspace_id}"
       )
 
-      {:ok, %{
-        outcome: :success,
-        system: :osa,
-        span_emitted: true,
-        span_attributes: %{
-          service: "osa",
-          workspace_id: workspace_id,
-          agent_id: "agent_#{iteration}",
-          trace_id: generate_trace_id()
-        },
-        transitions: transitions,
-        latency_ms: latency_ms
-      }}
+      {:ok,
+       %{
+         outcome: :success,
+         system: :osa,
+         span_emitted: true,
+         span_attributes: %{
+           service: "osa",
+           workspace_id: workspace_id,
+           agent_id: "agent_#{iteration}",
+           trace_id: generate_trace_id()
+         },
+         transitions: transitions,
+         latency_ms: latency_ms
+       }}
     catch
       type, reason ->
         Logger.error(
@@ -338,7 +395,9 @@ defmodule Canopy.JTBD.Runner do
   defp run_process_discovery(workspace_id, iteration) do
     start_time = System.monotonic_time(:millisecond)
 
-    Logger.debug("Runner executing process_discovery scenario | iteration=#{iteration} | workspace=#{workspace_id}")
+    Logger.debug(
+      "Runner executing process_discovery scenario | iteration=#{iteration} | workspace=#{workspace_id}"
+    )
 
     root_ctx = OpenTelemetry.Tracer.start_span("jtbd.scenario.process_discovery")
     Canopy.Telemetry.WeaverLiveCheck.put_correlation_attribute()
@@ -369,25 +428,29 @@ defmodule Canopy.JTBD.Runner do
       OpenTelemetry.Tracer.set_attribute(:"process_mining.fitness", 0.85)
       OpenTelemetry.Tracer.set_attribute(:"process_mining.model_format", "pnml")
 
-      Logger.info("Runner process_discovery scenario succeeded | iteration=#{iteration} | latency_ms=#{latency_ms} | workspace=#{workspace_id}")
+      Logger.info(
+        "Runner process_discovery scenario succeeded | iteration=#{iteration} | latency_ms=#{latency_ms} | workspace=#{workspace_id}"
+      )
 
-      pnml_model = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><pnml><net id=\"pn1\" type=\"http://www.pnml.org/version-2009-05-13/normative\"><page id=\"page1\"><place id=\"p1\"/><transition id=\"t1\"/></page></net></pnml>"
+      pnml_model =
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?><pnml><net id=\"pn1\" type=\"http://www.pnml.org/version-2009-05-13/normative\"><page id=\"page1\"><place id=\"p1\"/><transition id=\"t1\"/></page></net></pnml>"
 
-      {:ok, %{
-        outcome: :success,
-        system: :pm4py_rust,
-        span_emitted: true,
-        span_attributes: %{
-          workspace_id: workspace_id,
-          place_count: 5,
-          transition_count: 3,
-          fitness: 0.85,
-          model_format: "pnml"
-        },
-        model: pnml_model,
-        transitions: transitions,
-        latency_ms: latency_ms
-      }}
+      {:ok,
+       %{
+         outcome: :success,
+         system: :pm4py_rust,
+         span_emitted: true,
+         span_attributes: %{
+           workspace_id: workspace_id,
+           place_count: 5,
+           transition_count: 3,
+           fitness: 0.85,
+           model_format: "pnml"
+         },
+         model: pnml_model,
+         transitions: transitions,
+         latency_ms: latency_ms
+       }}
     catch
       type, reason ->
         Logger.error(
@@ -405,7 +468,9 @@ defmodule Canopy.JTBD.Runner do
   defp run_compliance_check(workspace_id, iteration) do
     start_time = System.monotonic_time(:millisecond)
 
-    Logger.debug("Runner executing compliance_check scenario | iteration=#{iteration} | workspace=#{workspace_id}")
+    Logger.debug(
+      "Runner executing compliance_check scenario | iteration=#{iteration} | workspace=#{workspace_id}"
+    )
 
     root_ctx = OpenTelemetry.Tracer.start_span("jtbd.scenario.compliance_check")
     Canopy.Telemetry.WeaverLiveCheck.put_correlation_attribute()
@@ -441,23 +506,26 @@ defmodule Canopy.JTBD.Runner do
       OpenTelemetry.Tracer.set_attribute(:"compliance.findings_count", findings_count)
       OpenTelemetry.Tracer.set_attribute(:"compliance.remediation_progress", remediation_progress)
 
-      Logger.info("Runner compliance_check scenario succeeded | iteration=#{iteration} | latency_ms=#{latency_ms} | workspace=#{workspace_id}")
+      Logger.info(
+        "Runner compliance_check scenario succeeded | iteration=#{iteration} | latency_ms=#{latency_ms} | workspace=#{workspace_id}"
+      )
 
-      {:ok, %{
-        outcome: :success,
-        system: :businessos,
-        span_emitted: true,
-        span_attributes: %{
-          workspace_id: workspace_id,
-          last_audit_date: last_audit_date,
-          findings_count: findings_count,
-          remediation_progress: remediation_progress,
-          framework: "soc2",
-          compliance_status: :compliant
-        },
-        transitions: transitions,
-        latency_ms: latency_ms
-      }}
+      {:ok,
+       %{
+         outcome: :success,
+         system: :businessos,
+         span_emitted: true,
+         span_attributes: %{
+           workspace_id: workspace_id,
+           last_audit_date: last_audit_date,
+           findings_count: findings_count,
+           remediation_progress: remediation_progress,
+           framework: "soc2",
+           compliance_status: :compliant
+         },
+         transitions: transitions,
+         latency_ms: latency_ms
+       }}
     catch
       type, reason ->
         Logger.error(
@@ -475,7 +543,9 @@ defmodule Canopy.JTBD.Runner do
   defp run_healing_recovery(workspace_id, iteration) do
     start_time = System.monotonic_time(:millisecond)
 
-    Logger.debug("Runner executing healing_recovery scenario | iteration=#{iteration} | workspace=#{workspace_id}")
+    Logger.debug(
+      "Runner executing healing_recovery scenario | iteration=#{iteration} | workspace=#{workspace_id}"
+    )
 
     root_ctx = OpenTelemetry.Tracer.start_span("jtbd.scenario.healing_recovery")
     Canopy.Telemetry.WeaverLiveCheck.put_correlation_attribute()
@@ -484,7 +554,10 @@ defmodule Canopy.JTBD.Runner do
       # Detection phase
       detect_start = System.monotonic_time(:millisecond)
       transitions = [:detect_failure]
-      Logger.debug("Runner healing_recovery transition | step=detect_failure | iteration=#{iteration}")
+
+      Logger.debug(
+        "Runner healing_recovery transition | step=detect_failure | iteration=#{iteration}"
+      )
 
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.id", "healing_recovery")
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.iteration", iteration)
@@ -496,7 +569,10 @@ defmodule Canopy.JTBD.Runner do
       # Diagnosis phase
       diagnose_start = System.monotonic_time(:millisecond)
       transitions = transitions ++ [:diagnose_root_cause]
-      Logger.debug("Runner healing_recovery transition | step=diagnose_root_cause | iteration=#{iteration}")
+
+      Logger.debug(
+        "Runner healing_recovery transition | step=diagnose_root_cause | iteration=#{iteration}"
+      )
 
       Process.sleep(150)
       diagnosis_latency_ms = System.monotonic_time(:millisecond) - diagnose_start
@@ -504,56 +580,86 @@ defmodule Canopy.JTBD.Runner do
       # Repair phase
       repair_start = System.monotonic_time(:millisecond)
       transitions = transitions ++ [:repair_system]
-      Logger.debug("Runner healing_recovery transition | step=repair_system | iteration=#{iteration}")
+
+      Logger.debug(
+        "Runner healing_recovery transition | step=repair_system | iteration=#{iteration}"
+      )
 
       Process.sleep(100)
       repair_latency_ms = System.monotonic_time(:millisecond) - repair_start
 
       # Verification phase
       transitions = transitions ++ [:verify_recovery]
-      Logger.debug("Runner healing_recovery transition | step=verify_recovery | iteration=#{iteration}")
+
+      Logger.debug(
+        "Runner healing_recovery transition | step=verify_recovery | iteration=#{iteration}"
+      )
 
       Process.sleep(50)
 
       latency_ms = System.monotonic_time(:millisecond) - start_time
 
       # Generate state hashes
-      pre_failure_state_hash = :crypto.hash(:sha256, "pre_failure_state_#{iteration}") |> Base.encode16(case: :lower)
-      post_recovery_state_hash = :crypto.hash(:sha256, "post_recovery_state_#{iteration}") |> Base.encode16(case: :lower)
+      pre_failure_state_hash =
+        :crypto.hash(:sha256, "pre_failure_state_#{iteration}") |> Base.encode16(case: :lower)
+
+      post_recovery_state_hash =
+        :crypto.hash(:sha256, "post_recovery_state_#{iteration}") |> Base.encode16(case: :lower)
 
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.latency_ms", latency_ms)
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.outcome", "success")
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.failure_mode", "deadlock")
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.diagnosis_confidence", 0.95)
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.repair_successful", true)
-      OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.detection_latency_ms", detection_latency_ms)
-      OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.diagnosis_latency_ms", diagnosis_latency_ms)
+
+      OpenTelemetry.Tracer.set_attribute(
+        :"jtbd.scenario.detection_latency_ms",
+        detection_latency_ms
+      )
+
+      OpenTelemetry.Tracer.set_attribute(
+        :"jtbd.scenario.diagnosis_latency_ms",
+        diagnosis_latency_ms
+      )
+
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.repair_latency_ms", repair_latency_ms)
-      OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.pre_failure_state_hash", pre_failure_state_hash)
-      OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.post_recovery_state_hash", post_recovery_state_hash)
+
+      OpenTelemetry.Tracer.set_attribute(
+        :"jtbd.scenario.pre_failure_state_hash",
+        pre_failure_state_hash
+      )
+
+      OpenTelemetry.Tracer.set_attribute(
+        :"jtbd.scenario.post_recovery_state_hash",
+        post_recovery_state_hash
+      )
+
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.state_consistency_restored", true)
 
-      Logger.info("Runner healing_recovery scenario succeeded | iteration=#{iteration} | latency_ms=#{latency_ms} | workspace=#{workspace_id}")
+      Logger.info(
+        "Runner healing_recovery scenario succeeded | iteration=#{iteration} | latency_ms=#{latency_ms} | workspace=#{workspace_id}"
+      )
 
-      {:ok, %{
-        outcome: :success,
-        system: :osa,
-        span_emitted: true,
-        span_attributes: %{
-          workspace_id: workspace_id,
-          failure_mode: :deadlock,
-          diagnosis_confidence: 0.95,
-          repair_successful: true,
-          detection_latency_ms: detection_latency_ms,
-          diagnosis_latency_ms: diagnosis_latency_ms,
-          repair_latency_ms: repair_latency_ms,
-          pre_failure_state_hash: pre_failure_state_hash,
-          post_recovery_state_hash: post_recovery_state_hash,
-          state_consistency_restored: true
-        },
-        transitions: transitions,
-        latency_ms: latency_ms
-      }}
+      {:ok,
+       %{
+         outcome: :success,
+         system: :osa,
+         span_emitted: true,
+         span_attributes: %{
+           workspace_id: workspace_id,
+           failure_mode: :deadlock,
+           diagnosis_confidence: 0.95,
+           repair_successful: true,
+           detection_latency_ms: detection_latency_ms,
+           diagnosis_latency_ms: diagnosis_latency_ms,
+           repair_latency_ms: repair_latency_ms,
+           pre_failure_state_hash: pre_failure_state_hash,
+           post_recovery_state_hash: post_recovery_state_hash,
+           state_consistency_restored: true
+         },
+         transitions: transitions,
+         latency_ms: latency_ms
+       }}
     catch
       type, reason ->
         Logger.error(
@@ -571,7 +677,9 @@ defmodule Canopy.JTBD.Runner do
   defp run_a2a_deal_lifecycle(workspace_id, iteration) do
     start_time = System.monotonic_time(:millisecond)
 
-    Logger.debug("Runner executing a2a_deal_lifecycle scenario | iteration=#{iteration} | workspace=#{workspace_id}")
+    Logger.debug(
+      "Runner executing a2a_deal_lifecycle scenario | iteration=#{iteration} | workspace=#{workspace_id}"
+    )
 
     root_ctx = OpenTelemetry.Tracer.start_span("jtbd.a2a.deal.create")
     Canopy.Telemetry.WeaverLiveCheck.put_correlation_attribute()
@@ -586,11 +694,17 @@ defmodule Canopy.JTBD.Runner do
 
       Process.sleep(150)
       transitions = transitions ++ [:negotiate]
-      Logger.debug("Runner a2a_deal_lifecycle transition | step=negotiate | iteration=#{iteration}")
+
+      Logger.debug(
+        "Runner a2a_deal_lifecycle transition | step=negotiate | iteration=#{iteration}"
+      )
 
       Process.sleep(200)
       transitions = transitions ++ [:finalize]
-      Logger.debug("Runner a2a_deal_lifecycle transition | step=finalize | iteration=#{iteration}")
+
+      Logger.debug(
+        "Runner a2a_deal_lifecycle transition | step=finalize | iteration=#{iteration}"
+      )
 
       Process.sleep(150)
 
@@ -598,16 +712,19 @@ defmodule Canopy.JTBD.Runner do
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.latency_ms", latency_ms)
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.outcome", "success")
 
-      Logger.info("Runner a2a_deal_lifecycle scenario succeeded | iteration=#{iteration} | latency_ms=#{latency_ms} | workspace=#{workspace_id}")
+      Logger.info(
+        "Runner a2a_deal_lifecycle scenario succeeded | iteration=#{iteration} | latency_ms=#{latency_ms} | workspace=#{workspace_id}"
+      )
 
-      {:ok, %{
-        outcome: :success,
-        system: :canopy,
-        span_emitted: true,
-        span_attributes: %{workspace_id: workspace_id},
-        transitions: transitions,
-        latency_ms: latency_ms
-      }}
+      {:ok,
+       %{
+         outcome: :success,
+         system: :canopy,
+         span_emitted: true,
+         span_attributes: %{workspace_id: workspace_id},
+         transitions: transitions,
+         latency_ms: latency_ms
+       }}
     catch
       type, reason ->
         Logger.error(
@@ -625,7 +742,9 @@ defmodule Canopy.JTBD.Runner do
   defp run_mcp_tool_execution(workspace_id, iteration) do
     start_time = System.monotonic_time(:millisecond)
 
-    Logger.debug("Runner executing mcp_tool_execution scenario | iteration=#{iteration} | workspace=#{workspace_id}")
+    Logger.debug(
+      "Runner executing mcp_tool_execution scenario | iteration=#{iteration} | workspace=#{workspace_id}"
+    )
 
     root_ctx = OpenTelemetry.Tracer.start_span("jtbd.scenario.mcp_tool_execution")
     Canopy.Telemetry.WeaverLiveCheck.put_correlation_attribute()
@@ -652,16 +771,19 @@ defmodule Canopy.JTBD.Runner do
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.latency_ms", latency_ms)
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.outcome", "success")
 
-      Logger.info("Runner mcp_tool_execution scenario succeeded | iteration=#{iteration} | latency_ms=#{latency_ms} | workspace=#{workspace_id}")
+      Logger.info(
+        "Runner mcp_tool_execution scenario succeeded | iteration=#{iteration} | latency_ms=#{latency_ms} | workspace=#{workspace_id}"
+      )
 
-      {:ok, %{
-        outcome: :success,
-        system: :osa,
-        span_emitted: true,
-        span_attributes: %{workspace_id: workspace_id},
-        transitions: transitions,
-        latency_ms: latency_ms
-      }}
+      {:ok,
+       %{
+         outcome: :success,
+         system: :osa,
+         span_emitted: true,
+         span_attributes: %{workspace_id: workspace_id},
+         transitions: transitions,
+         latency_ms: latency_ms
+       }}
     catch
       type, reason ->
         Logger.error(
@@ -679,7 +801,9 @@ defmodule Canopy.JTBD.Runner do
   defp run_conformance_drift(workspace_id, iteration) do
     start_time = System.monotonic_time(:millisecond)
 
-    Logger.debug("Runner executing conformance_drift scenario | iteration=#{iteration} | workspace=#{workspace_id}")
+    Logger.debug(
+      "Runner executing conformance_drift scenario | iteration=#{iteration} | workspace=#{workspace_id}"
+    )
 
     root_ctx = OpenTelemetry.Tracer.start_span("jtbd.conformance.drift")
     Canopy.Telemetry.WeaverLiveCheck.put_correlation_attribute()
@@ -706,16 +830,19 @@ defmodule Canopy.JTBD.Runner do
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.latency_ms", latency_ms)
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.outcome", "success")
 
-      Logger.info("Runner conformance_drift scenario succeeded | iteration=#{iteration} | latency_ms=#{latency_ms} | workspace=#{workspace_id}")
+      Logger.info(
+        "Runner conformance_drift scenario succeeded | iteration=#{iteration} | latency_ms=#{latency_ms} | workspace=#{workspace_id}"
+      )
 
-      {:ok, %{
-        outcome: :success,
-        system: :pm4py_rust,
-        span_emitted: true,
-        span_attributes: %{workspace_id: workspace_id},
-        transitions: transitions,
-        latency_ms: latency_ms
-      }}
+      {:ok,
+       %{
+         outcome: :success,
+         system: :pm4py_rust,
+         span_emitted: true,
+         span_attributes: %{workspace_id: workspace_id},
+         transitions: transitions,
+         latency_ms: latency_ms
+       }}
     catch
       type, reason ->
         Logger.error(
@@ -753,6 +880,7 @@ defmodule Canopy.JTBD.Runner do
           # Set YAWLV6_SIMULATE=false to run real mvnd builds
           sim = Canopy.JTBD.YAWLv6Simulation.checkpoint(iteration)
           Logger.info(Canopy.JTBD.YAWLv6Simulation.summary_line(sim))
+
           %{
             outcome: if(sim.outcome == :complete, do: :success, else: :success),
             tests_passed: sim.tests_passed,
@@ -767,6 +895,7 @@ defmodule Canopy.JTBD.Runner do
         else
           # Real mvnd build — requires YAWLV6_DIR and Java 26 + mvnd installed
           yawl_dir = System.get_env("YAWLV6_DIR", "/Users/sac/yawlv6")
+
           case System.cmd(
                  "mvnd",
                  ["-pl", "yawl-core", "test", "-Dcheckstyle.skip=true", "-Dpmd.skip=true", "-q"],
@@ -797,7 +926,12 @@ defmodule Canopy.JTBD.Runner do
 
       OpenTelemetry.Tracer.set_attribute(:"yawlv6.tests_passed", result[:tests_passed] || 0)
       OpenTelemetry.Tracer.set_attribute(:"yawlv6.tests_failed", result[:tests_failed] || 0)
-      OpenTelemetry.Tracer.set_attribute(:"yawlv6.modules_complete", result[:modules_complete] || 1)
+
+      OpenTelemetry.Tracer.set_attribute(
+        :"yawlv6.modules_complete",
+        result[:modules_complete] || 1
+      )
+
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.outcome", "success")
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.latency_ms", latency_ms)
 
@@ -813,18 +947,23 @@ defmodule Canopy.JTBD.Runner do
         workspace_id: workspace_id
       })
 
-      {:ok, %{
-        outcome: :success,
-        system: :yawlv6,
-        span_emitted: true,
-        latency_ms: latency_ms,
-        transitions: [:build, :test, :report],
-        metadata: result
-      }}
+      {:ok,
+       %{
+         outcome: :success,
+         system: :yawlv6,
+         span_emitted: true,
+         latency_ms: latency_ms,
+         transitions: [:build, :test, :report],
+         metadata: result
+       }}
     catch
       _type, reason ->
         latency_ms = System.monotonic_time(:millisecond) - start_time
-        Logger.warning("Wave 12 scenario failed | scenario=yawl_v6_checkpoint | reason=#{inspect(reason)}")
+
+        Logger.warning(
+          "Wave 12 scenario failed | scenario=yawl_v6_checkpoint | reason=#{inspect(reason)}"
+        )
+
         OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.outcome", "failure")
         OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.error", inspect(reason))
 
@@ -846,6 +985,7 @@ defmodule Canopy.JTBD.Runner do
     start_time = System.monotonic_time(:millisecond)
     root_ctx = OpenTelemetry.Tracer.start_span("jtbd.revops.icp_qualification")
     Canopy.Telemetry.WeaverLiveCheck.put_correlation_attribute()
+
     try do
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.id", "icp_qualification")
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.iteration", iteration)
@@ -858,20 +998,21 @@ defmodule Canopy.JTBD.Runner do
       min_score = 0.75
       result = Canopy.Adapters.BusinessOS.icp_score_contacts(min_score, %{})
 
-      {qualified_count, total_contacts} = case result do
-        {:ok, %{"qualified" => q, "total_contacts" => t}} ->
-          OpenTelemetry.Tracer.set_attribute(:"revops.icp.score", min_score)
-          OpenTelemetry.Tracer.set_attribute(:"revops.icp.qualified_count", q)
-          OpenTelemetry.Tracer.set_attribute(:"revops.icp.total_contacts", t)
-          {q, t}
+      {qualified_count, total_contacts} =
+        case result do
+          {:ok, %{"qualified" => q, "total_contacts" => t}} ->
+            OpenTelemetry.Tracer.set_attribute(:"revops.icp.score", min_score)
+            OpenTelemetry.Tracer.set_attribute(:"revops.icp.qualified_count", q)
+            OpenTelemetry.Tracer.set_attribute(:"revops.icp.total_contacts", t)
+            {q, t}
 
-        {:error, reason} ->
-          Logger.warning("ICP scoring failed: #{inspect(reason)}, using fallback")
-          # Fallback to simulated values
-          icp_score = 0.72 + :rand.uniform() * 0.28
-          OpenTelemetry.Tracer.set_attribute(:"revops.icp.score", Float.round(icp_score, 2))
-          {3, 10}
-      end
+          {:error, reason} ->
+            Logger.warning("ICP scoring failed: #{inspect(reason)}, using fallback")
+            # Fallback to simulated values
+            icp_score = 0.72 + :rand.uniform() * 0.28
+            OpenTelemetry.Tracer.set_attribute(:"revops.icp.score", Float.round(icp_score, 2))
+            {3, 10}
+        end
 
       # Route to appropriate pipeline stage
       qualified = qualified_count > 0
@@ -881,14 +1022,19 @@ defmodule Canopy.JTBD.Runner do
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.latency_ms", latency_ms)
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.outcome", "success")
 
-      {:ok, %{
-        outcome: :success,
-        system: :businessos,
-        span_emitted: true,
-        latency_ms: latency_ms,
-        transitions: [:assess_company, :score_icp_fit, :route_to_pipeline],
-        metadata: %{qualified_count: qualified_count, total_contacts: total_contacts, qualified: qualified}
-      }}
+      {:ok,
+       %{
+         outcome: :success,
+         system: :businessos,
+         span_emitted: true,
+         latency_ms: latency_ms,
+         transitions: [:assess_company, :score_icp_fit, :route_to_pipeline],
+         metadata: %{
+           qualified_count: qualified_count,
+           total_contacts: total_contacts,
+           qualified: qualified
+         }
+       }}
     catch
       _type, _reason ->
         OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.outcome", "failure")
@@ -902,6 +1048,7 @@ defmodule Canopy.JTBD.Runner do
     start_time = System.monotonic_time(:millisecond)
     root_ctx = OpenTelemetry.Tracer.start_span("jtbd.revops.retrofit_complexity")
     Canopy.Telemetry.WeaverLiveCheck.put_correlation_attribute()
+
     try do
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.id", "retrofit_complexity_scoring")
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.iteration", iteration)
@@ -927,14 +1074,19 @@ defmodule Canopy.JTBD.Runner do
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.latency_ms", latency_ms)
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.outcome", "success")
 
-      {:ok, %{
-        outcome: :success,
-        system: :pm4py_rust,
-        span_emitted: true,
-        latency_ms: latency_ms,
-        transitions: [:discover_patterns, :score_wcp_gaps, :estimate_effort],
-        metadata: %{wcp_gaps: wcp_gaps, complexity_score: complexity_score, estimated_days: estimated_days}
-      }}
+      {:ok,
+       %{
+         outcome: :success,
+         system: :pm4py_rust,
+         span_emitted: true,
+         latency_ms: latency_ms,
+         transitions: [:discover_patterns, :score_wcp_gaps, :estimate_effort],
+         metadata: %{
+           wcp_gaps: wcp_gaps,
+           complexity_score: complexity_score,
+           estimated_days: estimated_days
+         }
+       }}
     catch
       _type, _reason ->
         OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.outcome", "failure")
@@ -948,6 +1100,7 @@ defmodule Canopy.JTBD.Runner do
     start_time = System.monotonic_time(:millisecond)
     root_ctx = OpenTelemetry.Tracer.start_span("jtbd.revops.outreach_sequence")
     Canopy.Telemetry.WeaverLiveCheck.put_correlation_attribute()
+
     try do
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.id", "outreach_sequence_execution")
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.iteration", iteration)
@@ -959,41 +1112,52 @@ defmodule Canopy.JTBD.Runner do
       OpenTelemetry.Tracer.set_attribute(:"outreach.sequence_step", sequence_step)
 
       # Execute outreach via BusinessOS LinkedIn adapter (rate-limited queue)
-      sequence_id = 1 + rem(iteration, 5)  # Cycle through 5 sequences
+      # Cycle through 5 sequences
+      sequence_id = 1 + rem(iteration, 5)
       min_score = 0.75
 
       result = Canopy.Adapters.BusinessOS.queue_outreach_step(sequence_id, min_score, %{})
 
-      {enrolled, skipped} = case result do
-        {:ok, %{"enrolled" => e, "skipped" => s}} ->
-          OpenTelemetry.Tracer.set_attribute(:"outreach.channel", "linkedin_message")
-          OpenTelemetry.Tracer.set_attribute(:"outreach.enrolled", e)
-          OpenTelemetry.Tracer.set_attribute(:"outreach.skipped", s)
-          {e, s}
+      {enrolled, skipped} =
+        case result do
+          {:ok, %{"enrolled" => e, "skipped" => s}} ->
+            OpenTelemetry.Tracer.set_attribute(:"outreach.channel", "linkedin_message")
+            OpenTelemetry.Tracer.set_attribute(:"outreach.enrolled", e)
+            OpenTelemetry.Tracer.set_attribute(:"outreach.skipped", s)
+            {e, s}
 
-        {:error, reason} ->
-          Logger.warning("Outreach enrollment failed: #{inspect(reason)}, using fallback")
-          # Fallback: simulate enrollment
-          OpenTelemetry.Tracer.set_attribute(:"outreach.channel", "linkedin_message")
-          {3, 1}
-      end
+          {:error, reason} ->
+            Logger.warning("Outreach enrollment failed: #{inspect(reason)}, using fallback")
+            # Fallback: simulate enrollment
+            OpenTelemetry.Tracer.set_attribute(:"outreach.channel", "linkedin_message")
+            {3, 1}
+        end
 
       # Track predicted engagement (based on ICP score and message personalization)
       engagement_score = 0.35 + :rand.uniform() * 0.40
-      OpenTelemetry.Tracer.set_attribute(:"outreach.engagement_predicted", Float.round(engagement_score, 2))
+
+      OpenTelemetry.Tracer.set_attribute(
+        :"outreach.engagement_predicted",
+        Float.round(engagement_score, 2)
+      )
 
       latency_ms = System.monotonic_time(:millisecond) - start_time
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.latency_ms", latency_ms)
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.outcome", "success")
 
-      {:ok, %{
-        outcome: :success,
-        system: :businessos,
-        span_emitted: true,
-        latency_ms: latency_ms,
-        transitions: [:personalize_message, :execute_outreach, :track_engagement],
-        metadata: %{enrolled: enrolled, skipped: skipped, engagement_score: Float.round(engagement_score, 2)}
-      }}
+      {:ok,
+       %{
+         outcome: :success,
+         system: :businessos,
+         span_emitted: true,
+         latency_ms: latency_ms,
+         transitions: [:personalize_message, :execute_outreach, :track_engagement],
+         metadata: %{
+           enrolled: enrolled,
+           skipped: skipped,
+           engagement_score: Float.round(engagement_score, 2)
+         }
+       }}
     catch
       _type, _reason ->
         OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.outcome", "failure")
@@ -1007,6 +1171,7 @@ defmodule Canopy.JTBD.Runner do
     start_time = System.monotonic_time(:millisecond)
     root_ctx = OpenTelemetry.Tracer.start_span("jtbd.revops.deal_progression")
     Canopy.Telemetry.WeaverLiveCheck.put_correlation_attribute()
+
     try do
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.id", "deal_progression")
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.iteration", iteration)
@@ -1036,14 +1201,19 @@ defmodule Canopy.JTBD.Runner do
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.latency_ms", latency_ms)
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.outcome", "success")
 
-      {:ok, %{
-        outcome: :success,
-        system: :businessos,
-        span_emitted: true,
-        latency_ms: latency_ms,
-        transitions: [:evaluate_stage_gate, :advance_stage, :log_activity],
-        metadata: %{current_stage: current_stage, next_stage: next_stage, stage_advanced: stage_advanced}
-      }}
+      {:ok,
+       %{
+         outcome: :success,
+         system: :businessos,
+         span_emitted: true,
+         latency_ms: latency_ms,
+         transitions: [:evaluate_stage_gate, :advance_stage, :log_activity],
+         metadata: %{
+           current_stage: current_stage,
+           next_stage: next_stage,
+           stage_advanced: stage_advanced
+         }
+       }}
     catch
       _type, _reason ->
         OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.outcome", "failure")
@@ -1057,6 +1227,7 @@ defmodule Canopy.JTBD.Runner do
     start_time = System.monotonic_time(:millisecond)
     root_ctx = OpenTelemetry.Tracer.start_span("jtbd.revops.contract_closure")
     Canopy.Telemetry.WeaverLiveCheck.put_correlation_attribute()
+
     try do
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.id", "contract_closure")
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.iteration", iteration)
@@ -1070,10 +1241,12 @@ defmodule Canopy.JTBD.Runner do
 
       # BFT commit — 3 rounds (propose, prepare, commit)
       Process.sleep(160)
+
       contract_hash =
         :crypto.hash(:sha256, "#{contract_id}:#{iteration}")
         |> Base.encode16(case: :lower)
         |> String.slice(0..15)
+
       OpenTelemetry.Tracer.set_attribute(:"contract.block_hash", contract_hash)
       OpenTelemetry.Tracer.set_attribute(:"contract.consensus_reached", true)
       OpenTelemetry.Tracer.set_attribute(:"contract.signatories", 2)
@@ -1087,14 +1260,15 @@ defmodule Canopy.JTBD.Runner do
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.latency_ms", latency_ms)
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.outcome", "success")
 
-      {:ok, %{
-        outcome: :success,
-        system: :osa,
-        span_emitted: true,
-        latency_ms: latency_ms,
-        transitions: [:generate_contract, :bft_commit, :record_closure],
-        metadata: %{contract_hash: contract_hash, consensus_reached: true, fibo_compliant: true}
-      }}
+      {:ok,
+       %{
+         outcome: :success,
+         system: :osa,
+         span_emitted: true,
+         latency_ms: latency_ms,
+         transitions: [:generate_contract, :bft_commit, :record_closure],
+         metadata: %{contract_hash: contract_hash, consensus_reached: true, fibo_compliant: true}
+       }}
     catch
       _type, _reason ->
         OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.outcome", "failure")
@@ -1109,6 +1283,7 @@ defmodule Canopy.JTBD.Runner do
       [_, total, failures] ->
         tests_passed = String.to_integer(total) - String.to_integer(failures)
         tests_failed = String.to_integer(failures)
+
         %{
           outcome: :success,
           tests_passed: tests_passed,
@@ -1134,14 +1309,19 @@ defmodule Canopy.JTBD.Runner do
   defp run_process_intelligence_query(workspace_id, iteration) do
     start_time = System.monotonic_time(:millisecond)
 
-    Logger.debug("Runner executing process_intelligence_query scenario | iteration=#{iteration} | workspace=#{workspace_id}")
+    Logger.debug(
+      "Runner executing process_intelligence_query scenario | iteration=#{iteration} | workspace=#{workspace_id}"
+    )
 
     root_ctx = OpenTelemetry.Tracer.start_span("jtbd.scenario.process_intelligence_query")
     Canopy.Telemetry.WeaverLiveCheck.put_correlation_attribute()
 
     try do
       transitions = [:query]
-      Logger.debug("Runner process_intelligence_query transition | step=query | iteration=#{iteration}")
+
+      Logger.debug(
+        "Runner process_intelligence_query transition | step=query | iteration=#{iteration}"
+      )
 
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.id", "process_intelligence_query")
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.iteration", iteration)
@@ -1149,18 +1329,30 @@ defmodule Canopy.JTBD.Runner do
 
       # Query pm4py-rust for process intelligence
       pm4py_url = System.get_env("PM4PY_RUST_URL", "http://localhost:8090")
-      query = "Describe the current process state including critical path, bottlenecks, and common variants"
 
-      response = Req.post("#{pm4py_url}/api/query", json: %{
-        "query" => query
-      }, receive_timeout: 5000)
+      query =
+        "Describe the current process state including critical path, bottlenecks, and common variants"
+
+      response =
+        Req.post("#{pm4py_url}/api/query",
+          json: %{
+            "query" => query
+          },
+          receive_timeout: 5000
+        )
 
       transitions = transitions ++ [:analyze]
-      Logger.debug("Runner process_intelligence_query transition | step=analyze | iteration=#{iteration}")
+
+      Logger.debug(
+        "Runner process_intelligence_query transition | step=analyze | iteration=#{iteration}"
+      )
 
       Process.sleep(50)
       transitions = transitions ++ [:complete]
-      Logger.debug("Runner process_intelligence_query transition | step=complete | iteration=#{iteration}")
+
+      Logger.debug(
+        "Runner process_intelligence_query transition | step=complete | iteration=#{iteration}"
+      )
 
       Process.sleep(30)
 
@@ -1168,17 +1360,20 @@ defmodule Canopy.JTBD.Runner do
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.latency_ms", latency_ms)
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.outcome", "success")
 
-      Logger.info("Runner process_intelligence_query scenario succeeded | iteration=#{iteration} | latency_ms=#{latency_ms} | workspace=#{workspace_id}")
+      Logger.info(
+        "Runner process_intelligence_query scenario succeeded | iteration=#{iteration} | latency_ms=#{latency_ms} | workspace=#{workspace_id}"
+      )
 
-      {:ok, %{
-        outcome: :success,
-        system: :pm4py_rust,
-        span_emitted: true,
-        span_attributes: %{workspace_id: workspace_id},
-        query_response: response,
-        transitions: transitions,
-        latency_ms: latency_ms
-      }}
+      {:ok,
+       %{
+         outcome: :success,
+         system: :pm4py_rust,
+         span_emitted: true,
+         span_attributes: %{workspace_id: workspace_id},
+         query_response: response,
+         transitions: transitions,
+         latency_ms: latency_ms
+       }}
     catch
       type, reason ->
         Logger.error(
@@ -1216,6 +1411,7 @@ defmodule Canopy.JTBD.Runner do
   @doc false
   defp yawl_core_installed? do
     m2 = Path.expand("~/.m2/repository/org/yawlfoundation/yawl-core")
+
     case File.ls(m2) do
       {:ok, files} -> length(files) > 0
       {:error, _} -> false

@@ -4,7 +4,10 @@ defmodule Canopy.Repo.Migrations.CreateSchedules do
   def change do
     create table(:schedules, primary_key: false) do
       add :id, :binary_id, primary_key: true
-      add :workspace_id, references(:workspaces, type: :binary_id, on_delete: :delete_all), null: false
+
+      add :workspace_id, references(:workspaces, type: :binary_id, on_delete: :delete_all),
+        null: false
+
       add :agent_id, references(:agents, type: :binary_id, on_delete: :delete_all), null: false
       add :name, :string, null: false
       add :cron_expression, :string, null: false

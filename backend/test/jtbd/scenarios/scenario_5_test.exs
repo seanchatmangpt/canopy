@@ -8,7 +8,8 @@ defmodule Canopy.JTBD.Scenarios.Scenario5Test do
     @tag :requires_osa
     test "syncs workspace state from Canopy to OSA with outcome=success" do
       # RED: This test fails because Canopy.JTBD.Runner doesn't exist yet
-      {:ok, result} = Canopy.JTBD.Runner.run_scenario(:workspace_sync, workspace_id: @workspace_id)
+      {:ok, result} =
+        Canopy.JTBD.Runner.run_scenario(:workspace_sync, workspace_id: @workspace_id)
 
       assert result.outcome == :success
       assert result.span_emitted == true
@@ -18,7 +19,8 @@ defmodule Canopy.JTBD.Scenarios.Scenario5Test do
 
     test "records workspace state sync lifecycle phases" do
       # RED: Scenario runner must track prepare → transfer → verify phases
-      {:ok, result} = Canopy.JTBD.Runner.run_scenario(:workspace_sync, workspace_id: @workspace_id)
+      {:ok, result} =
+        Canopy.JTBD.Runner.run_scenario(:workspace_sync, workspace_id: @workspace_id)
 
       assert result.outcome == :success
       assert length(result.transitions) >= 3
@@ -29,7 +31,8 @@ defmodule Canopy.JTBD.Scenarios.Scenario5Test do
 
     test "captures workspace state snapshot and delta in span attributes" do
       # RED: Span must record workspace state hash and change count
-      {:ok, result} = Canopy.JTBD.Runner.run_scenario(:workspace_sync, workspace_id: @workspace_id)
+      {:ok, result} =
+        Canopy.JTBD.Runner.run_scenario(:workspace_sync, workspace_id: @workspace_id)
 
       assert result.span_attributes.workspace_id == @workspace_id
       assert is_binary(result.span_attributes.state_hash)
@@ -39,7 +42,8 @@ defmodule Canopy.JTBD.Scenarios.Scenario5Test do
 
     test "validates state consistency after sync" do
       # RED: Result must include consistency check status
-      {:ok, result} = Canopy.JTBD.Runner.run_scenario(:workspace_sync, workspace_id: @workspace_id)
+      {:ok, result} =
+        Canopy.JTBD.Runner.run_scenario(:workspace_sync, workspace_id: @workspace_id)
 
       assert result.span_attributes.consistency_check == :passed
       assert result.span_attributes.source_state_hash == result.span_attributes.target_state_hash

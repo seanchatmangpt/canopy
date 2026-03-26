@@ -50,10 +50,12 @@ defmodule Canopy.Adapters.HTTP do
               {events, :done}
 
             {:ok, %{status: s, body: resp}} ->
-              {[%{event_type: "run.failed", data: %{"status" => s, "body" => resp}, tokens: 0}], :done}
+              {[%{event_type: "run.failed", data: %{"status" => s, "body" => resp}, tokens: 0}],
+               :done}
 
             {:error, reason} ->
-              {[%{event_type: "run.failed", data: %{"error" => inspect(reason)}, tokens: 0}], :done}
+              {[%{event_type: "run.failed", data: %{"error" => inspect(reason)}, tokens: 0}],
+               :done}
           end
 
         :done ->

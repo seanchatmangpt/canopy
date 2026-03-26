@@ -18,7 +18,11 @@ defmodule Canopy.JTBD.LinkedInRevOpsSmokeTest do
       workspace_id = "test-workspace-1"
       iteration = 1
 
-      {:ok, result} = Canopy.JTBD.Runner.run_scenario(:icp_qualification, workspace_id: workspace_id, iteration: iteration)
+      {:ok, result} =
+        Canopy.JTBD.Runner.run_scenario(:icp_qualification,
+          workspace_id: workspace_id,
+          iteration: iteration
+        )
 
       assert result.outcome == :success
       assert result.system == :businessos
@@ -41,7 +45,12 @@ defmodule Canopy.JTBD.LinkedInRevOpsSmokeTest do
       workspace_id = "test-workspace-2"
 
       for iteration <- 1..3 do
-        {:ok, result} = Canopy.JTBD.Runner.run_scenario(:icp_qualification, workspace_id: workspace_id, iteration: iteration)
+        {:ok, result} =
+          Canopy.JTBD.Runner.run_scenario(:icp_qualification,
+            workspace_id: workspace_id,
+            iteration: iteration
+          )
+
         assert result.outcome == :success
         assert result.latency_ms > 0
       end
@@ -55,7 +64,11 @@ defmodule Canopy.JTBD.LinkedInRevOpsSmokeTest do
       workspace_id = "test-workspace-3"
       iteration = 1
 
-      {:ok, result} = Canopy.JTBD.Runner.run_scenario(:outreach_sequence_execution, workspace_id: workspace_id, iteration: iteration)
+      {:ok, result} =
+        Canopy.JTBD.Runner.run_scenario(:outreach_sequence_execution,
+          workspace_id: workspace_id,
+          iteration: iteration
+        )
 
       assert result.outcome == :success
       assert result.system == :businessos
@@ -73,14 +86,21 @@ defmodule Canopy.JTBD.LinkedInRevOpsSmokeTest do
       assert result.metadata.engagement_score >= 0.0
       assert result.metadata.engagement_score <= 1.0
 
-      Logger.info("Outreach sequence execution test passed | metadata=#{inspect(result.metadata)}")
+      Logger.info(
+        "Outreach sequence execution test passed | metadata=#{inspect(result.metadata)}"
+      )
     end
 
     test "handles multiple sequence iterations with varying sequence IDs" do
       workspace_id = "test-workspace-4"
 
       for iteration <- 1..5 do
-        {:ok, result} = Canopy.JTBD.Runner.run_scenario(:outreach_sequence_execution, workspace_id: workspace_id, iteration: iteration)
+        {:ok, result} =
+          Canopy.JTBD.Runner.run_scenario(:outreach_sequence_execution,
+            workspace_id: workspace_id,
+            iteration: iteration
+          )
+
         assert result.outcome == :success
         assert result.latency_ms > 0
         # Sequence ID should vary: 1 + rem(iteration, 5)

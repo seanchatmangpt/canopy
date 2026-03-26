@@ -98,6 +98,7 @@ defmodule Canopy.Integration.OrgAwareDispatchE2ETest do
     test "agent_receives_org_context: org metadata provided to agent" do
       # Arrange: Task with org context
       agent_id = :health_agent
+
       org_context = %{
         "org_unit" => "operations",
         "team" => "platform",
@@ -116,6 +117,7 @@ defmodule Canopy.Integration.OrgAwareDispatchE2ETest do
     test "agent_org_context_includes_hierarchy: org hierarchy levels in context" do
       # Arrange
       agent_id = :compliance_agent
+
       org_context = %{
         "org_unit" => "engineering",
         "division" => "product",
@@ -133,6 +135,7 @@ defmodule Canopy.Integration.OrgAwareDispatchE2ETest do
     test "agent_makes_org_aware_decisions: agent decision respects org constraints" do
       # Arrange: Agent making decision with org context
       agent_id = :learning_agent
+
       org_context = %{
         "org_unit" => "finance",
         "authority_level" => "limited"
@@ -169,6 +172,7 @@ defmodule Canopy.Integration.OrgAwareDispatchE2ETest do
     test "org_aware_decision_checks_authority_level: authorization based on org role" do
       # Arrange: Agent with org role
       agent_id = :compliance_agent
+
       org_context = %{
         "role" => "auditor",
         "authority_level" => "read_only"
@@ -208,12 +212,14 @@ defmodule Canopy.Integration.OrgAwareDispatchE2ETest do
     test "org_aware_decision_identifies_escalation_point: knows when to escalate" do
       # Arrange: Decision requiring escalation
       agent_id = :healing_agent
+
       org_context = %{
         "authority_level" => "low",
         "escalation_threshold" => 10000
       }
 
-      decision_value = 15000  # Exceeds threshold
+      # Exceeds threshold
+      decision_value = 15000
 
       # Act: Check if escalation needed
       needs_escalation = check_escalation_needed(agent_id, org_context, decision_value)
@@ -225,6 +231,7 @@ defmodule Canopy.Integration.OrgAwareDispatchE2ETest do
     test "org_aware_decision_respects_compliance_context: compliance in org decisions" do
       # Arrange: Decision with compliance implications
       agent_id = :data_agent
+
       org_context = %{
         "org_unit" => "finance",
         "compliance_framework" => "SOC2",
@@ -441,7 +448,7 @@ defmodule Canopy.Integration.OrgAwareDispatchE2ETest do
 
       request = %{
         "id" => "req-escalate",
-        "amount" => 100000
+        "amount" => 100_000
       }
 
       # Act: Route through approval chain (bounded depth)
@@ -592,7 +599,8 @@ defmodule Canopy.Integration.OrgAwareDispatchE2ETest do
       elapsed2 = System.monotonic_time(:microsecond) - start2
 
       # Assert: Cache doesn't regress performance
-      assert elapsed2 <= elapsed1 + 50_000  # +50ms tolerance
+      # +50ms tolerance
+      assert elapsed2 <= elapsed1 + 50_000
     end
   end
 
@@ -611,8 +619,12 @@ defmodule Canopy.Integration.OrgAwareDispatchE2ETest do
     task_process = Task.async(fn -> dispatch_task_with_org_routing(task) end)
 
     case Task.yield(task_process, timeout_ms) do
-      {:ok, result} -> result
-      nil -> Task.shutdown(task_process); {:error, :timeout}
+      {:ok, result} ->
+        result
+
+      nil ->
+        Task.shutdown(task_process)
+        {:error, :timeout}
     end
   end
 

@@ -141,6 +141,7 @@ defmodule Canopy.Integration.ToolRegistryOntologyE2ETest do
     test "tool_execution_uses_ontology_metadata: metadata guides execution" do
       # Arrange: Tool with ontology metadata
       tool_name = "bash"
+
       params = %{
         "command" => "echo 'test'",
         "timeout_ms" => 5000
@@ -158,6 +159,7 @@ defmodule Canopy.Integration.ToolRegistryOntologyE2ETest do
       # Arrange: Tool with timeout from ontology
       tool_name = "http"
       timeout_ms = 1000
+
       params = %{
         "url" => "http://example.com",
         "timeout_ms" => timeout_ms
@@ -194,6 +196,7 @@ defmodule Canopy.Integration.ToolRegistryOntologyE2ETest do
     test "schema_validation_against_ontology_definition: input validated" do
       # Arrange: Tool with schema in ontology
       tool_name = "bash"
+
       valid_params = %{
         "command" => "ls -la",
         "timeout_ms" => 5000
@@ -203,7 +206,8 @@ defmodule Canopy.Integration.ToolRegistryOntologyE2ETest do
       try do
         validation = validate_params_against_ontology(tool_name, valid_params)
         # Assert: Valid params pass validation
-        assert validation == true or validation == :ok or is_map(validation) or validation == false
+        assert validation == true or validation == :ok or is_map(validation) or
+                 validation == false
       rescue
         _e ->
           # ETS table may not be initialized; skip
@@ -214,9 +218,12 @@ defmodule Canopy.Integration.ToolRegistryOntologyE2ETest do
     test "schema_validation_rejects_invalid_params: schema enforcement" do
       # Arrange: Invalid params (wrong type or missing required field)
       tool_name = "bash"
+
       invalid_params = %{
-        "command" => 12345,  # Should be string
-        "timeout_ms" => "not_a_number"  # Should be integer
+        # Should be string
+        "command" => 12345,
+        # Should be integer
+        "timeout_ms" => "not_a_number"
       }
 
       # Act: Validate invalid params
@@ -254,7 +261,8 @@ defmodule Canopy.Integration.ToolRegistryOntologyE2ETest do
 
       # Act: Cross-reference with ontology (may not have query_tool_definitions)
       # Using direct ontology service call instead
-      ontology_tools = nil  # Placeholder; API may vary
+      # Placeholder; API may vary
+      ontology_tools = nil
 
       # Assert: Both sources available (may not be identical)
       assert registry_tools == nil or is_list(registry_tools) or is_map(registry_tools)
@@ -476,6 +484,7 @@ defmodule Canopy.Integration.ToolRegistryOntologyE2ETest do
     test "integration_tool_execution_with_ontology_context: execution uses full context" do
       # Arrange: Tool with complete ontology context
       tool_name = "http"
+
       params = %{
         "url" => "http://localhost:9089/health",
         "method" => "GET",
@@ -509,7 +518,8 @@ defmodule Canopy.Integration.ToolRegistryOntologyE2ETest do
 
       # Assert: Cache benefits discovery latency
       # (Second call should not be significantly slower)
-      assert elapsed2 <= elapsed1 + 50_000  # +50ms tolerance
+      # +50ms tolerance
+      assert elapsed2 <= elapsed1 + 50_000
     end
   end
 
@@ -534,8 +544,12 @@ defmodule Canopy.Integration.ToolRegistryOntologyE2ETest do
     task = Task.async(fn -> discover_tools_from_ontology(tool_names) end)
 
     case Task.yield(task, timeout_ms) do
-      {:ok, result} -> result
-      nil -> Task.shutdown(task); []
+      {:ok, result} ->
+        result
+
+      nil ->
+        Task.shutdown(task)
+        []
     end
   end
 
@@ -582,30 +596,37 @@ defmodule Canopy.Integration.ToolRegistryOntologyE2ETest do
     # Simulate tool execution with ontology metadata
     timeout_ms = Map.get(params, "timeout_ms", 5000)
 
-    task = Task.async(fn ->
-      # Simulate tool execution
-      case tool_name do
-        "bash" ->
-          command = Map.get(params, "command", "echo 'default'")
-          {:ok, "Executed: #{command}"}
+    task =
+      Task.async(fn ->
+        # Simulate tool execution
+        case tool_name do
+          "bash" ->
+            command = Map.get(params, "command", "echo 'default'")
+            {:ok, "Executed: #{command}"}
 
-        "http" ->
-          url = Map.get(params, "url", "http://localhost:9089")
-          {:ok, "HTTP request to #{url}"}
+          "http" ->
+            url = Map.get(params, "url", "http://localhost:9089")
+            {:ok, "HTTP request to #{url}"}
 
-        "file_read" ->
-          path = Map.get(params, "path", "/tmp/test.txt")
-          {:ok, "File content from #{path}"}
+          "file_read" ->
+            path = Map.get(params, "path", "/tmp/test.txt")
+            {:ok, "File content from #{path}"}
 
-        _ ->
-          {:ok, "Unknown tool"}
-      end
-    end)
+          _ ->
+            {:ok, "Unknown tool"}
+        end
+      end)
 
     case Task.yield(task, timeout_ms) do
-      {:ok, {:ok, result}} -> result
-      {:ok, {:error, reason}} -> {:error, reason}
-      nil -> Task.shutdown(task); {:error, :timeout}
+      {:ok, {:ok, result}} ->
+        result
+
+      {:ok, {:error, reason}} ->
+        {:error, reason}
+
+      nil ->
+        Task.shutdown(task)
+        {:error, :timeout}
     end
   end
 

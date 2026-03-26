@@ -148,11 +148,16 @@ defmodule Canopy.Integration.HeartbeatOntologyE2ETest do
     test "heartbeat_priority_ordered_dispatch: agents ordered by priority" do
       # Arrange
       agent_types = [
-        :adaptation_agent,  # Low priority
-        :health_agent,      # High priority
-        :learning_agent,    # Medium priority
-        :data_agent,        # High priority
-        :compliance_agent   # Medium priority
+        # Low priority
+        :adaptation_agent,
+        # High priority
+        :health_agent,
+        # Medium priority
+        :learning_agent,
+        # High priority
+        :data_agent,
+        # Medium priority
+        :compliance_agent
       ]
 
       # Act: Get priority-ordered enrichment
@@ -491,7 +496,8 @@ defmodule Canopy.Integration.HeartbeatOntologyE2ETest do
 
       # Assert: Cache hit is faster (or similar; no regression)
       # We allow for timing variance, but cache should not be slower
-      assert elapsed2 <= elapsed1 + 100_000  # +100ms tolerance
+      # +100ms tolerance
+      assert elapsed2 <= elapsed1 + 100_000
     end
   end
 end

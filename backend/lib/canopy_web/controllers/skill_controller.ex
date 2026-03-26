@@ -92,7 +92,11 @@ defmodule CanopyWeb.SkillController do
     query =
       from s in Skill,
         group_by: s.category,
-        select: %{category: s.category, count: count(s.id), enabled_count: sum(fragment("CASE WHEN ? THEN 1 ELSE 0 END", s.enabled))}
+        select: %{
+          category: s.category,
+          count: count(s.id),
+          enabled_count: sum(fragment("CASE WHEN ? THEN 1 ELSE 0 END", s.enabled))
+        }
 
     query = if workspace_id, do: where(query, [s], s.workspace_id == ^workspace_id), else: query
 

@@ -9,7 +9,8 @@ defmodule Canopy.JTBD.Scenarios.Scenario6Test do
     @tag :requires_osa
     test "completes HotStuff BFT consensus round with outcome=success" do
       # RED: This test fails because Canopy.JTBD.Runner doesn't exist yet
-      {:ok, result} = Canopy.JTBD.Runner.run_scenario(:consensus_round, workspace_id: @workspace_id)
+      {:ok, result} =
+        Canopy.JTBD.Runner.run_scenario(:consensus_round, workspace_id: @workspace_id)
 
       assert result.outcome == :success
       assert result.span_emitted == true
@@ -19,7 +20,8 @@ defmodule Canopy.JTBD.Scenarios.Scenario6Test do
 
     test "records HotStuff consensus phases: propose → prepare → commit → decide" do
       # RED: Scenario runner must track all HotStuff phases with validator participation
-      {:ok, result} = Canopy.JTBD.Runner.run_scenario(:consensus_round, workspace_id: @workspace_id)
+      {:ok, result} =
+        Canopy.JTBD.Runner.run_scenario(:consensus_round, workspace_id: @workspace_id)
 
       assert result.outcome == :success
       assert length(result.transitions) >= 4
@@ -31,7 +33,8 @@ defmodule Canopy.JTBD.Scenarios.Scenario6Test do
 
     test "captures consensus quorum and validator agreement in span" do
       # RED: Span must record quorum size and voting agreement
-      {:ok, result} = Canopy.JTBD.Runner.run_scenario(:consensus_round, workspace_id: @workspace_id)
+      {:ok, result} =
+        Canopy.JTBD.Runner.run_scenario(:consensus_round, workspace_id: @workspace_id)
 
       assert result.span_attributes.quorum_size == @num_validators
       assert result.span_attributes.agreement_count >= trunc(@num_validators * 0.67)
@@ -41,7 +44,8 @@ defmodule Canopy.JTBD.Scenarios.Scenario6Test do
 
     test "validates BFT safety: all validators agree on final block" do
       # RED: Result must show Byzantine fault tolerance guarantee
-      {:ok, result} = Canopy.JTBD.Runner.run_scenario(:consensus_round, workspace_id: @workspace_id)
+      {:ok, result} =
+        Canopy.JTBD.Runner.run_scenario(:consensus_round, workspace_id: @workspace_id)
 
       assert result.span_attributes.bft_safety == :satisfied
       assert result.span_attributes.faulty_validators_tolerated == 1

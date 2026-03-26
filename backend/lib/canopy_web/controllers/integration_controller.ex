@@ -22,7 +22,9 @@ defmodule CanopyWeb.IntegrationController do
 
     existing =
       if workspace_id do
-        Repo.one(from i in Integration, where: i.slug == ^slug and i.workspace_id == ^workspace_id)
+        Repo.one(
+          from i in Integration, where: i.slug == ^slug and i.workspace_id == ^workspace_id
+        )
       else
         Repo.one(from i in Integration, where: i.slug == ^slug, limit: 1)
       end
@@ -41,7 +43,10 @@ defmodule CanopyWeb.IntegrationController do
 
         integration ->
           integration
-          |> Integration.changeset(%{"connected" => true, "config" => Map.merge(integration.config || %{}, config)})
+          |> Integration.changeset(%{
+            "connected" => true,
+            "config" => Map.merge(integration.config || %{}, config)
+          })
           |> Repo.update()
       end
 

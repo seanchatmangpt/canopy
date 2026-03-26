@@ -13,7 +13,11 @@ defmodule CanopyWeb.AuthController do
         {:ok, token, _claims} =
           Canopy.Guardian.encode_and_sign(user, %{"role" => user.role}, ttl: {1, :hour})
 
-        Repo.update!(Ecto.Changeset.change(user, last_login: DateTime.utc_now() |> DateTime.truncate(:second)))
+        Repo.update!(
+          Ecto.Changeset.change(user,
+            last_login: DateTime.utc_now() |> DateTime.truncate(:second)
+          )
+        )
 
         json(conn, %{
           token: token,
@@ -72,7 +76,10 @@ defmodule CanopyWeb.AuthController do
   def register(conn, %{"password" => password}) when byte_size(password) < 8 do
     conn
     |> put_status(422)
-    |> json(%{error: "validation_failed", details: %{password: ["must be at least 8 characters"]}})
+    |> json(%{
+      error: "validation_failed",
+      details: %{password: ["must be at least 8 characters"]}
+    })
   end
 
   def register(conn, _params) do

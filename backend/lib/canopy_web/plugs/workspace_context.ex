@@ -77,11 +77,12 @@ defmodule CanopyWeb.Plugs.WorkspaceContext do
     import Ecto.Query
 
     case Repo.one(
-      from w in Workspace,
-        where: w.owner_id == ^user_id or (w.is_active == true and w.isolation_level == "public"),
-        order_by: [desc: w.inserted_at],
-        limit: 1
-    ) do
+           from w in Workspace,
+             where:
+               w.owner_id == ^user_id or (w.is_active == true and w.isolation_level == "public"),
+             order_by: [desc: w.inserted_at],
+             limit: 1
+         ) do
       nil -> nil
       workspace -> workspace
     end

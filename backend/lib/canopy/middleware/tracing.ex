@@ -127,11 +127,12 @@ defmodule Canopy.Middleware.Tracing do
       [first | _] ->
         organized = organize_spans(spans)
 
-        {:ok, %{
-          trace_id: first.trace_id,
-          spans: organized,
-          span_count: length(spans)
-        }}
+        {:ok,
+         %{
+           trace_id: first.trace_id,
+           spans: organized,
+           span_count: length(spans)
+         }}
     end
   end
 
@@ -156,7 +157,8 @@ defmodule Canopy.Middleware.Tracing do
 
   defp parse_traceparent(traceparent) when is_binary(traceparent) do
     case String.split(traceparent, "-") do
-      ["00", trace_id, span_id, flags] when byte_size(trace_id) == 32 and byte_size(span_id) == 16 ->
+      ["00", trace_id, span_id, flags]
+      when byte_size(trace_id) == 32 and byte_size(span_id) == 16 ->
         {:ok, %{trace_id: trace_id, span_id: span_id, flags: flags}}
 
       _ ->

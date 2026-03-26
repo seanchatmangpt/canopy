@@ -21,7 +21,16 @@ defmodule Canopy.Schemas.WorkProduct do
 
   def changeset(work_product, attrs) do
     work_product
-    |> cast(attrs, [:title, :product_type, :content, :metadata, :issue_id, :session_id, :agent_id, :workspace_id])
+    |> cast(attrs, [
+      :title,
+      :product_type,
+      :content,
+      :metadata,
+      :issue_id,
+      :session_id,
+      :agent_id,
+      :workspace_id
+    ])
     |> validate_required([:title, :product_type])
   end
 end

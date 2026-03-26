@@ -32,10 +32,10 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
   | `inductive_miner_imdfa` | `"inductive_miner_imdfa"` | inductive_miner_imdfa |
   """
   @spec process_mining_inductive_algorithm_values() :: %{
-    inductive_miner_base: :inductive_miner_base,
-    inductive_miner_dfg: :inductive_miner_dfg,
-    inductive_miner_imdfa: :inductive_miner_imdfa
-  }
+          inductive_miner_base: :inductive_miner_base,
+          inductive_miner_dfg: :inductive_miner_dfg,
+          inductive_miner_imdfa: :inductive_miner_imdfa
+        }
   def process_mining_inductive_algorithm_values do
     %{
       inductive_miner_base: :inductive_miner_base,
@@ -60,7 +60,6 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
     @doc "inductive_miner_imdfa"
     @spec inductive_miner_imdfa() :: :inductive_miner_imdfa
     def inductive_miner_imdfa, do: :inductive_miner_imdfa
-
   end
 
   @doc """
@@ -98,11 +97,11 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
   | `sequence` | `"sequence"` | sequence |
   """
   @spec process_mining_inductive_split_type_values() :: %{
-    exclusive: :exclusive,
-    parallel: :parallel,
-    loop: :loop,
-    sequence: :sequence
-  }
+          exclusive: :exclusive,
+          parallel: :parallel,
+          loop: :loop,
+          sequence: :sequence
+        }
   def process_mining_inductive_split_type_values do
     %{
       exclusive: :exclusive,
@@ -132,7 +131,6 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
     @doc "sequence"
     @spec sequence() :: :sequence
     def sequence, do: :sequence
-
   end
 
   @doc """
@@ -219,12 +217,12 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
   | `directly_follows` | `"directly_follows"` | directly_follows |
   """
   @spec process_mining_algorithm_values() :: %{
-    alpha_miner: :alpha_miner,
-    inductive_miner: :inductive_miner,
-    heuristics_miner: :heuristics_miner,
-    heuristic_miner: :heuristic_miner,
-    directly_follows: :directly_follows
-  }
+          alpha_miner: :alpha_miner,
+          inductive_miner: :inductive_miner,
+          heuristics_miner: :heuristics_miner,
+          heuristic_miner: :heuristic_miner,
+          directly_follows: :directly_follows
+        }
   def process_mining_algorithm_values do
     %{
       alpha_miner: :alpha_miner,
@@ -259,7 +257,6 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
     @doc "directly_follows"
     @spec directly_follows() :: :directly_follows
     def directly_follows, do: :directly_follows
-
   end
 
   @doc """
@@ -307,8 +304,10 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
   Requirement: `recommended`
   Examples: `12`, `35`, `78`
   """
-  @spec process_mining_alignment_optimal_path_length() :: :"process.mining.alignment.optimal_path_length"
-  def process_mining_alignment_optimal_path_length, do: :"process.mining.alignment.optimal_path_length"
+  @spec process_mining_alignment_optimal_path_length() ::
+          :"process.mining.alignment.optimal_path_length"
+  def process_mining_alignment_optimal_path_length,
+    do: :"process.mining.alignment.optimal_path_length"
 
   @doc """
   Anomaly score for the detected process deviation [0.0, 1.0].
@@ -453,11 +452,11 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
   | `spectral` | `"spectral"` | spectral |
   """
   @spec process_mining_cluster_algorithm_values() :: %{
-    kmeans: :kmeans,
-    dbscan: :dbscan,
-    hierarchical: :hierarchical,
-    spectral: :spectral
-  }
+          kmeans: :kmeans,
+          dbscan: :dbscan,
+          hierarchical: :hierarchical,
+          spectral: :spectral
+        }
   def process_mining_cluster_algorithm_values do
     %{
       kmeans: :kmeans,
@@ -487,7 +486,6 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
     @doc "spectral"
     @spec spectral() :: :spectral
     def spectral, do: :spectral
-
   end
 
   @doc """
@@ -548,10 +546,10 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
   | `structural` | `"structural"` | structural |
   """
   @spec process_mining_complexity_metric_values() :: %{
-    cyclomatic: :cyclomatic,
-    cognitive: :cognitive,
-    structural: :structural
-  }
+          cyclomatic: :cyclomatic,
+          cognitive: :cognitive,
+          structural: :structural
+        }
   def process_mining_complexity_metric_values do
     %{
       cyclomatic: :cyclomatic,
@@ -576,7 +574,6 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
     @doc "structural"
     @spec structural() :: :structural
     def structural, do: :structural
-
   end
 
   @doc """
@@ -612,7 +609,8 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
   Requirement: `recommended`
   Examples: `0.7`, `0.85`, `0.95`
   """
-  @spec process_mining_conformance_case_threshold() :: :"process.mining.conformance.case_threshold"
+  @spec process_mining_conformance_case_threshold() ::
+          :"process.mining.conformance.case_threshold"
   def process_mining_conformance_case_threshold, do: :"process.mining.conformance.case_threshold"
 
   @doc """
@@ -624,8 +622,10 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
   Requirement: `recommended`
   Examples: `0`, `5`, `23`
   """
-  @spec process_mining_conformance_deviation_count() :: :"process.mining.conformance.deviation_count"
-  def process_mining_conformance_deviation_count, do: :"process.mining.conformance.deviation_count"
+  @spec process_mining_conformance_deviation_count() ::
+          :"process.mining.conformance.deviation_count"
+  def process_mining_conformance_deviation_count,
+    do: :"process.mining.conformance.deviation_count"
 
   @doc """
   Type of conformance deviation detected during trace alignment.
@@ -636,7 +636,8 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
   Requirement: `recommended`
   Examples: `missing_activity`, `wrong_order`
   """
-  @spec process_mining_conformance_deviation_type() :: :"process.mining.conformance.deviation_type"
+  @spec process_mining_conformance_deviation_type() ::
+          :"process.mining.conformance.deviation_type"
   def process_mining_conformance_deviation_type, do: :"process.mining.conformance.deviation_type"
 
   @doc """
@@ -650,11 +651,11 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
   | `loop_violation` | `"loop_violation"` | Loop constraints violated |
   """
   @spec process_mining_conformance_deviation_type_values() :: %{
-    missing_activity: :missing_activity,
-    extra_activity: :extra_activity,
-    wrong_order: :wrong_order,
-    loop_violation: :loop_violation
-  }
+          missing_activity: :missing_activity,
+          extra_activity: :extra_activity,
+          wrong_order: :wrong_order,
+          loop_violation: :loop_violation
+        }
   def process_mining_conformance_deviation_type_values do
     %{
       missing_activity: :missing_activity,
@@ -684,7 +685,6 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
     @doc "Loop constraints violated"
     @spec loop_violation() :: :loop_violation
     def loop_violation, do: :loop_violation
-
   end
 
   @doc """
@@ -696,7 +696,8 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
   Requirement: `recommended`
   Examples: `50`, `200`, `1000`
   """
-  @spec process_mining_conformance_repair_cost_ms() :: :"process.mining.conformance.repair_cost_ms"
+  @spec process_mining_conformance_repair_cost_ms() ::
+          :"process.mining.conformance.repair_cost_ms"
   def process_mining_conformance_repair_cost_ms, do: :"process.mining.conformance.repair_cost_ms"
 
   @doc """
@@ -746,11 +747,11 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
   | `replace` | `"replace"` | replace |
   """
   @spec process_mining_conformance_repair_type_values() :: %{
-    insert: :insert,
-    delete: :delete,
-    move: :move,
-    replace: :replace
-  }
+          insert: :insert,
+          delete: :delete,
+          move: :move,
+          replace: :replace
+        }
   def process_mining_conformance_repair_type_values do
     %{
       insert: :insert,
@@ -780,7 +781,6 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
     @doc "replace"
     @spec replace() :: :replace
     def replace, do: :replace
-
   end
 
   @doc """
@@ -792,8 +792,10 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
   Requirement: `recommended`
   Examples: `0.85`, `0.95`, `1.0`
   """
-  @spec process_mining_conformance_repaired_fitness() :: :"process.mining.conformance.repaired_fitness"
-  def process_mining_conformance_repaired_fitness, do: :"process.mining.conformance.repaired_fitness"
+  @spec process_mining_conformance_repaired_fitness() ::
+          :"process.mining.conformance.repaired_fitness"
+  def process_mining_conformance_repaired_fitness,
+    do: :"process.mining.conformance.repaired_fitness"
 
   @doc """
   Overall conformance fitness score measuring how well event traces follow the process model. Range [0.0, 1.0].
@@ -816,8 +818,10 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
   Requirement: `recommended`
   Examples: `0`, `5`, `42`
   """
-  @spec process_mining_conformance_violation_count() :: :"process.mining.conformance.violation_count"
-  def process_mining_conformance_violation_count, do: :"process.mining.conformance.violation_count"
+  @spec process_mining_conformance_violation_count() ::
+          :"process.mining.conformance.violation_count"
+  def process_mining_conformance_violation_count,
+    do: :"process.mining.conformance.violation_count"
 
   @doc """
   The visualization technique used for conformance checking results.
@@ -828,8 +832,10 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
   Requirement: `recommended`
   Examples: `token_replay`, `alignment`
   """
-  @spec process_mining_conformance_visualization_type() :: :"process.mining.conformance.visualization_type"
-  def process_mining_conformance_visualization_type, do: :"process.mining.conformance.visualization_type"
+  @spec process_mining_conformance_visualization_type() ::
+          :"process.mining.conformance.visualization_type"
+  def process_mining_conformance_visualization_type,
+    do: :"process.mining.conformance.visualization_type"
 
   @doc """
   Enumerated values for `process.mining.conformance.visualization_type`.
@@ -842,11 +848,11 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
   | `anti_alignment` | `"anti_alignment"` | anti_alignment |
   """
   @spec process_mining_conformance_visualization_type_values() :: %{
-    token_replay: :token_replay,
-    alignment: :alignment,
-    footprint: :footprint,
-    anti_alignment: :anti_alignment
-  }
+          token_replay: :token_replay,
+          alignment: :alignment,
+          footprint: :footprint,
+          anti_alignment: :anti_alignment
+        }
   def process_mining_conformance_visualization_type_values do
     %{
       token_replay: :token_replay,
@@ -876,7 +882,6 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
     @doc "anti_alignment"
     @spec anti_alignment() :: :anti_alignment
     def anti_alignment, do: :anti_alignment
-
   end
 
   @doc """
@@ -950,11 +955,11 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
   | `move_log` | `"move_log"` | move_log |
   """
   @spec process_mining_deviation_type_values() :: %{
-    skip: :skip,
-    insert: :insert,
-    move_model: :move_model,
-    move_log: :move_log
-  }
+          skip: :skip,
+          insert: :insert,
+          move_model: :move_model,
+          move_log: :move_log
+        }
   def process_mining_deviation_type_values do
     %{
       skip: :skip,
@@ -984,7 +989,6 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
     @doc "move_log"
     @spec move_log() :: :move_log
     def move_log, do: :move_log
-
   end
 
   @doc """
@@ -1032,8 +1036,10 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
   Requirement: `recommended`
   Examples: `500`, `5000`, `30000`
   """
-  @spec process_mining_drift_correction_duration_ms() :: :"process.mining.drift.correction.duration_ms"
-  def process_mining_drift_correction_duration_ms, do: :"process.mining.drift.correction.duration_ms"
+  @spec process_mining_drift_correction_duration_ms() ::
+          :"process.mining.drift.correction.duration_ms"
+  def process_mining_drift_correction_duration_ms,
+    do: :"process.mining.drift.correction.duration_ms"
 
   @doc """
   The type of correction applied to address the detected process drift.
@@ -1058,11 +1064,11 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
   | `incremental_update` | `"incremental_update"` | incremental_update |
   """
   @spec process_mining_drift_correction_type_values() :: %{
-    retrain: :retrain,
-    threshold_adjust: :threshold_adjust,
-    model_swap: :model_swap,
-    incremental_update: :incremental_update
-  }
+          retrain: :retrain,
+          threshold_adjust: :threshold_adjust,
+          model_swap: :model_swap,
+          incremental_update: :incremental_update
+        }
   def process_mining_drift_correction_type_values do
     %{
       retrain: :retrain,
@@ -1092,7 +1098,6 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
     @doc "incremental_update"
     @spec incremental_update() :: :incremental_update
     def incremental_update, do: :incremental_update
-
   end
 
   @doc """
@@ -1130,11 +1135,11 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
   | `incremental` | `"incremental"` | incremental |
   """
   @spec process_mining_drift_severity_values() :: %{
-    none: :none,
-    gradual: :gradual,
-    sudden: :sudden,
-    incremental: :incremental
-  }
+          none: :none,
+          gradual: :gradual,
+          sudden: :sudden,
+          incremental: :incremental
+        }
   def process_mining_drift_severity_values do
     %{
       none: :none,
@@ -1164,7 +1169,6 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
     @doc "incremental"
     @spec incremental() :: :incremental
     def incremental, do: :incremental
-
   end
 
   @doc """
@@ -1212,8 +1216,10 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
   Requirement: `recommended`
   Examples: `0.12`, `0.35`
   """
-  @spec process_mining_enhancement_improvement_rate() :: :"process.mining.enhancement.improvement_rate"
-  def process_mining_enhancement_improvement_rate, do: :"process.mining.enhancement.improvement_rate"
+  @spec process_mining_enhancement_improvement_rate() ::
+          :"process.mining.enhancement.improvement_rate"
+  def process_mining_enhancement_improvement_rate,
+    do: :"process.mining.enhancement.improvement_rate"
 
   @doc """
   Unique identifier of the base process model being enhanced.
@@ -1250,11 +1256,11 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
   | `decision` | `"decision"` | decision |
   """
   @spec process_mining_enhancement_perspective_values() :: %{
-    performance: :performance,
-    conformance: :conformance,
-    organizational: :organizational,
-    decision: :decision
-  }
+          performance: :performance,
+          conformance: :conformance,
+          organizational: :organizational,
+          decision: :decision
+        }
   def process_mining_enhancement_perspective_values do
     %{
       performance: :performance,
@@ -1284,7 +1290,6 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
     @doc "decision"
     @spec decision() :: :decision
     def decision, do: :decision
-
   end
 
   @doc """
@@ -1322,11 +1327,11 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
   | `social_network` | `"social_network"` | social_network |
   """
   @spec process_mining_enhancement_type_values() :: %{
-    performance: :performance,
-    conformance: :conformance,
-    organizational: :organizational,
-    social_network: :social_network
-  }
+          performance: :performance,
+          conformance: :conformance,
+          organizational: :organizational,
+          social_network: :social_network
+        }
   def process_mining_enhancement_type_values do
     %{
       performance: :performance,
@@ -1356,7 +1361,6 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
     @doc "social_network"
     @spec social_network() :: :social_network
     def social_network, do: :social_network
-
   end
 
   @doc """
@@ -1368,8 +1372,10 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
   Requirement: `recommended`
   Examples: `100`, `5000`, `100000`
   """
-  @spec process_mining_event_abstraction_input_count() :: :"process.mining.event.abstraction_input_count"
-  def process_mining_event_abstraction_input_count, do: :"process.mining.event.abstraction_input_count"
+  @spec process_mining_event_abstraction_input_count() ::
+          :"process.mining.event.abstraction_input_count"
+  def process_mining_event_abstraction_input_count,
+    do: :"process.mining.event.abstraction_input_count"
 
   @doc """
   Abstraction level of the process mining event.
@@ -1394,11 +1400,11 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
   | `process` | `"process"` | process |
   """
   @spec process_mining_event_abstraction_level_values() :: %{
-    raw: :raw,
-    activity: :activity,
-    case: :case,
-    process: :process
-  }
+          raw: :raw,
+          activity: :activity,
+          case: :case,
+          process: :process
+        }
   def process_mining_event_abstraction_level_values do
     %{
       raw: :raw,
@@ -1428,7 +1434,6 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
     @doc "process"
     @spec process() :: :process
     def process, do: :process
-
   end
 
   @doc """
@@ -1440,8 +1445,10 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
   Requirement: `recommended`
   Examples: `0`, `5`, `20`
   """
-  @spec process_mining_event_abstraction_mapping_rules() :: :"process.mining.event.abstraction_mapping_rules"
-  def process_mining_event_abstraction_mapping_rules, do: :"process.mining.event.abstraction_mapping_rules"
+  @spec process_mining_event_abstraction_mapping_rules() ::
+          :"process.mining.event.abstraction_mapping_rules"
+  def process_mining_event_abstraction_mapping_rules,
+    do: :"process.mining.event.abstraction_mapping_rules"
 
   @doc """
   Number of abstracted events after abstraction.
@@ -1452,8 +1459,10 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
   Requirement: `recommended`
   Examples: `50`, `2000`, `80000`
   """
-  @spec process_mining_event_abstraction_output_count() :: :"process.mining.event.abstraction_output_count"
-  def process_mining_event_abstraction_output_count, do: :"process.mining.event.abstraction_output_count"
+  @spec process_mining_event_abstraction_output_count() ::
+          :"process.mining.event.abstraction_output_count"
+  def process_mining_event_abstraction_output_count,
+    do: :"process.mining.event.abstraction_output_count"
 
   @doc """
   Sequence number of this event within the trace (0-indexed).
@@ -1536,8 +1545,10 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
   Requirement: `recommended`
   Examples: `proc-root-001`, `proc-parent-42`
   """
-  @spec process_mining_hierarchy_parent_process_id() :: :"process.mining.hierarchy.parent_process_id"
-  def process_mining_hierarchy_parent_process_id, do: :"process.mining.hierarchy.parent_process_id"
+  @spec process_mining_hierarchy_parent_process_id() ::
+          :"process.mining.hierarchy.parent_process_id"
+  def process_mining_hierarchy_parent_process_id,
+    do: :"process.mining.hierarchy.parent_process_id"
 
   @doc """
   Unique identifier of the event log being processed.
@@ -1610,11 +1621,11 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
   | `declare` | `"declare"` | declare |
   """
   @spec process_mining_model_type_values() :: %{
-    petri_net: :petri_net,
-    bpmn: :bpmn,
-    dfg: :dfg,
-    declare: :declare
-  }
+          petri_net: :petri_net,
+          bpmn: :bpmn,
+          dfg: :dfg,
+          declare: :declare
+        }
   def process_mining_model_type_values do
     %{
       petri_net: :petri_net,
@@ -1644,7 +1655,6 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
     @doc "declare"
     @spec declare() :: :declare
     def declare, do: :declare
-
   end
 
   @doc """
@@ -1668,7 +1678,8 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
   Requirement: `recommended`
   Examples: `10`, `25`, `60`
   """
-  @spec process_mining_petri_net_transition_count() :: :"process.mining.petri_net.transition_count"
+  @spec process_mining_petri_net_transition_count() ::
+          :"process.mining.petri_net.transition_count"
   def process_mining_petri_net_transition_count, do: :"process.mining.petri_net.transition_count"
 
   @doc """
@@ -1716,8 +1727,10 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
   Requirement: `recommended`
   Examples: `0.82`, `0.95`
   """
-  @spec process_mining_replay_comparison_baseline_fitness() :: :"process.mining.replay.comparison.baseline_fitness"
-  def process_mining_replay_comparison_baseline_fitness, do: :"process.mining.replay.comparison.baseline_fitness"
+  @spec process_mining_replay_comparison_baseline_fitness() ::
+          :"process.mining.replay.comparison.baseline_fitness"
+  def process_mining_replay_comparison_baseline_fitness,
+    do: :"process.mining.replay.comparison.baseline_fitness"
 
   @doc """
   Difference (target - baseline) in fitness scores.
@@ -1740,8 +1753,10 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
   Requirement: `recommended`
   Examples: `0.88`, `0.97`
   """
-  @spec process_mining_replay_comparison_target_fitness() :: :"process.mining.replay.comparison.target_fitness"
-  def process_mining_replay_comparison_target_fitness, do: :"process.mining.replay.comparison.target_fitness"
+  @spec process_mining_replay_comparison_target_fitness() ::
+          :"process.mining.replay.comparison.target_fitness"
+  def process_mining_replay_comparison_target_fitness,
+    do: :"process.mining.replay.comparison.target_fitness"
 
   @doc """
   Unique identifier for the replay comparison run.
@@ -1776,7 +1791,8 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
   Requirement: `recommended`
   Examples: `12`, `48`, `200`
   """
-  @spec process_mining_replay_enabled_transitions() :: :"process.mining.replay.enabled_transitions"
+  @spec process_mining_replay_enabled_transitions() ::
+          :"process.mining.replay.enabled_transitions"
   def process_mining_replay_enabled_transitions, do: :"process.mining.replay.enabled_transitions"
 
   @doc """
@@ -1898,12 +1914,12 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
   | `compliance_violation` | `"compliance_violation"` | compliance_violation |
   """
   @spec process_mining_root_cause_type_values() :: %{
-    data_quality: :data_quality,
-    model_drift: :model_drift,
-    process_change: :process_change,
-    resource_bottleneck: :resource_bottleneck,
-    compliance_violation: :compliance_violation
-  }
+          data_quality: :data_quality,
+          model_drift: :model_drift,
+          process_change: :process_change,
+          resource_bottleneck: :resource_bottleneck,
+          compliance_violation: :compliance_violation
+        }
   def process_mining_root_cause_type_values do
     %{
       data_quality: :data_quality,
@@ -1938,7 +1954,6 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
     @doc "compliance_violation"
     @spec compliance_violation() :: :compliance_violation
     def compliance_violation, do: :compliance_violation
-
   end
 
   @doc """
@@ -1986,8 +2001,10 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
   Requirement: `recommended`
   Examples: `0.25`, `0.6`, `0.9`
   """
-  @spec process_mining_social_network_centrality_max() :: :"process.mining.social_network.centrality_max"
-  def process_mining_social_network_centrality_max, do: :"process.mining.social_network.centrality_max"
+  @spec process_mining_social_network_centrality_max() ::
+          :"process.mining.social_network.centrality_max"
+  def process_mining_social_network_centrality_max,
+    do: :"process.mining.social_network.centrality_max"
 
   @doc """
   Density of the social network graph derived from the process log, range [0.0, 1.0].
@@ -2010,8 +2027,10 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
   Requirement: `recommended`
   Examples: `10`, `50`, `200`
   """
-  @spec process_mining_social_network_handover_count() :: :"process.mining.social_network.handover_count"
-  def process_mining_social_network_handover_count, do: :"process.mining.social_network.handover_count"
+  @spec process_mining_social_network_handover_count() ::
+          :"process.mining.social_network.handover_count"
+  def process_mining_social_network_handover_count,
+    do: :"process.mining.social_network.handover_count"
 
   @doc """
   Number of nodes (resources/roles) in the social network.
@@ -2034,8 +2053,10 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
   Requirement: `recommended`
   Examples: `100.0`, `2500.0`, `50000.0`
   """
-  @spec process_mining_streaming_events_per_second() :: :"process.mining.streaming.events_per_second"
-  def process_mining_streaming_events_per_second, do: :"process.mining.streaming.events_per_second"
+  @spec process_mining_streaming_events_per_second() ::
+          :"process.mining.streaming.events_per_second"
+  def process_mining_streaming_events_per_second,
+    do: :"process.mining.streaming.events_per_second"
 
   @doc """
   Current lag in milliseconds between event stream and mining output.
@@ -2082,8 +2103,10 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
   Requirement: `recommended`
   Examples: `86400000`, `604800000`
   """
-  @spec process_mining_temporal_seasonality_period_ms() :: :"process.mining.temporal.seasonality_period_ms"
-  def process_mining_temporal_seasonality_period_ms, do: :"process.mining.temporal.seasonality_period_ms"
+  @spec process_mining_temporal_seasonality_period_ms() ::
+          :"process.mining.temporal.seasonality_period_ms"
+  def process_mining_temporal_seasonality_period_ms,
+    do: :"process.mining.temporal.seasonality_period_ms"
 
   @doc """
   Slope of the temporal trend in the process — positive = accelerating, negative = decelerating.
@@ -2192,5 +2215,4 @@ defmodule OpenTelemetry.SemConv.Incubating.ProcessAttributes do
   """
   @spec process_pid() :: :"process.pid"
   def process_pid, do: :"process.pid"
-
 end

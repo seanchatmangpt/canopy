@@ -87,7 +87,15 @@ defmodule Canopy.Autonomic.HeartbeatOntologyIntegrationTest do
       assert enriched.constraints.timeout_ms > 0
       assert is_integer(enriched.constraints.budget)
       assert enriched.constraints.budget > 0
-      assert enriched.constraints.tier in ["critical", "high", "normal", "low", "batch", "dormant"] or
+
+      assert enriched.constraints.tier in [
+               "critical",
+               "high",
+               "normal",
+               "low",
+               "batch",
+               "dormant"
+             ] or
                is_atom(enriched.constraints.tier)
     end
 
@@ -197,9 +205,12 @@ defmodule Canopy.Autonomic.HeartbeatOntologyIntegrationTest do
     test "enrich_agents_batch_priority_ordered: agents ordered by heartbeat priority" do
       # Arrange
       agent_types = [
-        :adaptation_agent,  # Low priority
-        :health_agent,      # High priority
-        :learning_agent     # Medium priority
+        # Low priority
+        :adaptation_agent,
+        # High priority
+        :health_agent,
+        # Medium priority
+        :learning_agent
       ]
 
       # Act

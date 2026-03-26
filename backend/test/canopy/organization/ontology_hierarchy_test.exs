@@ -92,7 +92,12 @@ defmodule Canopy.Organization.OntologyHierarchyTest do
       ]
 
       # Test the filtering logic directly
-      filtered = Enum.filter(results, &String.contains?(Map.get(&1, "attributes", %{})["role"] || "", "engineer"))
+      filtered =
+        Enum.filter(
+          results,
+          &String.contains?(Map.get(&1, "attributes", %{})["role"] || "", "engineer")
+        )
+
       assert length(filtered) == 2
     end
   end
@@ -111,7 +116,10 @@ defmodule Canopy.Organization.OntologyHierarchyTest do
       ]
 
       filtered =
-        Enum.filter(results, &String.contains?(Map.get(&1, "attributes", %{})["department"] || "", "eng-dept"))
+        Enum.filter(
+          results,
+          &String.contains?(Map.get(&1, "attributes", %{})["department"] || "", "eng-dept")
+        )
 
       assert length(filtered) == 2
     end
@@ -123,7 +131,10 @@ defmodule Canopy.Organization.OntologyHierarchyTest do
       ]
 
       filtered =
-        Enum.filter(results, &String.contains?(Map.get(&1, "attributes", %{})["department"] || "", "sales-dept"))
+        Enum.filter(
+          results,
+          &String.contains?(Map.get(&1, "attributes", %{})["department"] || "", "sales-dept")
+        )
 
       assert length(filtered) == 0
     end
@@ -281,7 +292,8 @@ defmodule Canopy.Organization.OntologyHierarchyTest do
       max_depth = Keyword.get(opts, :max_depth, 10)
       assert max_depth == 5
       assert max_depth > 0
-      assert max_depth < 1000  # Bounded
+      # Bounded
+      assert max_depth < 1000
     end
 
     test "traversal depth is bounded" do
@@ -295,14 +307,21 @@ defmodule Canopy.Organization.OntologyHierarchyTest do
 
       # Chain should have at most 4 levels
       chain_size = 4
-      assert chain_size <= 10  # Less than max_depth
+      # Less than max_depth
+      assert chain_size <= 10
     end
   end
 
   describe "error handling and robustness" do
     test "find_by_role handles empty results" do
       results = []
-      filtered = Enum.filter(results, &String.contains?(Map.get(&1, "attributes", %{})["role"] || "", "engineer"))
+
+      filtered =
+        Enum.filter(
+          results,
+          &String.contains?(Map.get(&1, "attributes", %{})["role"] || "", "engineer")
+        )
+
       assert length(filtered) == 0
     end
 
@@ -436,9 +455,10 @@ defmodule Canopy.Organization.OntologyHierarchyTest do
         mock_person("p3", "Carol", "engineer")
       ]
 
-      engineers = Enum.filter(available_people, fn p ->
-        Map.get(p["attributes"], "role") == role
-      end)
+      engineers =
+        Enum.filter(available_people, fn p ->
+          Map.get(p["attributes"], "role") == role
+        end)
 
       assert length(engineers) == 2
     end
@@ -452,9 +472,10 @@ defmodule Canopy.Organization.OntologyHierarchyTest do
         mock_person("p3", "Carol", nil, nil, "engineering")
       ]
 
-      dept_people = Enum.filter(available_people, fn p ->
-        Map.get(p["attributes"], "department") == dept
-      end)
+      dept_people =
+        Enum.filter(available_people, fn p ->
+          Map.get(p["attributes"], "department") == dept
+        end)
 
       assert length(dept_people) == 2
     end

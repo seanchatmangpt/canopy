@@ -34,12 +34,12 @@ defmodule OpenTelemetry.SemConv.Incubating.BusinessOsAttributes do
   | `export` | `"export"` | export |
   """
   @spec business_os_audit_event_type_values() :: %{
-    create: :create,
-    update: :update,
-    delete: :delete,
-    access: :access,
-    export: :export
-  }
+          create: :create,
+          update: :update,
+          delete: :delete,
+          access: :access,
+          export: :export
+        }
   def business_os_audit_event_type_values do
     %{
       create: :create,
@@ -74,7 +74,6 @@ defmodule OpenTelemetry.SemConv.Incubating.BusinessOsAttributes do
     @doc "export"
     @spec export() :: :export
     def export, do: :export
-
   end
 
   @doc """
@@ -100,11 +99,11 @@ defmodule OpenTelemetry.SemConv.Incubating.BusinessOsAttributes do
   | `sox` | `"SOX"` | SOX |
   """
   @spec business_os_compliance_framework_values() :: %{
-    soc2: :SOC2,
-    hipaa: :HIPAA,
-    gdpr: :GDPR,
-    sox: :SOX
-  }
+          soc2: :SOC2,
+          hipaa: :HIPAA,
+          gdpr: :GDPR,
+          sox: :SOX
+        }
   def business_os_compliance_framework_values do
     %{
       soc2: :SOC2,
@@ -134,7 +133,6 @@ defmodule OpenTelemetry.SemConv.Incubating.BusinessOsAttributes do
     @doc "SOX"
     @spec sox() :: :SOX
     def sox, do: :SOX
-
   end
 
   @doc """
@@ -160,11 +158,11 @@ defmodule OpenTelemetry.SemConv.Incubating.BusinessOsAttributes do
   | `realtime_stream` | `"realtime_stream"` | realtime_stream |
   """
   @spec business_os_integration_type_values() :: %{
-    webhook: :webhook,
-    api_pull: :api_pull,
-    file_sync: :file_sync,
-    realtime_stream: :realtime_stream
-  }
+          webhook: :webhook,
+          api_pull: :api_pull,
+          file_sync: :file_sync,
+          realtime_stream: :realtime_stream
+        }
   def business_os_integration_type_values do
     %{
       webhook: :webhook,
@@ -194,7 +192,5 @@ defmodule OpenTelemetry.SemConv.Incubating.BusinessOsAttributes do
     @doc "realtime_stream"
     @spec realtime_stream() :: :realtime_stream
     def realtime_stream, do: :realtime_stream
-
   end
-
 end

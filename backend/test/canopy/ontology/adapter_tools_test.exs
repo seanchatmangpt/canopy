@@ -189,7 +189,8 @@ defmodule Canopy.Ontology.AdapterToolsTest do
       {:ok, _tools, m2} = AdapterTools.list_adapter_tools("unknown-adapter")
 
       assert m1.ontology_id == "osa-agents"
-      assert m2.ontology_id == "chatman-agents"  # Default
+      # Default
+      assert m2.ontology_id == "chatman-agents"
     end
 
     test "mcp adapter maps to mcp-agents ontology" do

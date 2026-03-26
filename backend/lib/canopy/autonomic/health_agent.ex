@@ -88,7 +88,8 @@ defmodule Canopy.Autonomic.HealthAgent do
 
     try do
       # Simulate health check (would be real HTTP in production)
-      :timer.sleep(10)  # Simulate network latency
+      # Simulate network latency
+      :timer.sleep(10)
 
       latency = System.monotonic_time(:millisecond) - start
       error_rate = :rand.uniform()
@@ -108,6 +109,7 @@ defmodule Canopy.Autonomic.HealthAgent do
         Logger.error(
           "[HealthAgent] Error polling #{inspect(system_name)}: #{Exception.message(e)}"
         )
+
         {system_name, %{status: "unreachable", error: Exception.message(e), anomaly: true}}
     end
   end

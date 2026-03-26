@@ -72,7 +72,8 @@ defmodule Canopy.JTBD.Scenarios.Scenario12Test do
 
     test "cross_system_handoff validates source_agent is non-empty" do
       handoff_request = %{
-        "source_agent" => "",  # Invalid: empty
+        # Invalid: empty
+        "source_agent" => "",
         "target_agent" => "businessos-recovery-agent",
         "payload" => %{}
       }
@@ -84,7 +85,8 @@ defmodule Canopy.JTBD.Scenarios.Scenario12Test do
     test "cross_system_handoff validates target_agent is non-empty" do
       handoff_request = %{
         "source_agent" => "osa-healing-agent",
-        "target_agent" => "",  # Invalid: empty
+        # Invalid: empty
+        "target_agent" => "",
         "payload" => %{}
       }
 
@@ -96,7 +98,8 @@ defmodule Canopy.JTBD.Scenarios.Scenario12Test do
       handoff_request = %{
         "source_agent" => "osa-healing-agent",
         "target_agent" => "businessos-recovery-agent",
-        "payload" => "not a map"  # Invalid: should be map
+        # Invalid: should be map
+        "payload" => "not a map"
       }
 
       assert {:error, :invalid_payload} =
@@ -173,8 +176,10 @@ defmodule Canopy.JTBD.Scenarios.Scenario12Test do
       }
 
       start_ms = System.monotonic_time(:millisecond)
+
       {:ok, result} =
         Canopy.JTBD.Scenarios.Scenario12.execute(handoff_request, timeout_ms: 10_000)
+
       end_ms = System.monotonic_time(:millisecond)
 
       actual_latency = end_ms - start_ms

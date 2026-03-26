@@ -29,13 +29,28 @@ defmodule CanopyWeb.IssueController do
     query = if assignee_id, do: where(query, [i], i.assignee_id == ^assignee_id), else: query
     query = if goal_id, do: where(query, [i], i.goal_id == ^goal_id), else: query
 
-    count_query = from i in Issue
-    count_query = if workspace_id, do: where(count_query, [i], i.workspace_id == ^workspace_id), else: count_query
+    count_query = from(i in Issue)
+
+    count_query =
+      if workspace_id,
+        do: where(count_query, [i], i.workspace_id == ^workspace_id),
+        else: count_query
+
     count_query = if status, do: where(count_query, [i], i.status == ^status), else: count_query
-    count_query = if priority, do: where(count_query, [i], i.priority == ^priority), else: count_query
-    count_query = if project_id, do: where(count_query, [i], i.project_id == ^project_id), else: count_query
-    count_query = if assignee_id, do: where(count_query, [i], i.assignee_id == ^assignee_id), else: count_query
-    count_query = if goal_id, do: where(count_query, [i], i.goal_id == ^goal_id), else: count_query
+
+    count_query =
+      if priority, do: where(count_query, [i], i.priority == ^priority), else: count_query
+
+    count_query =
+      if project_id, do: where(count_query, [i], i.project_id == ^project_id), else: count_query
+
+    count_query =
+      if assignee_id,
+        do: where(count_query, [i], i.assignee_id == ^assignee_id),
+        else: count_query
+
+    count_query =
+      if goal_id, do: where(count_query, [i], i.goal_id == ^goal_id), else: count_query
 
     issues = Repo.all(query) |> Repo.preload([:labels, :assignee, :comments])
     total = Repo.aggregate(count_query, :count)
@@ -196,8 +211,11 @@ defmodule CanopyWeb.IssueController do
     with %Issue{} <- Repo.get(Issue, issue_id),
          %Label{} <- Repo.get(Label, label_id) do
       case Repo.insert(%IssueLabel{issue_id: issue_id, label_id: label_id}, on_conflict: :nothing) do
-        {:ok, _} -> json(conn, %{ok: true})
-        {:error, cs} -> conn |> put_status(422) |> json(%{error: "failed", details: format_errors(cs)})
+        {:ok, _} ->
+          json(conn, %{ok: true})
+
+        {:error, cs} ->
+          conn |> put_status(422) |> json(%{error: "failed", details: format_errors(cs)})
       end
     else
       nil -> conn |> put_status(404) |> json(%{error: "not_found"})

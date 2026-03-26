@@ -71,16 +71,26 @@ defmodule Canopy.Heartbeat do
         agent_name: agent.name
       })
 
-      persist_activity_event(agent, "run.started", "Agent #{agent.name} started a heartbeat run", %{session_id: session.id})
+      persist_activity_event(
+        agent,
+        "run.started",
+        "Agent #{agent.name} started a heartbeat run",
+        %{session_id: session.id}
+      )
 
       if issue_id do
         Repo.transaction(fn ->
-          case Repo.one(from i in Canopy.Schemas.Issue, where: i.id == ^issue_id, lock: "FOR UPDATE") do
+          case Repo.one(
+                 from i in Canopy.Schemas.Issue, where: i.id == ^issue_id, lock: "FOR UPDATE"
+               ) do
             nil ->
               Logger.warning("[Heartbeat] Issue #{issue_id} not found, skipping checkout")
 
             %{checked_out_by: existing} when not is_nil(existing) ->
-              Logger.warning("[Heartbeat] Issue #{issue_id} already checked out by #{existing}, skipping")
+              Logger.warning(
+                "[Heartbeat] Issue #{issue_id} already checked out by #{existing}, skipping"
+              )
+
               Repo.rollback(:already_checked_out)
 
             issue ->
@@ -106,32 +116,56 @@ defmodule Canopy.Heartbeat do
         "url" => agent.config["url"]
       }
 
-      Logger.info("[Heartbeat] Executing agent #{agent.name} (#{agent.id}) via #{agent.adapter} in #{workspace.path}")
+      Logger.info(
+        "[Heartbeat] Executing agent #{agent.name} (#{agent.id}) via #{agent.adapter} in #{workspace.path}"
+      )
 
       totals =
         try do
           execute_and_stream(adapter_mod, params, session, agent)
         rescue
           e ->
-            Logger.error("[Heartbeat] FATAL: #{Exception.message(e)}\n#{Exception.format_stacktrace(__STACKTRACE__)}")
+            Logger.error(
+              "[Heartbeat] FATAL: #{Exception.message(e)}\n#{Exception.format_stacktrace(__STACKTRACE__)}"
+            )
+
             fail_session!(session, Exception.message(e))
             agent |> change(status: "error") |> Repo.update!()
 
             if issue_id do
               Repo.transaction(fn ->
-                case Repo.one(from i in Canopy.Schemas.Issue, where: i.id == ^issue_id, lock: "FOR UPDATE") do
+                case Repo.one(
+                       from i in Canopy.Schemas.Issue,
+                         where: i.id == ^issue_id,
+                         lock: "FOR UPDATE"
+                     ) do
                   nil ->
                     :ok
 
                   issue ->
                     issue |> change(status: "backlog", checked_out_by: nil) |> Repo.update!()
-                    Logger.info("[Heartbeat] Rolled back issue #{issue_id} to backlog after failure")
+
+                    Logger.info(
+                      "[Heartbeat] Rolled back issue #{issue_id} to backlog after failure"
+                    )
                 end
               end)
             end
 
-            broadcast_workspace(agent, %{event: "run.failed", agent_id: agent.id, session_id: session.id, error: Exception.message(e)})
-            persist_activity_event(agent, "run.failed", "Agent #{agent.name} run failed: #{Exception.message(e)}", %{session_id: session.id})
+            broadcast_workspace(agent, %{
+              event: "run.failed",
+              agent_id: agent.id,
+              session_id: session.id,
+              error: Exception.message(e)
+            })
+
+            persist_activity_event(
+              agent,
+              "run.failed",
+              "Agent #{agent.name} run failed: #{Exception.message(e)}",
+              %{session_id: session.id}
+            )
+
             raise e
         end
 
@@ -162,7 +196,9 @@ defmodule Canopy.Heartbeat do
                 Logger.info("[Heartbeat] Created WorkProduct #{wp.id} for issue #{issue_id}")
 
               {:error, changeset} ->
-                Logger.warning("[Heartbeat] Failed to create WorkProduct for issue #{issue_id}: #{inspect(changeset.errors)}")
+                Logger.warning(
+                  "[Heartbeat] Failed to create WorkProduct for issue #{issue_id}: #{inspect(changeset.errors)}"
+                )
             end
         end
       end
@@ -189,7 +225,12 @@ defmodule Canopy.Heartbeat do
         cost_cents: totals.cost
       })
 
-      persist_activity_event(agent, "run.completed", "Agent #{agent.name} completed run (cost: #{totals.cost}\u00A2)", %{session_id: session.id, cost_cents: totals.cost})
+      persist_activity_event(
+        agent,
+        "run.completed",
+        "Agent #{agent.name} completed run (cost: #{totals.cost}\u00A2)",
+        %{session_id: session.id, cost_cents: totals.cost}
+      )
 
       {:ok, session.id}
     else
@@ -241,8 +282,11 @@ defmodule Canopy.Heartbeat do
   defp resolve_workspace(agent) do
     workspace_path =
       case Repo.get(Workspace, agent.workspace_id) do
-        %Workspace{path: path} when is_binary(path) and path != "" -> path
-        _ -> raise "No workspace path found for agent #{agent.id} (workspace_id: #{inspect(agent.workspace_id)}). Cannot execute without a valid workspace."
+        %Workspace{path: path} when is_binary(path) and path != "" ->
+          path
+
+        _ ->
+          raise "No workspace path found for agent #{agent.id} (workspace_id: #{inspect(agent.workspace_id)}). Cannot execute without a valid workspace."
       end
 
     Logger.info("[Heartbeat] Resolved workspace path: #{workspace_path} for agent #{agent.id}")
@@ -251,9 +295,14 @@ defmodule Canopy.Heartbeat do
       %{path: workspace_path, strategy: :shared}
     else
       case Canopy.ExecutionWorkspace.create(workspace_path, strategy: :worktree) do
-        {:ok, ws} -> ws
+        {:ok, ws} ->
+          ws
+
         {:error, reason} ->
-          Logger.warning("[Heartbeat] Worktree creation failed (#{inspect(reason)}), using shared workspace")
+          Logger.warning(
+            "[Heartbeat] Worktree creation failed (#{inspect(reason)}), using shared workspace"
+          )
+
           %{path: workspace_path, strategy: :shared}
       end
     end
@@ -422,7 +471,9 @@ defmodule Canopy.Heartbeat do
 
       case Repo.insert(changeset) do
         {:ok, ocpm_event} ->
-          Logger.debug("[Heartbeat] Created OCPM event: #{ocpm_event.activity} for case #{case_id}")
+          Logger.debug(
+            "[Heartbeat] Created OCPM event: #{ocpm_event.activity} for case #{case_id}"
+          )
 
           # Broadcast OCPM event for process mining consumption
           Canopy.EventBus.broadcast(
@@ -482,7 +533,8 @@ defmodule Canopy.Heartbeat do
         # Include structured attributes, exclude large text blobs
         is_binary(k) and
           not String.contains?(k, ["content", "message", "text", "output"]) and
-          (is_number(elem({k, data}, 1)) or is_binary(elem({k, data}, 1)) or is_boolean(elem({k, data}, 1)))
+          (is_number(elem({k, data}, 1)) or is_binary(elem({k, data}, 1)) or
+             is_boolean(elem({k, data}, 1)))
       end)
       |> Map.new()
 
@@ -498,7 +550,9 @@ defmodule Canopy.Heartbeat do
         :ok
 
       workflows ->
-        Logger.info("[Heartbeat] Found #{length(workflows)} active Temporal workflows for agent #{agent.name}")
+        Logger.info(
+          "[Heartbeat] Found #{length(workflows)} active Temporal workflows for agent #{agent.name}"
+        )
 
         # Process workflow signals (pause, skip_stage, abort)
         Enum.each(workflows, fn workflow ->

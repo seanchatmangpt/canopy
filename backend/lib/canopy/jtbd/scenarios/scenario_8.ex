@@ -90,9 +90,10 @@ defmodule Canopy.JTBD.Scenarios.Scenario8 do
     start_time = System.monotonic_time(:millisecond)
 
     # Use a task with timeout to enforce timeout constraint
-    task = Task.async(fn ->
-      create_deal_with_tracking(deal_params, agent_id, price)
-    end)
+    task =
+      Task.async(fn ->
+        create_deal_with_tracking(deal_params, agent_id, price)
+      end)
 
     case Task.yield(task, timeout_ms) || Task.shutdown(task, 0) do
       {:ok, {:ok, result}} ->
@@ -147,12 +148,12 @@ defmodule Canopy.JTBD.Scenarios.Scenario8 do
 
     # Create deal via DealLifecycle module
     case Canopy.JTBD.DealLifecycle.create_deal(%{
-          customer_id: agent_id,
-          product_id: Map.get(deal_params, "item_name"),
-          quantity: 1,
-          price_per_unit: price,
-          notes: Map.get(deal_params, "description", "")
-        }) do
+           customer_id: agent_id,
+           product_id: Map.get(deal_params, "item_name"),
+           quantity: 1,
+           price_per_unit: price,
+           notes: Map.get(deal_params, "description", "")
+         }) do
       {:ok, deal} ->
         {:ok,
          %{
@@ -202,7 +203,7 @@ defmodule Canopy.JTBD.Scenarios.Scenario8 do
   end
 
   @doc false
-  defp emit_otel_span(deal_id, agent_id, counterparty_agent_id, item_name, price, latency_ms) do
+  defp emit_otel_span(deal_id, agent_id, _counterparty_agent_id, _item_name, price, latency_ms) do
     cid = System.get_env("CHATMANGPT_CORRELATION_ID") || ""
 
     OpenTelemetry.Tracer.with_span "jtbd.a2a.deal.create", %{} do
@@ -212,13 +213,13 @@ defmodule Canopy.JTBD.Scenarios.Scenario8 do
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.step_total", 1)
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.outcome", "success")
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.system", "canopy")
-      OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.wave", 12)
+      OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.wave", "wave12")
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.latency_ms", latency_ms)
-      OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.deal_id", deal_id)
-      OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.agent_id", agent_id)
-      OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.counterparty_agent_id", counterparty_agent_id || "")
-      OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.item_name", item_name)
-      OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.price_usd", price)
+      OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.iteration", 1)
+      OpenTelemetry.Tracer.set_attribute(:"a2a.deal.id", to_string(deal_id))
+      OpenTelemetry.Tracer.set_attribute(:"a2a.agent.id", to_string(agent_id))
+      OpenTelemetry.Tracer.set_attribute(:"a2a.deal.value", price * 1.0)
+      OpenTelemetry.Tracer.set_attribute(:"a2a.deal.currency", "USD")
       OpenTelemetry.Tracer.set_attribute(:"chatmangpt.run.correlation_id", cid)
     end
 

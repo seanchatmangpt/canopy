@@ -19,23 +19,26 @@ defmodule CanopyWeb.HealthcareControllerTest do
   # ── Setup ───────────────────────────────────────────────────────
 
   setup do
-    healthcare_provider = insert_user(%{
-      email: "provider@hospital.com",
-      name: "Dr. Smith",
-      role: "healthcare_provider"
-    })
+    healthcare_provider =
+      insert_user(%{
+        email: "provider@hospital.com",
+        name: "Dr. Smith",
+        role: "healthcare_provider"
+      })
 
-    staff_member = insert_user(%{
-      email: "staff@hospital.com",
-      name: "Nurse Jane",
-      role: "staff"
-    })
+    staff_member =
+      insert_user(%{
+        email: "staff@hospital.com",
+        name: "Nurse Jane",
+        role: "staff"
+      })
 
-    admin_user = insert_user(%{
-      email: "admin@hospital.com",
-      name: "Admin",
-      role: "admin"
-    })
+    admin_user =
+      insert_user(%{
+        email: "admin@hospital.com",
+        name: "Admin",
+        role: "admin"
+      })
 
     {:ok,
      provider: healthcare_provider,
@@ -154,7 +157,10 @@ defmodule CanopyWeb.HealthcareControllerTest do
   # ── Test: Verify Consent ────────────────────────────────────────
 
   describe "POST /api/v1/healthcare/consent/verify" do
-    test "verifies consent when patient has granted", %{provider: provider, patient_id: patient_id} do
+    test "verifies consent when patient has granted", %{
+      provider: provider,
+      patient_id: patient_id
+    } do
       conn = build_authenticated_conn(provider)
 
       # First grant consent
@@ -180,7 +186,10 @@ defmodule CanopyWeb.HealthcareControllerTest do
       assert body["message"] == "Consent verified"
     end
 
-    test "denies consent when patient has not granted", %{provider: provider, patient_id: patient_id} do
+    test "denies consent when patient has not granted", %{
+      provider: provider,
+      patient_id: patient_id
+    } do
       conn = build_authenticated_conn(provider)
 
       response =
@@ -471,7 +480,10 @@ defmodule CanopyWeb.HealthcareControllerTest do
       assert body["error"] == "invalid_expiration"
     end
 
-    test "defaults to 365 days if expiration not specified", %{provider: provider, patient_id: patient_id} do
+    test "defaults to 365 days if expiration not specified", %{
+      provider: provider,
+      patient_id: patient_id
+    } do
       conn = build_authenticated_conn(provider)
 
       response =

@@ -182,6 +182,7 @@ defmodule Wave12BoundednessChaosRunner do
     growth_rate = total_memory_growth / checkpoint1.memory_words
 
     IO.puts("Memory Growth Analysis:")
+
     IO.puts(
       "  100→200 iterations: #{inspect(memory_growth_100_to_200)} words " <>
         "(#{Float.round(memory_growth_100_to_200 * 8 / 1_000_000, 3)} MB)"
@@ -206,9 +207,7 @@ defmodule Wave12BoundednessChaosRunner do
 
     status_bounded = if bounded_100 and bounded_200 and bounded_300, do: "✓", else: "✗"
 
-    IO.puts(
-      "#{status_bounded} Boundedness (max=#{@max_entries}):"
-    )
+    IO.puts("#{status_bounded} Boundedness (max=#{@max_entries}):")
 
     IO.puts("    @ iter 100: #{cp1.size} <= #{@max_entries} → #{bounded_100}")
     IO.puts("    @ iter 200: #{cp2.size} <= #{@max_entries} → #{bounded_200}")

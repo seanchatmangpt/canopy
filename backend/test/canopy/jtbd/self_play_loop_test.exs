@@ -17,7 +17,10 @@ defmodule Canopy.JTBD.SelfPlayLoopTest do
 
   test "spawned loop process is supervised by Task.Supervisor" do
     # Verify the JTBD loop supervisor exists
-    assert :canopy_jtbd_loop_supervisor in elem(Supervisor.which_children(:canopy_jtbd_loop_supervisor), 0) ||
+    assert :canopy_jtbd_loop_supervisor in elem(
+             Supervisor.which_children(:canopy_jtbd_loop_supervisor),
+             0
+           ) ||
              is_pid(Process.whereis(:canopy_jtbd_loop_supervisor))
   end
 
@@ -107,6 +110,7 @@ defmodule Canopy.JTBD.SelfPlayLoopTest do
           # Restart not yet complete - verify within retry window
           # Try a few more times with backoff
           retry_recovery = wait_for_restart(loop_pid_before, 1000, 5)
+
           assert retry_recovery == :restarted,
                  "Loop should have restarted within 5 second window (Armstrong: supervisor restarts child on crash)"
 
@@ -149,6 +153,7 @@ defmodule Canopy.JTBD.SelfPlayLoopTest do
         nil ->
           # Spawn may have failed - verify supervisor exists and is healthy
           supervisor_pid = Process.whereis(:canopy_jtbd_loop_supervisor)
+
           assert is_pid(supervisor_pid),
                  "Task.Supervisor should exist even if loop spawn failed"
 

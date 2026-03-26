@@ -143,7 +143,7 @@ defmodule Canopy.JTBD.ConformanceDrift do
 
     conforms =
       Enum.filter(events, fn event ->
-        Enum.any?(model.transitions, &(String.contains?(event.activity, &1)))
+        Enum.any?(model.transitions, &String.contains?(event.activity, &1))
       end)
 
     if model_transitions > 0 do

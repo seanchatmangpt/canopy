@@ -85,7 +85,10 @@ defmodule Canopy.Agents.A2AService do
 
       {:ok, %{status: status, body: resp_body}} ->
         latency_ms = System.monotonic_time(:millisecond) - start_time
-        Logger.warning("[A2AService] Agent #{agent_url} returned #{status}: #{inspect(resp_body)}")
+
+        Logger.warning(
+          "[A2AService] Agent #{agent_url} returned #{status}: #{inspect(resp_body)}"
+        )
 
         # Emit error OTEL span
         tracer = :opentelemetry.get_tracer(:canopy)

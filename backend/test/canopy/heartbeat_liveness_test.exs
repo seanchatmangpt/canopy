@@ -55,7 +55,9 @@ defmodule Canopy.HeartbeatLivenessTest do
           # Attempt to contact OSA with bounded retry count
           Enum.reduce_while(1..max_retries, {:error, :unreachable}, fn attempt, _acc ->
             case attempt_osa_contact() do
-              {:ok, _} = success -> {:halt, success}
+              {:ok, _} = success ->
+                {:halt, success}
+
               {:error, :unreachable} ->
                 if attempt < max_retries do
                   # Retry with backoff
@@ -84,10 +86,11 @@ defmodule Canopy.HeartbeatLivenessTest do
 
       delays =
         for attempt <- 1..5 do
-          backoff = min(
-            trunc(initial_backoff_ms * backoff_multiplier ** (attempt - 1)),
-            max_backoff_ms
-          )
+          backoff =
+            min(
+              trunc(initial_backoff_ms * backoff_multiplier ** (attempt - 1)),
+              max_backoff_ms
+            )
 
           backoff
         end
@@ -180,6 +183,7 @@ defmodule Canopy.HeartbeatLivenessTest do
       # GREEN: Verify heartbeat frequency is configured
 
       assert @heartbeat_interval_ms > 0, "Interval must be positive"
+
       assert @heartbeat_interval_ms > @heartbeat_timeout_ms,
              "Interval should be > timeout (allow time for retries)"
     end

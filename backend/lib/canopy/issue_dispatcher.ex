@@ -44,7 +44,10 @@ defmodule Canopy.IssueDispatcher do
     # the exit signal into a normal error tuple so callers can handle it cleanly
     # instead of crashing with an unhandled exit.
     :exit, reason ->
-      Logger.error("[IssueDispatcher] timeout or process crash: #{inspect(reason)}. See docs/TROUBLESHOOTING.md#genserver-timeout. Tip: check if Canopy.IssueDispatcher is running with 'ps aux | grep beam'")
+      Logger.error(
+        "[IssueDispatcher] timeout or process crash: #{inspect(reason)}. See docs/TROUBLESHOOTING.md#genserver-timeout. Tip: check if Canopy.IssueDispatcher is running with 'ps aux | grep beam'"
+      )
+
       {:error, {:dispatcher_unavailable, reason}}
   end
 
@@ -100,7 +103,8 @@ defmodule Canopy.IssueDispatcher do
   # ── Private ───────────────────────────────────────────────────────────────────
 
   defp do_dispatch(issue_id, agent_id) do
-    with %Issue{} = issue <- Repo.get(Issue, issue_id) |> Repo.preload([:workspace, goal: :project]),
+    with %Issue{} = issue <-
+           Repo.get(Issue, issue_id) |> Repo.preload([:workspace, goal: :project]),
          %Agent{} = agent <- Repo.get(Agent, agent_id) |> Repo.preload(:workspace),
          :ok <- validate_agent(agent),
          {:ok, _checked_out_issue} <- Canopy.Work.checkout_issue(issue_id, agent_id) do
@@ -114,15 +118,24 @@ defmodule Canopy.IssueDispatcher do
         Canopy.Heartbeat.run(agent_id, context: context, issue_id: issue_id)
       end)
 
-      Logger.info("[IssueDispatcher] Dispatched agent #{agent.name} for issue: #{issue.title} with org context")
+      Logger.info(
+        "[IssueDispatcher] Dispatched agent #{agent.name} for issue: #{issue.title} with org context"
+      )
+
       {:ok, :dispatched}
     else
       nil ->
-        Logger.warning("[IssueDispatcher] Issue not found. Tip: verify issue_id exists and was created. See docs/TROUBLESHOOTING.md#issue-not-found")
+        Logger.warning(
+          "[IssueDispatcher] Issue not found. Tip: verify issue_id exists and was created. See docs/TROUBLESHOOTING.md#issue-not-found"
+        )
+
         {:error, :not_found}
 
       {:error, reason} ->
-        Logger.warning("[IssueDispatcher] Skipped dispatch: #{inspect(reason)}. See docs/TROUBLESHOOTING.md#dispatch-failure for common causes")
+        Logger.warning(
+          "[IssueDispatcher] Skipped dispatch: #{inspect(reason)}. See docs/TROUBLESHOOTING.md#dispatch-failure for common causes"
+        )
+
         {:error, reason}
     end
   end
@@ -146,16 +159,26 @@ defmodule Canopy.IssueDispatcher do
         }
 
       {:error, reason} ->
-        Logger.warning("[IssueDispatcher] Could not fetch org context for #{agent_id}: #{inspect(reason)}. Continuing without org awareness.")
+        Logger.warning(
+          "[IssueDispatcher] Could not fetch org context for #{agent_id}: #{inspect(reason)}. Continuing without org awareness."
+        )
+
         %{}
     end
   catch
     :exit, reason ->
-      Logger.warning("[IssueDispatcher] Org context query crashed: #{inspect(reason)}. Continuing without org awareness.")
+      Logger.warning(
+        "[IssueDispatcher] Org context query crashed: #{inspect(reason)}. Continuing without org awareness."
+      )
+
       %{}
   end
 
   defp validate_agent(%Agent{status: status}) when status in ["idle", "active"], do: :ok
-  defp validate_agent(%Agent{status: status}), do: {:error, {:agent_not_ready, "Agent has status '#{status}' — must be 'idle' or 'active'. Check agent configuration and heartbeat schedule. See docs/TROUBLESHOOTING.md#agent-status"}}
 
+  defp validate_agent(%Agent{status: status}),
+    do:
+      {:error,
+       {:agent_not_ready,
+        "Agent has status '#{status}' — must be 'idle' or 'active'. Check agent configuration and heartbeat schedule. See docs/TROUBLESHOOTING.md#agent-status"}}
 end

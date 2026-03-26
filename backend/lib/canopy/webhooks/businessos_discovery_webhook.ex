@@ -43,7 +43,8 @@ defmodule Canopy.Webhooks.BusinessosDiscoveryWebhook do
       when is_binary(model_id) and is_binary(algorithm) and is_integer(activities_count) and
              is_number(fitness_score) do
     with {:ok, _workspace} <- fetch_workspace(workspace_id),
-         {:ok, issue} <- create_or_get_issue(workspace_id, model_id, algorithm, activities_count, fitness_score),
+         {:ok, issue} <-
+           create_or_get_issue(workspace_id, model_id, algorithm, activities_count, fitness_score),
          {:ok, agent} <- fetch_process_mining_agent(workspace_id),
          {:ok, _assigned} <- Canopy.Work.assign_issue(issue, agent.id) do
       Logger.info(
@@ -104,7 +105,10 @@ defmodule Canopy.Webhooks.BusinessosDiscoveryWebhook do
   defp fetch_process_mining_agent(workspace_id) do
     case Repo.get_by(Agent, workspace_id: workspace_id, slug: "process-mining-monitor") do
       nil ->
-        Logger.warning("[BusinessOS Webhook] Agent 'process-mining-monitor' not found in workspace=#{workspace_id}")
+        Logger.warning(
+          "[BusinessOS Webhook] Agent 'process-mining-monitor' not found in workspace=#{workspace_id}"
+        )
+
         {:error, :agent_not_found}
 
       agent ->

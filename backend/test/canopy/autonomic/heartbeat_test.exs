@@ -11,42 +11,48 @@ defmodule Canopy.Autonomic.HeartbeatTest do
     Ecto.Adapters.SQL.Sandbox.mode(Repo, {:shared, self()})
 
     # Create test organization
-    org = Repo.insert!(%Organization{
-      name: "Test Org",
-      slug: "test-org-#{:crypto.strong_rand_bytes(4) |> Base.encode16(case: :lower)}",
-      settings: %{}
-    })
+    org =
+      Repo.insert!(%Organization{
+        name: "Test Org",
+        slug: "test-org-#{:crypto.strong_rand_bytes(4) |> Base.encode16(case: :lower)}",
+        settings: %{}
+      })
 
     # Create test user
-    user = Repo.insert!(%Canopy.Schemas.User{
-      email: "test#{System.unique_integer()}@example.com",
-      name: "Test User"
-    })
+    user =
+      Repo.insert!(%Canopy.Schemas.User{
+        email: "test#{System.unique_integer()}@example.com",
+        name: "Test User"
+      })
 
     # Create test workspace
-    workspace = Repo.insert!(%Canopy.Schemas.Workspace{
-      name: "Test Workspace",
-      owner_id: user.id,
-      organization_id: org.id,
-      path: "/test"
-    })
+    workspace =
+      Repo.insert!(%Canopy.Schemas.Workspace{
+        name: "Test Workspace",
+        owner_id: user.id,
+        organization_id: org.id,
+        path: "/test"
+      })
 
     # Create test agent
-    agent = Repo.insert!(%Agent{
-      workspace_id: workspace.id,
-      slug: "test-agent-#{:crypto.strong_rand_bytes(4) |> Base.encode16(case: :lower)}",
-      name: "Test Agent",
-      role: "test",
-      adapter: "mock",
-      model: "claude-3-haiku",
-      system_prompt: "You are a test agent"
-    })
+    agent =
+      Repo.insert!(%Agent{
+        workspace_id: workspace.id,
+        slug: "test-agent-#{:crypto.strong_rand_bytes(4) |> Base.encode16(case: :lower)}",
+        name: "Test Agent",
+        role: "test",
+        adapter: "mock",
+        model: "claude-3-haiku",
+        system_prompt: "You are a test agent"
+      })
 
     {:ok, org: org, user: user, workspace: workspace, agent: agent}
   end
 
   describe "heartbeat dispatcher" do
-    test "heartbeat_dispatches_6_agents: all 6 autonomic agents receive dispatch signal", %{agent: _agent} do
+    test "heartbeat_dispatches_6_agents: all 6 autonomic agents receive dispatch signal", %{
+      agent: _agent
+    } do
       # Verify that Heartbeat.tick() initiates dispatch to all 6 agents
       dispatch_results = Heartbeat.tick()
 
@@ -126,6 +132,7 @@ defmodule Canopy.Autonomic.HeartbeatTest do
       {_, result_data} = health_result
       # Verify result has budget info
       assert is_map(result_data), "Result should be a map"
+
       assert Map.has_key?(result_data, :budget) or Map.has_key?(result_data, :status),
              "Result should have budget or status info"
     end
@@ -185,6 +192,7 @@ defmodule Canopy.Autonomic.HeartbeatTest do
       {_, result} = health_result
       # Health agent result should contain status
       assert is_map(result), "Health agent result should be a map"
+
       assert Map.has_key?(result, :status) or Map.has_key?(result, :alerts),
              "Health result should have status or alerts"
     end
@@ -211,6 +219,7 @@ defmodule Canopy.Autonomic.HeartbeatTest do
       result = Canopy.Autonomic.HealingAgent.run()
 
       assert is_map(result), "HealingAgent.run should return a map"
+
       assert Map.has_key?(result, :healed_count) or Map.has_key?(result, :status),
              "Result should have healed_count or status"
     end
@@ -230,6 +239,7 @@ defmodule Canopy.Autonomic.HeartbeatTest do
       result = Canopy.Autonomic.HealingAgent.run()
 
       assert is_map(result), "Result should be a map"
+
       assert Map.has_key?(result, :timestamp) or Map.has_key?(result, :status),
              "Result should have timestamp or status for audit"
     end
@@ -240,6 +250,7 @@ defmodule Canopy.Autonomic.HeartbeatTest do
       result = Canopy.Autonomic.DataAgent.run()
 
       assert is_map(result), "DataAgent.run should return a map"
+
       assert Map.has_key?(result, :duplicates_found) or Map.has_key?(result, :status),
              "Result should have duplicates_found or status"
     end
@@ -248,6 +259,7 @@ defmodule Canopy.Autonomic.HeartbeatTest do
       result = Canopy.Autonomic.DataAgent.run()
 
       assert is_map(result), "Result should be a map"
+
       if Map.has_key?(result, :duplicates_found) do
         assert is_integer(result.duplicates_found), "duplicates_found should be an integer"
         assert result.duplicates_found >= 0, "duplicates_found should be non-negative"
@@ -258,6 +270,7 @@ defmodule Canopy.Autonomic.HeartbeatTest do
       result = Canopy.Autonomic.DataAgent.run()
 
       assert is_map(result), "Result should be a map"
+
       assert Map.has_key?(result, :freshness) or Map.has_key?(result, :status),
              "Result should have freshness or status"
     end
@@ -268,6 +281,7 @@ defmodule Canopy.Autonomic.HeartbeatTest do
       result = Canopy.Autonomic.ComplianceAgent.run()
 
       assert is_map(result), "ComplianceAgent.run should return a map"
+
       assert Map.has_key?(result, :signature_gaps) or Map.has_key?(result, :status),
              "Result should have signature_gaps or status"
     end
@@ -276,6 +290,7 @@ defmodule Canopy.Autonomic.HeartbeatTest do
       result = Canopy.Autonomic.ComplianceAgent.run()
 
       assert is_map(result), "Result should be a map"
+
       if Map.has_key?(result, :signature_gaps) do
         assert is_integer(result.signature_gaps), "signature_gaps should be an integer"
         assert result.signature_gaps >= 0, "signature_gaps should be non-negative"
@@ -287,6 +302,7 @@ defmodule Canopy.Autonomic.HeartbeatTest do
 
       assert is_map(result), "Result should be a map"
       assert Map.has_key?(result, :status), "Result should have status"
+
       assert result.status in ["compliant", "at_risk", "critical"],
              "Status should be one of: compliant, at_risk, critical"
     end
@@ -297,6 +313,7 @@ defmodule Canopy.Autonomic.HeartbeatTest do
       result = Canopy.Autonomic.LearningAgent.run()
 
       assert is_map(result), "LearningAgent.run should return a map"
+
       assert Map.has_key?(result, :data_pulled) or Map.has_key?(result, :status),
              "Result should have data_pulled or status"
     end
@@ -305,6 +322,7 @@ defmodule Canopy.Autonomic.HeartbeatTest do
       result = Canopy.Autonomic.LearningAgent.run()
 
       assert is_map(result), "Result should be a map"
+
       if Map.has_key?(result, :model_updated) do
         assert is_boolean(result.model_updated), "model_updated should be a boolean"
       end
@@ -314,6 +332,7 @@ defmodule Canopy.Autonomic.HeartbeatTest do
       result = Canopy.Autonomic.LearningAgent.run()
 
       assert is_map(result), "Result should be a map"
+
       assert Map.has_key?(result, :accuracy) or Map.has_key?(result, :status),
              "Result should have accuracy or status"
     end
@@ -324,6 +343,7 @@ defmodule Canopy.Autonomic.HeartbeatTest do
       result = Canopy.Autonomic.AdaptationAgent.run()
 
       assert is_map(result), "AdaptationAgent.run should return a map"
+
       assert Map.has_key?(result, :drift_detected) or Map.has_key?(result, :status),
              "Result should have drift_detected or status"
     end
@@ -332,6 +352,7 @@ defmodule Canopy.Autonomic.HeartbeatTest do
       result = Canopy.Autonomic.AdaptationAgent.run()
 
       assert is_map(result), "Result should be a map"
+
       if Map.has_key?(result, :reloaded) do
         assert is_boolean(result.reloaded), "reloaded should be a boolean"
       end
@@ -341,6 +362,7 @@ defmodule Canopy.Autonomic.HeartbeatTest do
       result = Canopy.Autonomic.AdaptationAgent.run()
 
       assert is_map(result), "Result should be a map"
+
       assert Map.has_key?(result, :changes) or Map.has_key?(result, :status),
              "Result should have changes or status"
     end

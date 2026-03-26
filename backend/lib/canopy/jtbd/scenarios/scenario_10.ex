@@ -188,7 +188,7 @@ defmodule Canopy.JTBD.Scenarios.Scenario10 do
             end
         end
     end
-end
+  end
 
   @doc false
   defp release_concurrency_slot(_ref) do

@@ -20,7 +20,15 @@ defmodule Canopy.Schemas.ConfigRevision do
 
   def changeset(config_revision, attrs) do
     config_revision
-    |> cast(attrs, [:entity_type, :entity_id, :key, :old_value, :new_value, :changed_by, :workspace_id])
+    |> cast(attrs, [
+      :entity_type,
+      :entity_id,
+      :key,
+      :old_value,
+      :new_value,
+      :changed_by,
+      :workspace_id
+    ])
     |> validate_required([:entity_type, :entity_id, :key, :new_value])
   end
 end

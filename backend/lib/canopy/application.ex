@@ -20,6 +20,7 @@ defmodule Canopy.Application do
       Canopy.IdempotencyCleanup,
       Canopy.Isolation.Validator,
       Canopy.Autonomic.Heartbeat,
+      Canopy.Board.ConwayMonitor,
       Canopy.Ontology.Loader,
       Canopy.Ontology.Service,
       Canopy.Ontology.ToolRegistry,
@@ -54,7 +55,9 @@ defmodule Canopy.Application do
           :load_schedules,
           []
         )
-      _ -> :ok
+
+      _ ->
+        :ok
     end
 
     result

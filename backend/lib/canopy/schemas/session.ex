@@ -28,7 +28,22 @@ defmodule Canopy.Schemas.Session do
 
   def changeset(session, attrs) do
     session
-    |> cast(attrs, [:model, :status, :tokens_input, :tokens_output, :tokens_cache, :cost_cents, :workspace_path, :workspace_branch, :started_at, :completed_at, :agent_id, :schedule_id, :issue_id, :workspace_id])
+    |> cast(attrs, [
+      :model,
+      :status,
+      :tokens_input,
+      :tokens_output,
+      :tokens_cache,
+      :cost_cents,
+      :workspace_path,
+      :workspace_branch,
+      :started_at,
+      :completed_at,
+      :agent_id,
+      :schedule_id,
+      :issue_id,
+      :workspace_id
+    ])
     |> validate_required([:model, :started_at, :agent_id])
     |> validate_inclusion(:status, ~w(active idle completed failed cancelled))
   end

@@ -74,7 +74,8 @@ defmodule Canopy.Autonomic.LearningAgent do
   defp pull_training_data do
     # Query for completed sessions to use as training data
     try do
-      from_time = DateTime.add(DateTime.utc_now(), -86_400, :second)  # Last 24 hours
+      # Last 24 hours
+      from_time = DateTime.add(DateTime.utc_now(), -86_400, :second)
 
       count =
         Repo.one(
@@ -115,7 +116,9 @@ defmodule Canopy.Autonomic.LearningAgent do
       }
     rescue
       e ->
-        Logger.error("[LearningAgent] Failed to retrain #{inspect(model_name)}: #{Exception.message(e)}")
+        Logger.error(
+          "[LearningAgent] Failed to retrain #{inspect(model_name)}: #{Exception.message(e)}"
+        )
 
         %{
           model: model_name,

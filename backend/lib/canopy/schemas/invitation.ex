@@ -20,7 +20,15 @@ defmodule Canopy.Schemas.Invitation do
 
   def changeset(invitation, attrs) do
     invitation
-    |> cast(attrs, [:email, :role, :token, :accepted_at, :expires_at, :organization_id, :invited_by])
+    |> cast(attrs, [
+      :email,
+      :role,
+      :token,
+      :accepted_at,
+      :expires_at,
+      :organization_id,
+      :invited_by
+    ])
     |> validate_required([:email, :organization_id, :token])
     |> validate_format(:email, ~r/@/)
     |> validate_inclusion(:role, ~w(owner admin member))

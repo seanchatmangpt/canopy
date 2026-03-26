@@ -17,9 +17,18 @@ defmodule Canopy.Schemas.BudgetPolicy do
 
   def changeset(policy, attrs) do
     policy
-    |> cast(attrs, [:scope_type, :scope_id, :monthly_limit_cents, :warning_threshold_pct, :hard_stop])
+    |> cast(attrs, [
+      :scope_type,
+      :scope_id,
+      :monthly_limit_cents,
+      :warning_threshold_pct,
+      :hard_stop
+    ])
     |> validate_required([:scope_type, :scope_id, :monthly_limit_cents])
-    |> validate_inclusion(:scope_type, ~w(agent team department division organization project workspace))
+    |> validate_inclusion(
+      :scope_type,
+      ~w(agent team department division organization project workspace)
+    )
     |> validate_number(:monthly_limit_cents, greater_than: 0)
     |> validate_number(:warning_threshold_pct, greater_than: 0, less_than_or_equal_to: 100)
     |> unique_constraint([:scope_type, :scope_id])

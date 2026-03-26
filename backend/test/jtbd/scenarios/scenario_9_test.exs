@@ -68,21 +68,25 @@ defmodule Canopy.JTBD.Scenarios.Scenario9Test do
     test "mcp_tool_execution validates tool_name is non-empty" do
       tool_request = %{
         "agent_id" => "code-review-agent-1",
-        "tool_name" => "",  # Invalid: empty
+        # Invalid: empty
+        "tool_name" => "",
         "parameters" => %{"code" => "test"}
       }
 
-      assert {:error, :invalid_tool_name} = Canopy.JTBD.Scenarios.Scenario9.execute(tool_request, timeout_ms: 30_000)
+      assert {:error, :invalid_tool_name} =
+               Canopy.JTBD.Scenarios.Scenario9.execute(tool_request, timeout_ms: 30_000)
     end
 
     test "mcp_tool_execution validates parameters is a map" do
       tool_request = %{
         "agent_id" => "code-review-agent-1",
         "tool_name" => "code_analyzer",
-        "parameters" => "not a map"  # Invalid: should be map
+        # Invalid: should be map
+        "parameters" => "not a map"
       }
 
-      assert {:error, :invalid_parameters} = Canopy.JTBD.Scenarios.Scenario9.execute(tool_request, timeout_ms: 30_000)
+      assert {:error, :invalid_parameters} =
+               Canopy.JTBD.Scenarios.Scenario9.execute(tool_request, timeout_ms: 30_000)
     end
 
     test "mcp_tool_execution returns error on 30s timeout" do
@@ -104,14 +108,15 @@ defmodule Canopy.JTBD.Scenarios.Scenario9Test do
       }
 
       # Queue 51 tool executions (exceeds max 50)
-      tasks = Enum.map(1..51, fn i ->
-        Task.async(fn ->
-          Canopy.JTBD.Scenarios.Scenario9.execute(
-            Map.put(tool_template, "request_id", "req-#{i}"),
-            timeout_ms: 30_000
-          )
+      tasks =
+        Enum.map(1..51, fn i ->
+          Task.async(fn ->
+            Canopy.JTBD.Scenarios.Scenario9.execute(
+              Map.put(tool_template, "request_id", "req-#{i}"),
+              timeout_ms: 30_000
+            )
+          end)
         end)
-      end)
 
       results = Task.await_many(tasks, 60_000)
 
@@ -145,7 +150,8 @@ defmodule Canopy.JTBD.Scenarios.Scenario9Test do
         "agent_id" => "code-review-agent-1",
         "tool_name" => "code_analyzer",
         "parameters" => %{"code" => "test"},
-        "provider" => "http"  # Specify HTTP provider
+        # Specify HTTP provider
+        "provider" => "http"
       }
 
       {:ok, result} = Canopy.JTBD.Scenarios.Scenario9.execute(tool_request, timeout_ms: 30_000)

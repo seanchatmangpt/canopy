@@ -313,12 +313,13 @@ defmodule Canopy.Ontology.ToolRegistry do
     all_keys = :ets.match_object(:tool_registry_cache, {:"$1", :_, :_})
 
     Enum.each(all_keys, fn {key, _, _} ->
-      should_delete = case key do
-        {:tools, {^ontology_id, _, _}} -> true
-        {:tools_by_capability, {^ontology_id, _}} -> true
-        {:capabilities_index, ^ontology_id} -> true
-        _ -> false
-      end
+      should_delete =
+        case key do
+          {:tools, {^ontology_id, _, _}} -> true
+          {:tools_by_capability, {^ontology_id, _}} -> true
+          {:capabilities_index, ^ontology_id} -> true
+          _ -> false
+        end
 
       if should_delete do
         :ets.delete(:tool_registry_cache, key)
@@ -390,11 +391,17 @@ defmodule Canopy.Ontology.ToolRegistry do
   end
 
   defp search_tools_in_ontology(ontology_id, limit, offset) do
-    case Service.search(ontology_id, "tool", type: "property", limit: limit, offset: offset, cache: true) do
+    case Service.search(ontology_id, "tool",
+           type: "property",
+           limit: limit,
+           offset: offset,
+           cache: true
+         ) do
       {:ok, results, _metadata} ->
-        normalized = results
-                     |> Enum.take(min(length(results), 1000))
-                     |> Enum.map(&normalize_tool(&1, ontology_id))
+        normalized =
+          results
+          |> Enum.take(min(length(results), 1000))
+          |> Enum.map(&normalize_tool(&1, ontology_id))
 
         {:ok, normalized}
 
@@ -412,10 +419,11 @@ defmodule Canopy.Ontology.ToolRegistry do
 
     case Service.search(ontology_id, query, type: "property", limit: 100, cache: true) do
       {:ok, results, _metadata} ->
-        normalized = results
-                     |> Enum.take(1000)
-                     |> Enum.map(&normalize_tool(&1, ontology_id))
-                     |> Enum.filter(&has_capability?(&1, capability))
+        normalized =
+          results
+          |> Enum.take(1000)
+          |> Enum.map(&normalize_tool(&1, ontology_id))
+          |> Enum.filter(&has_capability?(&1, capability))
 
         {:ok, normalized}
 
@@ -431,16 +439,17 @@ defmodule Canopy.Ontology.ToolRegistry do
   defp build_capabilities_index(ontology_id) do
     case search_tools_in_ontology(ontology_id, 1000, 0) do
       {:ok, tools} ->
-        index = tools
-                |> Enum.reduce(%{}, fn tool, acc ->
-                  capabilities = tool[:capabilities] || []
+        index =
+          tools
+          |> Enum.reduce(%{}, fn tool, acc ->
+            capabilities = tool[:capabilities] || []
 
-                  Enum.reduce(capabilities, acc, fn cap, inner_acc ->
-                    cap_key = to_string(cap)
-                    existing = Map.get(inner_acc, cap_key, [])
-                    Map.put(inner_acc, cap_key, existing ++ [tool])
-                  end)
-                end)
+            Enum.reduce(capabilities, acc, fn cap, inner_acc ->
+              cap_key = to_string(cap)
+              existing = Map.get(inner_acc, cap_key, [])
+              Map.put(inner_acc, cap_key, existing ++ [tool])
+            end)
+          end)
 
         {:ok, index}
 
@@ -475,7 +484,10 @@ defmodule Canopy.Ontology.ToolRegistry do
 
   defp has_capability?(tool, capability) when is_map(tool) do
     capabilities = tool[:capabilities] || []
-    Enum.any?(capabilities, fn cap -> String.downcase(to_string(cap)) == String.downcase(to_string(capability)) end)
+
+    Enum.any?(capabilities, fn cap ->
+      String.downcase(to_string(cap)) == String.downcase(to_string(capability))
+    end)
   end
 
   defp has_capability?(_tool, _capability), do: false

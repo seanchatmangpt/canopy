@@ -119,6 +119,7 @@ defmodule Canopy.Integration.Wave12IsolationTest do
 
       # ASSERTION 4: No cascade failure (loop didn't crash)
       loop_pid = Process.whereis(Canopy.JTBD.SelfPlayLoop)
+
       assert is_pid(loop_pid) and Process.alive?(loop_pid),
              "SelfPlayLoop GenServer should still be alive"
 
@@ -241,7 +242,10 @@ defmodule Canopy.Integration.Wave12IsolationTest do
 
       # Verify supervisor state unchanged (Dashboard crash doesn't affect supervisor)
       current_children = Supervisor.which_children(supervisor_pid)
-      Logger.info("Isolation test: After crashes, supervisor has #{length(current_children)} children")
+
+      Logger.info(
+        "Isolation test: After crashes, supervisor has #{length(current_children)} children"
+      )
 
       # ASSERTION: Supervisor state unchanged (isolation maintained)
       assert length(current_children) == length(initial_children),
@@ -250,6 +254,7 @@ defmodule Canopy.Integration.Wave12IsolationTest do
       # ASSERTION: Loop still running (not crashed by Dashboard)
       loop_state = Canopy.JTBD.SelfPlayLoop.get_state()
       assert loop_state.running == true, "Loop should still be running"
+
       assert is_pid(Process.whereis(Canopy.JTBD.SelfPlayLoop)),
              "SelfPlayLoop GenServer should be alive"
 

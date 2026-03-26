@@ -77,11 +77,25 @@ defmodule Canopy.MixProject do
 
       # Fast feedback loops — unit tests only (no integration/slow)
       # Usage: mix test.fast
-      "test.fast": ["ecto.create --quiet", "ecto.migrate --quiet", "test", "--exclude", "integration", "--exclude", "slow"],
+      "test.fast": [
+        "ecto.create --quiet",
+        "ecto.migrate --quiet",
+        "test",
+        "--exclude",
+        "integration",
+        "--exclude",
+        "slow"
+      ],
 
       # Integration tests only
       # Usage: mix test.integration
-      "test.integration": ["ecto.create --quiet", "ecto.migrate --quiet", "test", "--include", "integration"],
+      "test.integration": [
+        "ecto.create --quiet",
+        "ecto.migrate --quiet",
+        "test",
+        "--include",
+        "integration"
+      ],
 
       # Slow tests only
       # Usage: mix test.slow
@@ -89,7 +103,16 @@ defmodule Canopy.MixProject do
 
       # Unit tests without app startup
       # Usage: mix test.unit
-      "test.unit": ["ecto.create --quiet", "ecto.migrate --quiet", "test", "--no-start", "--exclude", "integration", "--exclude", "slow"]
+      "test.unit": [
+        "ecto.create --quiet",
+        "ecto.migrate --quiet",
+        "test",
+        "--no-start",
+        "--exclude",
+        "integration",
+        "--exclude",
+        "slow"
+      ]
     ]
   end
 end

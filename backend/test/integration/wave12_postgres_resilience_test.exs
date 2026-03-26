@@ -54,7 +54,8 @@ defmodule Canopy.Integration.Wave12PostgresResilienceTest do
 
     # Start PostgreSQL if it's not running
     start_postgres()
-    Process.sleep(1000)  # Allow postgres to fully start
+    # Allow postgres to fully start
+    Process.sleep(1000)
 
     # Only start SelfPlayLoop if it's not already running
     case SelfPlayLoop.start_link([]) do
@@ -68,7 +69,7 @@ defmodule Canopy.Integration.Wave12PostgresResilienceTest do
     test "loop_continues_during_postgres_outage" do
       Logger.info(
         "=== Wave 12 Chaos Test: PostgreSQL Outage Resilience (Chicago TDD) ===",
-        [test: "loop_continues_during_postgres_outage"]
+        test: "loop_continues_during_postgres_outage"
       )
 
       # Phase 1: Check if loop is running, start if not
@@ -81,16 +82,19 @@ defmodule Canopy.Integration.Wave12PostgresResilienceTest do
 
       if !loop_was_running do
         Logger.info("Starting Wave 12 loop with max_iterations=20")
+
         case SelfPlayLoop.start(max_iterations: 20) do
           {:ok, _pid} -> Logger.info("Loop started successfully")
           {:error, :already_running} -> Logger.info("Loop already running")
           error -> Logger.warning("Error starting loop", error: inspect(error))
         end
+
         Process.sleep(200)
       end
 
       # Get initial state
       initial_state = SelfPlayLoop.get_state()
+
       Logger.info("Phase 1 complete",
         iteration: initial_state.iteration,
         running: initial_state.running
@@ -112,14 +116,13 @@ defmodule Canopy.Integration.Wave12PostgresResilienceTest do
       Process.sleep(500)
 
       # Phase 3: Continue loop execution for ~5 more iterations WITHOUT database
-      Logger.info(
-        "Phase 3: Allowing loop to continue for iterations WITHOUT database access"
-      )
+      Logger.info("Phase 3: Allowing loop to continue for iterations WITHOUT database access")
 
       Process.sleep(3000)
 
       # Get state after database down
       mid_state = SelfPlayLoop.get_state()
+
       Logger.info("Phase 3 complete",
         iterations_completed: mid_state.iteration - initial_iteration,
         pass_count_delta: mid_state.pass_count - initial_pass_count
@@ -130,7 +133,7 @@ defmodule Canopy.Integration.Wave12PostgresResilienceTest do
 
       # Key assertions for Wave 12 in-memory operation:
       assert mid_state.running == true,
-        "Loop should still be running despite database being unavailable"
+             "Loop should still be running despite database being unavailable"
 
       # The loop should not have crashed (no 0 pass_count if iterations happened)
       if mid_state.iteration > initial_iteration do
@@ -149,6 +152,7 @@ defmodule Canopy.Integration.Wave12PostgresResilienceTest do
       Process.sleep(1000)
 
       final_state = SelfPlayLoop.get_state()
+
       Logger.info("Phase 5 final state",
         iteration: final_state.iteration,
         total_pass_count: final_state.pass_count,
@@ -158,24 +162,22 @@ defmodule Canopy.Integration.Wave12PostgresResilienceTest do
       # Final assertions
       Logger.info(
         "=== Wave 12 Chaos Test: PostgreSQL Down Resilience (Complete) ===",
-        [
-          total_iterations: final_state.iteration,
-          iterations_without_db: mid_state.iteration - initial_iteration,
-          total_passes: final_state.pass_count,
-          total_fails: final_state.fail_count,
-          pass_rate: final_state.pass_rate
-        ]
+        total_iterations: final_state.iteration,
+        iterations_without_db: mid_state.iteration - initial_iteration,
+        total_passes: final_state.pass_count,
+        total_fails: final_state.fail_count,
+        pass_rate: final_state.pass_rate
       )
 
       # Key finding: Loop is running in-memory, independent of database
       assert final_state.running == true,
-        "Wave 12 loop should continue running despite database unavailability"
+             "Wave 12 loop should continue running despite database unavailability"
     end
 
     test "loop_handles_database_recovery_gracefully" do
       Logger.info(
         "=== Wave 12 Chaos Test: Database Recovery Handling (Start) ===",
-        [test: "loop_handles_database_recovery_gracefully"]
+        test: "loop_handles_database_recovery_gracefully"
       )
 
       # Get current state
@@ -210,7 +212,7 @@ defmodule Canopy.Integration.Wave12PostgresResilienceTest do
     test "loop_does_not_deadlock_on_database_timeout" do
       Logger.info(
         "=== Wave 12 Chaos Test: Deadlock Prevention (Start) ===",
-        [test: "loop_does_not_deadlock_on_database_timeout"]
+        test: "loop_does_not_deadlock_on_database_timeout"
       )
 
       # Get current state
@@ -243,7 +245,7 @@ defmodule Canopy.Integration.Wave12PostgresResilienceTest do
       # WvdA assertion: Loop should progress OR gracefully timeout,
       # not deadlock indefinitely
       assert iter_after_wait >= iter_before_wait,
-        "Loop should not be deadlocked (no progress = deadlock)"
+             "Loop should not be deadlocked (no progress = deadlock)"
 
       # Restart database
       Logger.info("Restarting PostgreSQL")
@@ -256,7 +258,7 @@ defmodule Canopy.Integration.Wave12PostgresResilienceTest do
     test "loop_memory_bounded_without_database" do
       Logger.info(
         "=== Wave 12 Chaos Test: Memory Boundedness (Start) ===",
-        [test: "loop_memory_bounded_without_database"]
+        test: "loop_memory_bounded_without_database"
       )
 
       # Get current state
@@ -287,7 +289,8 @@ defmodule Canopy.Integration.Wave12PostgresResilienceTest do
 
       Logger.info("Memory delta",
         delta_mb: Float.round(memory_delta_mb, 2),
-        percent_increase: Float.round(abs(memory_delta_mb) / (memory_before / 1024 / 1024) * 100, 1)
+        percent_increase:
+          Float.round(abs(memory_delta_mb) / (memory_before / 1024 / 1024) * 100, 1)
       )
 
       # WvdA assertion: Boundedness — memory should not grow unbounded
@@ -295,7 +298,7 @@ defmodule Canopy.Integration.Wave12PostgresResilienceTest do
       max_allowed_delta_mb = 50.0
 
       assert abs(memory_delta_mb) < max_allowed_delta_mb,
-        "Memory should be bounded during loop execution (delta=#{Float.round(memory_delta_mb, 2)}MB, max=#{max_allowed_delta_mb}MB)"
+             "Memory should be bounded during loop execution (delta=#{Float.round(memory_delta_mb, 2)}MB, max=#{max_allowed_delta_mb}MB)"
 
       # Restart database
       Logger.info("Restarting PostgreSQL")
@@ -316,8 +319,8 @@ defmodule Canopy.Integration.Wave12PostgresResilienceTest do
         {_output, 0} ->
           # PostgreSQL CLI is available, try to stop via system
           case System.cmd("pg_ctl", ["stop", "-D", postgres_data_dir(), "-m", "fast"],
-            stderr_to_stdout: true
-          ) do
+                 stderr_to_stdout: true
+               ) do
             {output, 0} -> {:ok, "stopped", output}
             {output, code} -> {:error, "pg_ctl failed", output, code}
           end
@@ -339,9 +342,7 @@ defmodule Canopy.Integration.Wave12PostgresResilienceTest do
       case System.cmd("psql", ["--version"], stderr_to_stdout: true) do
         {_output, 0} ->
           # PostgreSQL CLI is available, try to start via system
-          case System.cmd("pg_ctl", ["start", "-D", postgres_data_dir()],
-            stderr_to_stdout: true
-          ) do
+          case System.cmd("pg_ctl", ["start", "-D", postgres_data_dir()], stderr_to_stdout: true) do
             {output, 0} -> {:ok, "started", output}
             {output, code} -> {:error, "pg_ctl failed", output, code}
           end
@@ -364,5 +365,4 @@ defmodule Canopy.Integration.Wave12PostgresResilienceTest do
       path -> path
     end
   end
-
 end

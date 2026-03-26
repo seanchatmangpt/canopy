@@ -57,11 +57,11 @@ defmodule OpenTelemetry.SemConv.Incubating.EventAttributes do
   | `dropped` | `"dropped"` | dropped |
   """
   @spec event_delivery_status_values() :: %{
-    delivered: :delivered,
-    failed: :failed,
-    retrying: :retrying,
-    dropped: :dropped
-  }
+          delivered: :delivered,
+          failed: :failed,
+          retrying: :retrying,
+          dropped: :dropped
+        }
   def event_delivery_status_values do
     %{
       delivered: :delivered,
@@ -91,7 +91,6 @@ defmodule OpenTelemetry.SemConv.Incubating.EventAttributes do
     @doc "dropped"
     @spec dropped() :: :dropped
     def dropped, do: :dropped
-
   end
 
   @doc """
@@ -118,12 +117,12 @@ defmodule OpenTelemetry.SemConv.Incubating.EventAttributes do
   | `system` | `"system"` | system |
   """
   @spec event_domain_values() :: %{
-    agent: :agent,
-    compliance: :compliance,
-    healing: :healing,
-    workflow: :workflow,
-    system: :system
-  }
+          agent: :agent,
+          compliance: :compliance,
+          healing: :healing,
+          workflow: :workflow,
+          system: :system
+        }
   def event_domain_values do
     %{
       agent: :agent,
@@ -158,7 +157,6 @@ defmodule OpenTelemetry.SemConv.Incubating.EventAttributes do
     @doc "system"
     @spec system() :: :system
     def system, do: :system
-
   end
 
   @doc """
@@ -232,12 +230,12 @@ defmodule OpenTelemetry.SemConv.Incubating.EventAttributes do
   | `content_based` | `"content_based"` | content_based |
   """
   @spec event_routing_strategy_values() :: %{
-    broadcast: :broadcast,
-    unicast: :unicast,
-    multicast: :multicast,
-    topic_based: :topic_based,
-    content_based: :content_based
-  }
+          broadcast: :broadcast,
+          unicast: :unicast,
+          multicast: :multicast,
+          topic_based: :topic_based,
+          content_based: :content_based
+        }
   def event_routing_strategy_values do
     %{
       broadcast: :broadcast,
@@ -272,7 +270,6 @@ defmodule OpenTelemetry.SemConv.Incubating.EventAttributes do
     @doc "content_based"
     @spec content_based() :: :content_based
     def content_based, do: :content_based
-
   end
 
   @doc """
@@ -311,12 +308,12 @@ defmodule OpenTelemetry.SemConv.Incubating.EventAttributes do
   | `fatal` | `"fatal"` | fatal |
   """
   @spec event_severity_values() :: %{
-    debug: :debug,
-    info: :info,
-    warn: :warn,
-    error: :error,
-    fatal: :fatal
-  }
+          debug: :debug,
+          info: :info,
+          warn: :warn,
+          error: :error,
+          fatal: :fatal
+        }
   def event_severity_values do
     %{
       debug: :debug,
@@ -351,7 +348,6 @@ defmodule OpenTelemetry.SemConv.Incubating.EventAttributes do
     @doc "fatal"
     @spec fatal() :: :fatal
     def fatal, do: :fatal
-
   end
 
   @doc """
@@ -413,5 +409,4 @@ defmodule OpenTelemetry.SemConv.Incubating.EventAttributes do
   """
   @spec event_version() :: :"event.version"
   def event_version, do: :"event.version"
-
 end

@@ -15,7 +15,18 @@ defmodule Canopy.BudgetEnforcer do
   require Logger
 
   alias Canopy.Repo
-  alias Canopy.Schemas.{BudgetPolicy, BudgetIncident, CostEvent, Agent, TeamMembership, Team, Department, Division}
+
+  alias Canopy.Schemas.{
+    BudgetPolicy,
+    BudgetIncident,
+    CostEvent,
+    Agent,
+    TeamMembership,
+    Team,
+    Department,
+    Division
+  }
+
   import Ecto.Query
 
   @table :canopy_budget_accumulator
@@ -151,10 +162,14 @@ defmodule Canopy.BudgetEnforcer do
     result =
       Repo.one(
         from a in Agent,
-          left_join: tm in TeamMembership, on: tm.agent_id == a.id,
-          left_join: t in Team, on: tm.team_id == t.id,
-          left_join: dept in Department, on: t.department_id == dept.id,
-          left_join: div in Division, on: dept.division_id == div.id,
+          left_join: tm in TeamMembership,
+          on: tm.agent_id == a.id,
+          left_join: t in Team,
+          on: tm.team_id == t.id,
+          left_join: dept in Department,
+          on: t.department_id == dept.id,
+          left_join: div in Division,
+          on: dept.division_id == div.id,
           where: a.id == ^agent_id,
           select: %{
             workspace_id: a.workspace_id,
@@ -165,7 +180,14 @@ defmodule Canopy.BudgetEnforcer do
           }
       )
 
-    result || %{workspace_id: nil, team_id: nil, department_id: nil, division_id: nil, organization_id: nil}
+    result ||
+      %{
+        workspace_id: nil,
+        team_id: nil,
+        department_id: nil,
+        division_id: nil,
+        organization_id: nil
+      }
   end
 
   defp check_policies(scope_type, scope_id) do
@@ -356,7 +378,9 @@ defmodule Canopy.BudgetEnforcer do
 
         if team_ids != [] do
           agent_ids =
-            Repo.all(from tm in TeamMembership, where: tm.team_id in ^team_ids, select: tm.agent_id)
+            Repo.all(
+              from tm in TeamMembership, where: tm.team_id in ^team_ids, select: tm.agent_id
+            )
 
           if agent_ids != [] do
             from(a in Agent, where: a.id in ^agent_ids and a.status != "paused")
@@ -425,7 +449,8 @@ defmodule Canopy.BudgetEnforcer do
     # Load workspace-level costs (aggregate via agents)
     Repo.all(
       from ce in CostEvent,
-        join: a in Agent, on: ce.agent_id == a.id,
+        join: a in Agent,
+        on: ce.agent_id == a.id,
         where: ce.inserted_at >= ^month_start and not is_nil(a.workspace_id),
         group_by: a.workspace_id,
         select: {a.workspace_id, sum(ce.cost_cents)}
@@ -437,7 +462,8 @@ defmodule Canopy.BudgetEnforcer do
     # Load team-level costs (aggregate via team_memberships)
     Repo.all(
       from ce in CostEvent,
-        join: tm in TeamMembership, on: ce.agent_id == tm.agent_id,
+        join: tm in TeamMembership,
+        on: ce.agent_id == tm.agent_id,
         where: ce.inserted_at >= ^month_start,
         group_by: tm.team_id,
         select: {tm.team_id, sum(ce.cost_cents)}
@@ -449,8 +475,10 @@ defmodule Canopy.BudgetEnforcer do
     # Load department-level costs
     Repo.all(
       from ce in CostEvent,
-        join: tm in TeamMembership, on: ce.agent_id == tm.agent_id,
-        join: t in Team, on: tm.team_id == t.id,
+        join: tm in TeamMembership,
+        on: ce.agent_id == tm.agent_id,
+        join: t in Team,
+        on: tm.team_id == t.id,
         where: ce.inserted_at >= ^month_start,
         group_by: t.department_id,
         select: {t.department_id, sum(ce.cost_cents)}
@@ -462,9 +490,12 @@ defmodule Canopy.BudgetEnforcer do
     # Load division-level costs
     Repo.all(
       from ce in CostEvent,
-        join: tm in TeamMembership, on: ce.agent_id == tm.agent_id,
-        join: t in Team, on: tm.team_id == t.id,
-        join: d in Department, on: t.department_id == d.id,
+        join: tm in TeamMembership,
+        on: ce.agent_id == tm.agent_id,
+        join: t in Team,
+        on: tm.team_id == t.id,
+        join: d in Department,
+        on: t.department_id == d.id,
         where: ce.inserted_at >= ^month_start,
         group_by: d.division_id,
         select: {d.division_id, sum(ce.cost_cents)}
@@ -476,10 +507,14 @@ defmodule Canopy.BudgetEnforcer do
     # Load organization-level costs
     Repo.all(
       from ce in CostEvent,
-        join: tm in TeamMembership, on: ce.agent_id == tm.agent_id,
-        join: t in Team, on: tm.team_id == t.id,
-        join: d in Department, on: t.department_id == d.id,
-        join: div in Division, on: d.division_id == div.id,
+        join: tm in TeamMembership,
+        on: ce.agent_id == tm.agent_id,
+        join: t in Team,
+        on: tm.team_id == t.id,
+        join: d in Department,
+        on: t.department_id == d.id,
+        join: div in Division,
+        on: d.division_id == div.id,
         where: ce.inserted_at >= ^month_start,
         group_by: div.organization_id,
         select: {div.organization_id, sum(ce.cost_cents)}

@@ -20,7 +20,7 @@ defmodule Canopy.Test.Helpers.TimeoutHelper do
       end
   """
 
-  @spec assert_completes_with_timeout(integer | nil, (() -> any)) :: any
+  @spec assert_completes_with_timeout(integer | nil, (-> any)) :: any
   def assert_completes_with_timeout(timeout_ms, operation) when is_function(operation, 0) do
     if timeout_ms == nil do
       raise ArgumentError, "timeout_ms is required (WvdA deadlock-freedom constraint)"

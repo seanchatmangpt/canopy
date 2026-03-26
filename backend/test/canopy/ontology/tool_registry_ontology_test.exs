@@ -194,6 +194,7 @@ defmodule Canopy.Ontology.ToolRegistryTest do
       Enum.each(index, fn {capability, tools} ->
         assert is_binary(capability)
         assert is_list(tools)
+
         Enum.each(tools, fn tool ->
           assert is_map(tool)
           assert Map.has_key?(tool, :name)

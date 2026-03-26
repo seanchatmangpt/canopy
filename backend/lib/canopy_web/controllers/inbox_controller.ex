@@ -79,8 +79,9 @@ defmodule CanopyWeb.InboxController do
 
     query =
       from e in ActivityEvent,
-        where: e.level == "notification" and
-          fragment("COALESCE((?->>'read')::boolean, false) = false", e.metadata)
+        where:
+          e.level == "notification" and
+            fragment("COALESCE((?->>'read')::boolean, false) = false", e.metadata)
 
     query = if workspace_id, do: where(query, [e], e.workspace_id == ^workspace_id), else: query
 
@@ -94,9 +95,7 @@ defmodule CanopyWeb.InboxController do
 
         ids ->
           from(e in ActivityEvent, where: e.id in ^ids)
-          |> Repo.update_all(
-            set: [metadata: %{"read" => true}, updated_at: DateTime.utc_now()]
-          )
+          |> Repo.update_all(set: [metadata: %{"read" => true}, updated_at: DateTime.utc_now()])
       end
 
     json(conn, %{ok: true, updated: count})

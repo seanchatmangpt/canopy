@@ -18,8 +18,13 @@ defmodule Integration.WorkspaceIsolationIntegrationTest do
     # Add user2 to ws1_org1
     WorkspaceIsolation.add_workspace_user(ws1_org1.id, user2.id, "user")
 
-    {:ok, user1: user1, user2: user2, user3: user3,
-          ws1_org1: ws1_org1, ws2_org1: ws2_org1, ws1_org2: ws1_org2}
+    {:ok,
+     user1: user1,
+     user2: user2,
+     user3: user3,
+     ws1_org1: ws1_org1,
+     ws2_org1: ws2_org1,
+     ws1_org2: ws1_org2}
   end
 
   describe "workspace data isolation" do
@@ -32,9 +37,10 @@ defmodule Integration.WorkspaceIsolationIntegrationTest do
       agent1 = insert_agent(%{workspace_id: ws1.id, name: "Agent in WS1"})
       agent2 = insert_agent(%{workspace_id: ws2.id, name: "Agent in WS2"})
 
-      conn = build_authenticated_conn(user1)
-      |> put_req_header("x-workspace-id", ws1.id)
-      |> get("/api/v1/agents")
+      conn =
+        build_authenticated_conn(user1)
+        |> put_req_header("x-workspace-id", ws1.id)
+        |> get("/api/v1/agents")
 
       body = json_response(conn, 200)
       agent_ids = Enum.map(body["agents"], & &1["id"])
@@ -178,39 +184,55 @@ defmodule Integration.WorkspaceIsolationIntegrationTest do
   # Helpers
 
   defp insert_user(attrs \\ %{}) do
-    user_attrs = Map.merge(%{
-      name: "Test User #{System.unique_integer([:positive])}",
-      email: "test#{System.unique_integer([:positive])}@test.com",
-      password: "password123",
-      role: "member",
-      provider: "local"
-    }, attrs)
+    user_attrs =
+      Map.merge(
+        %{
+          name: "Test User #{System.unique_integer([:positive])}",
+          email: "test#{System.unique_integer([:positive])}@test.com",
+          password: "password123",
+          role: "member",
+          provider: "local"
+        },
+        attrs
+      )
 
-    {:ok, user} = Repo.insert(Ecto.Changeset.cast(%User{}, user_attrs, [:name, :email, :password, :role, :provider]))
+    {:ok, user} =
+      Repo.insert(
+        Ecto.Changeset.cast(%User{}, user_attrs, [:name, :email, :password, :role, :provider])
+      )
+
     user
   end
 
   defp insert_workspace(attrs \\ %{}) do
-    ws_attrs = Map.merge(%{
-      name: "Test Workspace #{System.unique_integer([:positive])}",
-      path: "/tmp/workspace#{System.unique_integer([:positive])}",
-      status: "active",
-      is_active: true,
-      isolation_level: "full"
-    }, attrs)
+    ws_attrs =
+      Map.merge(
+        %{
+          name: "Test Workspace #{System.unique_integer([:positive])}",
+          path: "/tmp/workspace#{System.unique_integer([:positive])}",
+          status: "active",
+          is_active: true,
+          isolation_level: "full"
+        },
+        attrs
+      )
 
     {:ok, ws} = Repo.insert(Workspace.changeset(%Workspace{}, ws_attrs))
     ws
   end
 
   defp insert_agent(attrs \\ %{}) do
-    agent_attrs = Map.merge(%{
-      slug: "agent#{System.unique_integer([:positive])}",
-      name: "Test Agent #{System.unique_integer([:positive])}",
-      role: "worker",
-      adapter: "claude-code",
-      model: "claude-3-5-sonnet-20241022"
-    }, attrs)
+    agent_attrs =
+      Map.merge(
+        %{
+          slug: "agent#{System.unique_integer([:positive])}",
+          name: "Test Agent #{System.unique_integer([:positive])}",
+          role: "worker",
+          adapter: "claude-code",
+          model: "claude-3-5-sonnet-20241022"
+        },
+        attrs
+      )
 
     {:ok, agent} = Repo.insert(Agent.changeset(%Agent{}, agent_attrs))
     agent

@@ -4,7 +4,10 @@ defmodule Canopy.Repo.Migrations.CreateDepartments do
   def change do
     create table(:departments, primary_key: false) do
       add :id, :binary_id, primary_key: true
-      add :division_id, references(:divisions, type: :binary_id, on_delete: :delete_all), null: false
+
+      add :division_id, references(:divisions, type: :binary_id, on_delete: :delete_all),
+        null: false
+
       add :name, :string, null: false
       add :slug, :string, null: false
       add :description, :text

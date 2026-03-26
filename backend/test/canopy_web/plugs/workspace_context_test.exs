@@ -24,9 +24,10 @@ defmodule CanopyWeb.Plugs.WorkspaceContextTest do
 
   describe "WorkspaceContext plug" do
     test "extracts workspace_id from params and validates access", %{user1: user1, ws1: ws1} do
-      conn = build_authenticated_conn(user1)
-      |> put_req_header("content-type", "application/json")
-      |> Map.put(:params, %{"workspace_id" => ws1.id})
+      conn =
+        build_authenticated_conn(user1)
+        |> put_req_header("content-type", "application/json")
+        |> Map.put(:params, %{"workspace_id" => ws1.id})
 
       conn = WorkspaceContext.call(conn, [])
 
@@ -36,8 +37,9 @@ defmodule CanopyWeb.Plugs.WorkspaceContextTest do
     end
 
     test "extracts workspace_id from X-Workspace-ID header", %{user1: user1, ws1: ws1} do
-      conn = build_authenticated_conn(user1)
-      |> put_req_header("x-workspace-id", ws1.id)
+      conn =
+        build_authenticated_conn(user1)
+        |> put_req_header("x-workspace-id", ws1.id)
 
       conn = WorkspaceContext.call(conn, [])
 
@@ -45,9 +47,10 @@ defmodule CanopyWeb.Plugs.WorkspaceContextTest do
     end
 
     test "rejects request if user lacks access to workspace", %{user1: user1, ws3: ws3} do
-      conn = build_authenticated_conn(user1)
-      |> put_req_header("content-type", "application/json")
-      |> Map.put(:params, %{"workspace_id" => ws3.id})
+      conn =
+        build_authenticated_conn(user1)
+        |> put_req_header("content-type", "application/json")
+        |> Map.put(:params, %{"workspace_id" => ws3.id})
 
       conn = WorkspaceContext.call(conn, [])
 
@@ -56,9 +59,10 @@ defmodule CanopyWeb.Plugs.WorkspaceContextTest do
     end
 
     test "allows member access to workspace", %{user2: user2, ws1: ws1} do
-      conn = build_authenticated_conn(user2)
-      |> put_req_header("content-type", "application/json")
-      |> Map.put(:params, %{"workspace_id" => ws1.id})
+      conn =
+        build_authenticated_conn(user2)
+        |> put_req_header("content-type", "application/json")
+        |> Map.put(:params, %{"workspace_id" => ws1.id})
 
       conn = WorkspaceContext.call(conn, [])
 
@@ -88,26 +92,38 @@ defmodule CanopyWeb.Plugs.WorkspaceContextTest do
   # Helpers
 
   defp insert_user(attrs \\ %{}) do
-    user_attrs = Map.merge(%{
-      name: "Test User #{System.unique_integer([:positive])}",
-      email: "test#{System.unique_integer([:positive])}@test.com",
-      password: "password123",
-      role: "member",
-      provider: "local"
-    }, attrs)
+    user_attrs =
+      Map.merge(
+        %{
+          name: "Test User #{System.unique_integer([:positive])}",
+          email: "test#{System.unique_integer([:positive])}@test.com",
+          password: "password123",
+          role: "member",
+          provider: "local"
+        },
+        attrs
+      )
 
-    {:ok, user} = Repo.insert(Ecto.Changeset.cast(%User{}, user_attrs, [:name, :email, :password, :role, :provider]))
+    {:ok, user} =
+      Repo.insert(
+        Ecto.Changeset.cast(%User{}, user_attrs, [:name, :email, :password, :role, :provider])
+      )
+
     user
   end
 
   defp insert_workspace(attrs \\ %{}) do
-    ws_attrs = Map.merge(%{
-      name: "Test Workspace #{System.unique_integer([:positive])}",
-      path: "/tmp/workspace#{System.unique_integer([:positive])}",
-      status: "active",
-      is_active: true,
-      isolation_level: "full"
-    }, attrs)
+    ws_attrs =
+      Map.merge(
+        %{
+          name: "Test Workspace #{System.unique_integer([:positive])}",
+          path: "/tmp/workspace#{System.unique_integer([:positive])}",
+          status: "active",
+          is_active: true,
+          isolation_level: "full"
+        },
+        attrs
+      )
 
     {:ok, ws} = Repo.insert(Workspace.changeset(%Workspace{}, ws_attrs))
     ws

@@ -22,7 +22,7 @@ defmodule Canopy.Test.Helpers.BudgetEnforcer do
       end
   """
 
-  @spec assert_within_budget(keyword, (() -> any)) :: any
+  @spec assert_within_budget(keyword, (-> any)) :: any
   def assert_within_budget(opts, operation) when is_list(opts) and is_function(operation, 0) do
     time_budget_ms = Keyword.get(opts, :time_ms, :infinity)
 
@@ -55,7 +55,7 @@ defmodule Canopy.Test.Helpers.BudgetEnforcer do
     }
   end
 
-  @spec assert_tier_compliant(:critical | :high | :normal | :low, (() -> any)) :: any
+  @spec assert_tier_compliant(:critical | :high | :normal | :low, (-> any)) :: any
   def assert_tier_compliant(tier, operation) when is_atom(tier) and is_function(operation, 0) do
     tiers = budget_tiers()
 

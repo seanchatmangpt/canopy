@@ -8,7 +8,11 @@ defmodule Canopy.JTBD.Scenarios.Scenario3Test do
     @describetag :requires_businessos
     test "returns compliance status with framework coverage" do
       # RED: This test fails because Canopy.JTBD.Runner doesn't exist yet
-      {:ok, result} = Canopy.JTBD.Runner.run_scenario(:compliance_check, workspace_id: @workspace_id, framework: :soc2)
+      {:ok, result} =
+        Canopy.JTBD.Runner.run_scenario(:compliance_check,
+          workspace_id: @workspace_id,
+          framework: :soc2
+        )
 
       assert result.outcome == :success
       assert result.span_emitted == true
@@ -18,7 +22,11 @@ defmodule Canopy.JTBD.Scenarios.Scenario3Test do
 
     test "emits compliance.check span with soc2 and gdpr status" do
       # RED: BusinessOS must return status for SOC2, HIPAA, GDPR compliance
-      {:ok, result} = Canopy.JTBD.Runner.run_scenario(:compliance_check, workspace_id: @workspace_id, framework: :soc2)
+      {:ok, result} =
+        Canopy.JTBD.Runner.run_scenario(:compliance_check,
+          workspace_id: @workspace_id,
+          framework: :soc2
+        )
 
       assert result.outcome == :success
       assert result.span_attributes.framework == "soc2"
@@ -28,7 +36,11 @@ defmodule Canopy.JTBD.Scenarios.Scenario3Test do
 
     test "captures audit findings count and remediation status" do
       # RED: Compliance check must return gap count and remediation tracking
-      {:ok, result} = Canopy.JTBD.Runner.run_scenario(:compliance_check, workspace_id: @workspace_id, framework: :soc2)
+      {:ok, result} =
+        Canopy.JTBD.Runner.run_scenario(:compliance_check,
+          workspace_id: @workspace_id,
+          framework: :soc2
+        )
 
       assert result.outcome == :success
       assert is_integer(result.span_attributes.findings_count)

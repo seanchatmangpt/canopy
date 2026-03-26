@@ -47,12 +47,14 @@ defmodule CanopyWeb.AgentController do
           from ce in CostEvent,
             where: ce.agent_id in ^agent_ids and ce.inserted_at >= ^beginning_of_today,
             group_by: ce.agent_id,
-            select: {ce.agent_id, %{
-              cost_cents: coalesce(sum(ce.cost_cents), 0),
-              tokens_input: coalesce(sum(ce.tokens_input), 0),
-              tokens_output: coalesce(sum(ce.tokens_output), 0),
-              tokens_cache: coalesce(sum(ce.tokens_cache), 0)
-            }}
+            select:
+              {ce.agent_id,
+               %{
+                 cost_cents: coalesce(sum(ce.cost_cents), 0),
+                 tokens_input: coalesce(sum(ce.tokens_input), 0),
+                 tokens_output: coalesce(sum(ce.tokens_output), 0),
+                 tokens_cache: coalesce(sum(ce.tokens_cache), 0)
+               }}
         )
         |> Map.new()
       end
@@ -125,7 +127,8 @@ defmodule CanopyWeb.AgentController do
         total_sessions =
           Repo.aggregate(from(s in Session, where: s.agent_id == ^id), :count)
 
-        json(conn,
+        json(
+          conn,
           serialize_with_skills(agent)
           |> Map.merge(%{
             last_session:
@@ -331,6 +334,7 @@ defmodule CanopyWeb.AgentController do
         user_workspace_ids != [] -> where(query, [a], a.workspace_id in ^user_workspace_ids)
         true -> query
       end
+
     agents = Repo.all(query)
 
     json(conn, %{

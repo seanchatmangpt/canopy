@@ -38,7 +38,9 @@ defmodule Canopy.Webhooks.BusinessosDiscoveryWebhookTest do
         "fitness_score" => 0.95
       }
 
-      assert {:ok, result} = BusinessosDiscoveryWebhook.handle_discovery_complete(workspace.id, payload)
+      assert {:ok, result} =
+               BusinessosDiscoveryWebhook.handle_discovery_complete(workspace.id, payload)
+
       assert is_binary(result.issue_id)
       assert is_binary(result.agent_id)
 
@@ -67,7 +69,10 @@ defmodule Canopy.Webhooks.BusinessosDiscoveryWebhookTest do
       assert result.agent_id == agent.id
     end
 
-    test "is idempotent: duplicate POSTs create only 1 issue", %{workspace: workspace, agent: _agent} do
+    test "is idempotent: duplicate POSTs create only 1 issue", %{
+      workspace: workspace,
+      agent: _agent
+    } do
       payload = %{
         "model_id" => "model-xyz-789",
         "algorithm" => "alphabetic",
@@ -87,7 +92,9 @@ defmodule Canopy.Webhooks.BusinessosDiscoveryWebhookTest do
       assert issue_id_1 == issue_id_2
 
       # Verify only 1 issue exists in DB
-      issue_count = Repo.aggregate(from(i in Issue, where: i.workspace_id == ^workspace.id), :count)
+      issue_count =
+        Repo.aggregate(from(i in Issue, where: i.workspace_id == ^workspace.id), :count)
+
       assert issue_count == 1
     end
 
@@ -132,7 +139,10 @@ defmodule Canopy.Webhooks.BusinessosDiscoveryWebhookTest do
       }
 
       assert {:error, :invalid_payload} =
-               BusinessosDiscoveryWebhook.handle_discovery_complete(workspace.id, payload_missing_algorithm)
+               BusinessosDiscoveryWebhook.handle_discovery_complete(
+                 workspace.id,
+                 payload_missing_algorithm
+               )
 
       # Missing model_id
       payload_missing_model = %{
@@ -142,7 +152,10 @@ defmodule Canopy.Webhooks.BusinessosDiscoveryWebhookTest do
       }
 
       assert {:error, :invalid_payload} =
-               BusinessosDiscoveryWebhook.handle_discovery_complete(workspace.id, payload_missing_model)
+               BusinessosDiscoveryWebhook.handle_discovery_complete(
+                 workspace.id,
+                 payload_missing_model
+               )
 
       # Missing activities_count
       payload_missing_count = %{
@@ -152,7 +165,10 @@ defmodule Canopy.Webhooks.BusinessosDiscoveryWebhookTest do
       }
 
       assert {:error, :invalid_payload} =
-               BusinessosDiscoveryWebhook.handle_discovery_complete(workspace.id, payload_missing_count)
+               BusinessosDiscoveryWebhook.handle_discovery_complete(
+                 workspace.id,
+                 payload_missing_count
+               )
 
       # Missing fitness_score
       payload_missing_score = %{
@@ -162,11 +178,15 @@ defmodule Canopy.Webhooks.BusinessosDiscoveryWebhookTest do
       }
 
       assert {:error, :invalid_payload} =
-               BusinessosDiscoveryWebhook.handle_discovery_complete(workspace.id, payload_missing_score)
+               BusinessosDiscoveryWebhook.handle_discovery_complete(
+                 workspace.id,
+                 payload_missing_score
+               )
     end
 
     test "returns error with invalid payload types" do
       workspace = Repo.insert!(%Workspace{name: "WS2", path: "/tmp/ws2"})
+
       Repo.insert!(%Agent{
         workspace_id: workspace.id,
         slug: "process-mining-monitor",
@@ -186,7 +206,10 @@ defmodule Canopy.Webhooks.BusinessosDiscoveryWebhookTest do
       }
 
       assert {:error, :invalid_payload} =
-               BusinessosDiscoveryWebhook.handle_discovery_complete(workspace.id, payload_bad_count)
+               BusinessosDiscoveryWebhook.handle_discovery_complete(
+                 workspace.id,
+                 payload_bad_count
+               )
 
       # fitness_score is not a number
       payload_bad_score = %{
@@ -197,7 +220,10 @@ defmodule Canopy.Webhooks.BusinessosDiscoveryWebhookTest do
       }
 
       assert {:error, :invalid_payload} =
-               BusinessosDiscoveryWebhook.handle_discovery_complete(workspace.id, payload_bad_score)
+               BusinessosDiscoveryWebhook.handle_discovery_complete(
+                 workspace.id,
+                 payload_bad_score
+               )
     end
 
     test "populates agent_id in response", %{workspace: workspace, agent: agent} do

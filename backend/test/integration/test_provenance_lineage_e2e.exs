@@ -458,9 +458,10 @@ defmodule Canopy.Integration.ProvenanceLineageE2ETest do
   describe "Armstrong Fault Tolerance: Provenance" do
     test "armstrong_let_it_crash_invalid_execution: invalid execution doesn't crash emitter" do
       # Arrange: Invalid execution context
-      invalid_execution = %{
-        # Missing required fields
-      }
+      invalid_execution =
+        %{
+          # Missing required fields
+        }
 
       # Act: Try to emit invalid execution
       result = emit_provenance_triples(invalid_execution)
@@ -590,8 +591,12 @@ defmodule Canopy.Integration.ProvenanceLineageE2ETest do
     task = Task.async(fn -> emit_provenance_triples(execution) end)
 
     case Task.yield(task, timeout_ms) do
-      {:ok, result} -> result
-      nil -> Task.shutdown(task); []
+      {:ok, result} ->
+        result
+
+      nil ->
+        Task.shutdown(task)
+        []
     end
   end
 
@@ -659,7 +664,7 @@ defmodule Canopy.Integration.ProvenanceLineageE2ETest do
         "status" => execution["status"] || "ok",
         "execution_id" => execution["id"]
       },
-      "status" => execution["status"] == "error" && "error" || "ok",
+      "status" => (execution["status"] == "error" && "error") || "ok",
       "duration_us" => 1000
     }
   end

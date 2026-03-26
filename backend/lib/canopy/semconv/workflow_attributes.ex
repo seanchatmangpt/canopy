@@ -80,10 +80,10 @@ defmodule OpenTelemetry.SemConv.Incubating.WorkflowAttributes do
   | `business_os` | `"business_os"` | business_os |
   """
   @spec workflow_engine_values() :: %{
-    canopy: :canopy,
-    yawl: :yawl,
-    business_os: :business_os
-  }
+          canopy: :canopy,
+          yawl: :yawl,
+          business_os: :business_os
+        }
   def workflow_engine_values do
     %{
       canopy: :canopy,
@@ -108,7 +108,6 @@ defmodule OpenTelemetry.SemConv.Incubating.WorkflowAttributes do
     @doc "business_os"
     @spec business_os() :: :business_os
     def business_os, do: :business_os
-
   end
 
   @doc """
@@ -205,10 +204,10 @@ defmodule OpenTelemetry.SemConv.Incubating.WorkflowAttributes do
   | `threshold` | `"threshold"` | threshold |
   """
   @spec workflow_merge_policy_values() :: %{
-    first: :first,
-    all: :all,
-    threshold: :threshold
-  }
+          first: :first,
+          all: :all,
+          threshold: :threshold
+        }
   def workflow_merge_policy_values do
     %{
       first: :first,
@@ -233,7 +232,6 @@ defmodule OpenTelemetry.SemConv.Incubating.WorkflowAttributes do
     @doc "threshold"
     @spec threshold() :: :threshold
     def threshold, do: :threshold
-
   end
 
   @doc """
@@ -302,30 +300,30 @@ defmodule OpenTelemetry.SemConv.Incubating.WorkflowAttributes do
   | `structured_sync_merge` | `"structured_sync_merge"` | structured_sync_merge |
   """
   @spec workflow_pattern_values() :: %{
-    sequence: :sequence,
-    parallel_split: :parallel_split,
-    synchronization: :synchronization,
-    exclusive_choice: :exclusive_choice,
-    multi_choice: :multi_choice,
-    structured_loop: :structured_loop,
-    deferred_choice: :deferred_choice,
-    milestone: :milestone,
-    discriminator: :discriminator,
-    n_out_of_m: :n_out_of_m,
-    partial_join: :partial_join,
-    cancel_region: :cancel_region,
-    interleaved_parallel: :interleaved_parallel,
-    critical_section: :critical_section,
-    recursion: :recursion,
-    transient_trigger: :transient_trigger,
-    persistent_trigger: :persistent_trigger,
-    event_based_choice: :event_based_choice,
-    cancel_activity: :cancel_activity,
-    multi_instance_sync: :multi_instance_sync,
-    simple_merge: :simple_merge,
-    multiple_instance: :multiple_instance,
-    structured_sync_merge: :structured_sync_merge
-  }
+          sequence: :sequence,
+          parallel_split: :parallel_split,
+          synchronization: :synchronization,
+          exclusive_choice: :exclusive_choice,
+          multi_choice: :multi_choice,
+          structured_loop: :structured_loop,
+          deferred_choice: :deferred_choice,
+          milestone: :milestone,
+          discriminator: :discriminator,
+          n_out_of_m: :n_out_of_m,
+          partial_join: :partial_join,
+          cancel_region: :cancel_region,
+          interleaved_parallel: :interleaved_parallel,
+          critical_section: :critical_section,
+          recursion: :recursion,
+          transient_trigger: :transient_trigger,
+          persistent_trigger: :persistent_trigger,
+          event_based_choice: :event_based_choice,
+          cancel_activity: :cancel_activity,
+          multi_instance_sync: :multi_instance_sync,
+          simple_merge: :simple_merge,
+          multiple_instance: :multiple_instance,
+          structured_sync_merge: :structured_sync_merge
+        }
   def workflow_pattern_values do
     %{
       sequence: :sequence,
@@ -450,7 +448,6 @@ defmodule OpenTelemetry.SemConv.Incubating.WorkflowAttributes do
     @doc "structured_sync_merge"
     @spec structured_sync_merge() :: :structured_sync_merge
     def structured_sync_merge, do: :structured_sync_merge
-
   end
 
   @doc """
@@ -502,13 +499,13 @@ defmodule OpenTelemetry.SemConv.Incubating.WorkflowAttributes do
   | `suspended` | `"suspended"` | suspended |
   """
   @spec workflow_state_values() :: %{
-    pending: :pending,
-    active: :active,
-    completed: :completed,
-    failed: :failed,
-    cancelled: :cancelled,
-    suspended: :suspended
-  }
+          pending: :pending,
+          active: :active,
+          completed: :completed,
+          failed: :failed,
+          cancelled: :cancelled,
+          suspended: :suspended
+        }
   def workflow_state_values do
     %{
       pending: :pending,
@@ -548,7 +545,6 @@ defmodule OpenTelemetry.SemConv.Incubating.WorkflowAttributes do
     @doc "suspended"
     @spec suspended() :: :suspended
     def suspended, do: :suspended
-
   end
 
   @doc """
@@ -625,14 +621,14 @@ defmodule OpenTelemetry.SemConv.Incubating.WorkflowAttributes do
   | `condition` | `"condition"` | condition |
   """
   @spec workflow_trigger_type_values() :: %{
-    timer: :timer,
-    event: :event,
-    signal: :signal,
-    manual: :manual,
-    message: :message,
-    external: :external,
-    condition: :condition
-  }
+          timer: :timer,
+          event: :event,
+          signal: :signal,
+          manual: :manual,
+          message: :message,
+          external: :external,
+          condition: :condition
+        }
   def workflow_trigger_type_values do
     %{
       timer: :timer,
@@ -677,7 +673,5 @@ defmodule OpenTelemetry.SemConv.Incubating.WorkflowAttributes do
     @doc "condition"
     @spec condition() :: :condition
     def condition, do: :condition
-
   end
-
 end

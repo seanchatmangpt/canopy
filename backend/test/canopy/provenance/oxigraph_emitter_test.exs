@@ -188,8 +188,8 @@ defmodule Canopy.Provenance.OxigraphEmitterTest do
           role: "contributor"
         })
 
-      assert (result1 == :ok or match?({:error, _}, result1))
-      assert (result2 == :ok or match?({:error, _}, result2))
+      assert result1 == :ok or match?({:error, _}, result1)
+      assert result2 == :ok or match?({:error, _}, result2)
     end
   end
 

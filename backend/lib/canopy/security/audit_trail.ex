@@ -256,7 +256,9 @@ defmodule Canopy.Security.AuditTrail do
 
   # Private: Compute cryptographic hash for event
   defp compute_hash(attrs) do
-    hash_input = "#{attrs[:event_type]}-#{attrs[:action]}-#{attrs[:resource_id]}-#{attrs[:inserted_at]}"
+    hash_input =
+      "#{attrs[:event_type]}-#{attrs[:action]}-#{attrs[:resource_id]}-#{attrs[:inserted_at]}"
+
     hash = :crypto.hash(:sha256, hash_input) |> Base.encode16()
     Map.put(attrs, :hash, hash)
   end

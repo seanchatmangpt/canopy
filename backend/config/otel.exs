@@ -2,8 +2,8 @@ import Config
 
 # OpenTelemetry SDK configuration
 config :opentelemetry,
-  :tracer,
-  :global
+       :tracer,
+       :global
 
 # HTTP/protobuf OTLP (collector HTTP OTLP is usually port 4318; 4317 is gRPC).
 config :opentelemetry_exporter,

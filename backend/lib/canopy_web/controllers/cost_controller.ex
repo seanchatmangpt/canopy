@@ -11,8 +11,12 @@ defmodule CanopyWeb.CostController do
 
     today = Date.utc_today()
     beginning_of_today = DateTime.new!(today, ~T[00:00:00], "Etc/UTC")
-    beginning_of_week = DateTime.new!(Date.add(today, -Date.day_of_week(today) + 1), ~T[00:00:00], "Etc/UTC")
-    beginning_of_month = DateTime.new!(Date.new!(today.year, today.month, 1), ~T[00:00:00], "Etc/UTC")
+
+    beginning_of_week =
+      DateTime.new!(Date.add(today, -Date.day_of_week(today) + 1), ~T[00:00:00], "Etc/UTC")
+
+    beginning_of_month =
+      DateTime.new!(Date.new!(today.year, today.month, 1), ~T[00:00:00], "Etc/UTC")
 
     today_cost = cost_since(beginning_of_today, workspace_id, user_workspace_ids)
     week_cost = cost_since(beginning_of_week, workspace_id, user_workspace_ids)
@@ -58,9 +62,14 @@ defmodule CanopyWeb.CostController do
 
     top_agent_query =
       cond do
-        workspace_id -> where(top_agent_query, [ce, a], a.workspace_id == ^workspace_id)
-        user_workspace_ids != [] -> where(top_agent_query, [ce, a], a.workspace_id in ^user_workspace_ids)
-        true -> top_agent_query
+        workspace_id ->
+          where(top_agent_query, [ce, a], a.workspace_id == ^workspace_id)
+
+        user_workspace_ids != [] ->
+          where(top_agent_query, [ce, a], a.workspace_id in ^user_workspace_ids)
+
+        true ->
+          top_agent_query
       end
 
     top_agent = Repo.one(top_agent_query)

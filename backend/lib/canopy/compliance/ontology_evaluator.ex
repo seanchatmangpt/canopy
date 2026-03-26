@@ -74,8 +74,9 @@ defmodule Canopy.Compliance.OntologyEvaluator do
           confidence: float()
         }
 
-  @type evaluation_result :: {:ok, [violation()], elapsed_ms :: non_neg_integer()}
-                           | {:error, reason :: String.t()}
+  @type evaluation_result ::
+          {:ok, [violation()], elapsed_ms :: non_neg_integer()}
+          | {:error, reason :: String.t()}
 
   @type violation :: %{
           policy_uri: String.t(),
@@ -94,10 +95,10 @@ defmodule Canopy.Compliance.OntologyEvaluator do
           frameworks: [String.t()],
           last_discovery_at: DateTime.t() | nil,
           cache_status: %{
-              hits: non_neg_integer(),
-              misses: non_neg_integer(),
-              hit_rate: float()
-            }
+            hits: non_neg_integer(),
+            misses: non_neg_integer(),
+            hit_rate: float()
+          }
         }
 
   @max_policies 1000

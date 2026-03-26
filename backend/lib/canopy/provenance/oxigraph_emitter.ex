@@ -51,9 +51,10 @@ defmodule Canopy.Provenance.OxigraphEmitter do
   def emit_activity(activity_id, details) do
     timeout = Keyword.get([timeout: @default_timeout_ms], :timeout, @default_timeout_ms)
 
-    task = Task.Supervisor.async_nolink(Canopy.TaskSupervisor, fn ->
-      do_emit_activity(activity_id, details, timeout)
-    end)
+    task =
+      Task.Supervisor.async_nolink(Canopy.TaskSupervisor, fn ->
+        do_emit_activity(activity_id, details, timeout)
+      end)
 
     case Task.yield(task, timeout + 1000) do
       {:ok, result} ->
@@ -95,9 +96,10 @@ defmodule Canopy.Provenance.OxigraphEmitter do
   def emit_artifact(artifact_id, details) do
     timeout = Keyword.get([timeout: @default_timeout_ms], :timeout, @default_timeout_ms)
 
-    task = Task.Supervisor.async_nolink(Canopy.TaskSupervisor, fn ->
-      do_emit_artifact(artifact_id, details, timeout)
-    end)
+    task =
+      Task.Supervisor.async_nolink(Canopy.TaskSupervisor, fn ->
+        do_emit_artifact(artifact_id, details, timeout)
+      end)
 
     case Task.yield(task, timeout + 1000) do
       {:ok, result} ->
@@ -134,9 +136,10 @@ defmodule Canopy.Provenance.OxigraphEmitter do
   def emit_derivation(artifact_id, activity_id, details \\ %{}) do
     timeout = Keyword.get([timeout: @default_timeout_ms], :timeout, @default_timeout_ms)
 
-    task = Task.Supervisor.async_nolink(Canopy.TaskSupervisor, fn ->
-      do_emit_derivation(artifact_id, activity_id, details, timeout)
-    end)
+    task =
+      Task.Supervisor.async_nolink(Canopy.TaskSupervisor, fn ->
+        do_emit_derivation(artifact_id, activity_id, details, timeout)
+      end)
 
     case Task.yield(task, timeout + 1000) do
       {:ok, result} ->
@@ -144,7 +147,11 @@ defmodule Canopy.Provenance.OxigraphEmitter do
 
       nil ->
         Task.shutdown(task, :brutal_kill)
-        Logger.error("[OxigraphEmitter] Derivation emission timed out: #{activity_id} -> #{artifact_id}")
+
+        Logger.error(
+          "[OxigraphEmitter] Derivation emission timed out: #{activity_id} -> #{artifact_id}"
+        )
+
         {:error, :timeout}
     end
   end
@@ -255,7 +262,10 @@ defmodule Canopy.Provenance.OxigraphEmitter do
     action_type = Map.get(details, :action_type)
 
     unless agent_id and action_type do
-      Logger.error("[OxigraphEmitter] Missing required fields: agent_id=#{agent_id}, action_type=#{action_type}")
+      Logger.error(
+        "[OxigraphEmitter] Missing required fields: agent_id=#{agent_id}, action_type=#{action_type}"
+      )
+
       return_error(:missing_required_fields)
     else
       activity_uri = "<https://ontology.chatmangpt.com/activity/#{activity_id}>"
@@ -272,22 +282,30 @@ defmodule Canopy.Provenance.OxigraphEmitter do
       triples =
         triples ++
           if Map.get(details, :duration_ms) do
-            ["#{activity_uri} <https://ontology.chatmangpt.com/core#duration_ms> #{Map.get(details, :duration_ms)} ."]
+            [
+              "#{activity_uri} <https://ontology.chatmangpt.com/core#duration_ms> #{Map.get(details, :duration_ms)} ."
+            ]
           else
             []
           end ++
           if Map.get(details, :status) do
-            ["#{activity_uri} <https://ontology.chatmangpt.com/core#status> \"#{Map.get(details, :status)}\" ."]
+            [
+              "#{activity_uri} <https://ontology.chatmangpt.com/core#status> \"#{Map.get(details, :status)}\" ."
+            ]
           else
             []
           end ++
           if Map.get(details, :input) do
-            ["#{activity_uri} <https://ontology.chatmangpt.com/core#hasInput> \"#{escape_string(Map.get(details, :input))}\" ."]
+            [
+              "#{activity_uri} <https://ontology.chatmangpt.com/core#hasInput> \"#{escape_string(Map.get(details, :input))}\" ."
+            ]
           else
             []
           end ++
           if Map.get(details, :output) do
-            ["#{activity_uri} <https://ontology.chatmangpt.com/core#hasOutput> \"#{escape_string(Map.get(details, :output))}\" ."]
+            [
+              "#{activity_uri} <https://ontology.chatmangpt.com/core#hasOutput> \"#{escape_string(Map.get(details, :output))}\" ."
+            ]
           else
             []
           end
@@ -321,7 +339,10 @@ defmodule Canopy.Provenance.OxigraphEmitter do
     name = Map.get(details, :name)
 
     unless artifact_type and name do
-      Logger.error("[OxigraphEmitter] Missing required fields: artifact_type=#{artifact_type}, name=#{name}")
+      Logger.error(
+        "[OxigraphEmitter] Missing required fields: artifact_type=#{artifact_type}, name=#{name}"
+      )
+
       return_error(:missing_required_fields)
     else
       artifact_uri = "<https://ontology.chatmangpt.com/artifact/#{artifact_id}>"
@@ -338,17 +359,23 @@ defmodule Canopy.Provenance.OxigraphEmitter do
       triples =
         triples ++
           if Map.get(details, :content_hash) do
-            ["#{artifact_uri} <https://ontology.chatmangpt.com/core#contentHash> \"#{Map.get(details, :content_hash)}\" ."]
+            [
+              "#{artifact_uri} <https://ontology.chatmangpt.com/core#contentHash> \"#{Map.get(details, :content_hash)}\" ."
+            ]
           else
             []
           end ++
           if Map.get(details, :size_bytes) do
-            ["#{artifact_uri} <https://ontology.chatmangpt.com/core#sizeBytes> #{Map.get(details, :size_bytes)} ."]
+            [
+              "#{artifact_uri} <https://ontology.chatmangpt.com/core#sizeBytes> #{Map.get(details, :size_bytes)} ."
+            ]
           else
             []
           end ++
           if Map.get(details, :source) do
-            ["#{artifact_uri} <https://ontology.chatmangpt.com/core#source> \"#{escape_string(Map.get(details, :source))}\" ."]
+            [
+              "#{artifact_uri} <https://ontology.chatmangpt.com/core#source> \"#{escape_string(Map.get(details, :source))}\" ."
+            ]
           else
             []
           end
@@ -451,7 +478,10 @@ defmodule Canopy.Provenance.OxigraphEmitter do
     try do
       case Req.post(url,
              body: sparql,
-             headers: [{"content-type", "application/sparql-query"}, {"accept", "application/json"}],
+             headers: [
+               {"content-type", "application/sparql-query"},
+               {"accept", "application/json"}
+             ],
              timeout: timeout_ms
            ) do
         {:ok, %{status: 200, body: %{"results" => %{"bindings" => rows}}}} ->

@@ -111,7 +111,8 @@ defmodule Canopy.Compliance.FrameworkConfig do
       {:ok, %{id: "cc6.1", title: "Logical Access Control", ...}}
   """
   @spec get_control(String.t(), String.t()) :: control_result()
-  def get_control(framework_name, control_id) when is_binary(framework_name) and is_binary(control_id) do
+  def get_control(framework_name, control_id)
+      when is_binary(framework_name) and is_binary(control_id) do
     with {:ok, framework} <- load_config(framework_name),
          control <- Enum.find(framework.controls, &(&1.id == control_id)) do
       case control do
@@ -146,8 +147,10 @@ defmodule Canopy.Compliance.FrameworkConfig do
       iex> FrameworkConfig.get_controls_by_criticality("SOC2", "critical")
       {:ok, [critical_control1, critical_control2, ...]}
   """
-  @spec get_controls_by_criticality(String.t(), String.t()) :: {:ok, [control()]} | {:error, String.t()}
-  def get_controls_by_criticality(framework_name, criticality) when is_binary(framework_name) and is_binary(criticality) do
+  @spec get_controls_by_criticality(String.t(), String.t()) ::
+          {:ok, [control()]} | {:error, String.t()}
+  def get_controls_by_criticality(framework_name, criticality)
+      when is_binary(framework_name) and is_binary(criticality) do
     with {:ok, framework} <- load_config(framework_name) do
       filtered = Enum.filter(framework.controls, &(&1.criticality == criticality))
       {:ok, filtered}
@@ -168,7 +171,8 @@ defmodule Canopy.Compliance.FrameworkConfig do
       {:ok, %{compliant: 1, non_compliant: 1, missing: ...}}
   """
   @spec validate_assessment(String.t(), map()) :: validation_result()
-  def validate_assessment(framework_name, assessment) when is_binary(framework_name) and is_map(assessment) do
+  def validate_assessment(framework_name, assessment)
+      when is_binary(framework_name) and is_map(assessment) do
     with {:ok, framework} <- load_config(framework_name) do
       control_ids = Enum.map(framework.controls, & &1.id)
       assessment_ids = Map.keys(assessment)

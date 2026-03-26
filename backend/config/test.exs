@@ -5,11 +5,18 @@ import Config
 # The MIX_TEST_PARTITION environment variable can be used
 # to provide built-in test partitioning in CI environment.
 # Run `mix help test` for more information.
+# Local dev defaults (user `rhl`); CI overrides via POSTGRES_* / DATABASE_* (see .github/workflows/weaver-live-check.yml).
+db_user = System.get_env("POSTGRES_USER") || System.get_env("DATABASE_USER") || "rhl"
+db_pass = System.get_env("POSTGRES_PASSWORD") || System.get_env("DATABASE_PASSWORD") || ""
+db_host = System.get_env("POSTGRES_HOST") || System.get_env("DATABASE_HOST") || "localhost"
+db_base = System.get_env("POSTGRES_DB") || "canopy_test"
+db_name = "#{db_base}#{System.get_env("MIX_TEST_PARTITION") || ""}"
+
 config :canopy, Canopy.Repo,
-  username: "rhl",
-  password: "",
-  hostname: "localhost",
-  database: "canopy_test#{System.get_env("MIX_TEST_PARTITION")}",
+  username: db_user,
+  password: db_pass,
+  hostname: db_host,
+  database: db_name,
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: System.schedulers_online() * 2
 
@@ -32,8 +39,7 @@ config :phoenix,
 
 # OpenTelemetry (test): no export by default — avoids connection errors to :4317 when no collector.
 # Weaver live-check: gRPC OTLP to WEAVER_OTLP_ENDPOINT (same receiver as OSA / pm4py-rust).
-config :opentelemetry, :resource,
-  service: [name: "canopy", version: "1.0.0"]
+config :opentelemetry, :resource, service: [name: "canopy", version: "1.0.0"]
 
 config :opentelemetry, tracer: :global
 

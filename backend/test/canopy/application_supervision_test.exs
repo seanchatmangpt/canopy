@@ -27,7 +27,12 @@ defmodule Canopy.ApplicationSupervisionTest do
       assert is_pid(task_pid)
 
       # Wait for task to complete
-      assert Task.await(Task.Supervisor.async(TestTaskSupervisor, fn -> :timer.sleep(5); "done" end)) ==
+      assert Task.await(
+               Task.Supervisor.async(TestTaskSupervisor, fn ->
+                 :timer.sleep(5)
+                 "done"
+               end)
+             ) ==
                "done"
     end
   end
@@ -43,7 +48,8 @@ defmodule Canopy.ApplicationSupervisionTest do
           HeartbeatTestSupervisor,
           Canopy.Autonomic.Heartbeat,
           :loop_heartbeat_supervised,
-          [100, 3, 0]  # interval_ms=100, max_iterations=3, iteration=0
+          # interval_ms=100, max_iterations=3, iteration=0
+          [100, 3, 0]
         )
 
       assert is_pid(task_pid)
@@ -77,7 +83,8 @@ defmodule Canopy.ApplicationSupervisionTest do
               HeartbeatWarnTestSupervisor,
               Canopy.Autonomic.Heartbeat,
               :loop_heartbeat_supervised,
-              [10, 1, 0]  # iteration limit = 1, so hits limit quickly
+              # iteration limit = 1, so hits limit quickly
+              [10, 1, 0]
             )
 
           # Let it run through iteration

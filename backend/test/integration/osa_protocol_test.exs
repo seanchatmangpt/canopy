@@ -44,7 +44,10 @@ defmodule Integration.OSAProtocolTest do
         {:ok, osa_available: true}
 
       {:error, reason} ->
-        Logger.info("[OSAProtocolTest] OSA unreachable (#{inspect(reason)}) - integration tests will be skipped")
+        Logger.info(
+          "[OSAProtocolTest] OSA unreachable (#{inspect(reason)}) - integration tests will be skipped"
+        )
+
         {:ok, osa_available: false}
     end
   end
@@ -111,7 +114,9 @@ defmodule Integration.OSAProtocolTest do
       assert elapsed_ms <= @latency_sla_p95_ms,
              "Spawn latency #{elapsed_ms}ms exceeds SLA of #{@latency_sla_p95_ms}ms"
 
-      Logger.info("[OSAProtocol] spawn: agent_id=#{response["agent_id"]}, latency=#{elapsed_ms}ms")
+      Logger.info(
+        "[OSAProtocol] spawn: agent_id=#{response["agent_id"]}, latency=#{elapsed_ms}ms"
+      )
     end
 
     @tag :skip_if_osa_unavailable
@@ -192,7 +197,9 @@ defmodule Integration.OSAProtocolTest do
       # Verify latency SLA
       assert elapsed_ms <= @latency_sla_p95_ms
 
-      Logger.info("[OSAProtocol] state: agent_id=#{response["agent_id"]}, latency=#{elapsed_ms}ms")
+      Logger.info(
+        "[OSAProtocol] state: agent_id=#{response["agent_id"]}, latency=#{elapsed_ms}ms"
+      )
     end
   end
 
@@ -329,7 +336,9 @@ defmodule Integration.OSAProtocolTest do
       # Verify latency SLA
       assert elapsed_ms <= @latency_sla_p95_ms
 
-      Logger.info("[OSAProtocol] signal/query: workflow_id=#{workflow_id}, latency=#{elapsed_ms}ms")
+      Logger.info(
+        "[OSAProtocol] signal/query: workflow_id=#{workflow_id}, latency=#{elapsed_ms}ms"
+      )
     end
   end
 
@@ -394,7 +403,9 @@ defmodule Integration.OSAProtocolTest do
     @tag :integration
     @tag :skip_if_osa_unavailable
     test "concurrent agent lifecycle operations" do
-      Logger.info("[OSAProtocol] Starting concurrent load test: #{@concurrent_workspaces} workspaces × #{@agents_per_workspace} agents")
+      Logger.info(
+        "[OSAProtocol] Starting concurrent load test: #{@concurrent_workspaces} workspaces × #{@agents_per_workspace} agents"
+      )
 
       # Create workspaces + agents in parallel
       workspace_tasks =
@@ -429,7 +440,10 @@ defmodule Integration.OSAProtocolTest do
                   {:ok, latency}
 
                 {:error, reason} ->
-                  Logger.warning("[OSAProtocol] Agent #{agent_id} unreachable: #{inspect(reason)}")
+                  Logger.warning(
+                    "[OSAProtocol] Agent #{agent_id} unreachable: #{inspect(reason)}"
+                  )
+
                   {:error, reason}
               end
             end)
@@ -448,7 +462,9 @@ defmodule Integration.OSAProtocolTest do
       count_successful = length(successful_latencies)
       count_total = length(health_results)
 
-      Logger.info("[OSAProtocol] Concurrent load: #{count_successful}/#{count_total} agents healthy")
+      Logger.info(
+        "[OSAProtocol] Concurrent load: #{count_successful}/#{count_total} agents healthy"
+      )
 
       if count_successful > 0 do
         p50 = Enum.at(successful_latencies, div(count_successful, 2), 0)
@@ -545,7 +561,9 @@ defmodule Integration.OSAProtocolTest do
 
         throughput = div(batch_size * 1000, max(elapsed_ms, 1))
 
-        Logger.info("[OSAProtocol] Spawn batch #{batch_size}: #{length(successful)} succeeded in #{elapsed_ms}ms (#{throughput} ops/sec)")
+        Logger.info(
+          "[OSAProtocol] Spawn batch #{batch_size}: #{length(successful)} succeeded in #{elapsed_ms}ms (#{throughput} ops/sec)"
+        )
 
         # Verify at least 80% success
         assert length(successful) >= div(batch_size * 80, 100)
@@ -743,7 +761,8 @@ defmodule Integration.OSAProtocolTest do
         # Map transport errors to HTTP-like error tuple for consistent handling
         case reason do
           %Req.TransportError{reason: :econnrefused} ->
-            {:error, {503, %{"error" => "connection_refused", "message" => "OSA service unavailable"}}}
+            {:error,
+             {503, %{"error" => "connection_refused", "message" => "OSA service unavailable"}}}
 
           _ ->
             {:error, reason}
@@ -791,12 +810,12 @@ defmodule Integration.OSAProtocolTest do
 
   defp create_test_workspace(name) do
     case Repo.insert(%Workspace{
-      name: name,
-      path: "/tmp/#{name}",
-      status: "active",
-      is_active: true,
-      isolation_level: "full"
-    }) do
+           name: name,
+           path: "/tmp/#{name}",
+           status: "active",
+           is_active: true,
+           isolation_level: "full"
+         }) do
       {:ok, ws} -> {:ok, ws}
       {:error, reason} -> {:error, reason}
     end

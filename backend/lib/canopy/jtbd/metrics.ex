@@ -29,10 +29,10 @@ defmodule Canopy.JTBD.Metrics do
   Returns: :ok
   """
   @spec record_metric(
-    iteration :: integer(),
-    metric_type :: :pass | :fail | :latency | :error,
-    data :: map()
-  ) :: :ok
+          iteration :: integer(),
+          metric_type :: :pass | :fail | :latency | :error,
+          data :: map()
+        ) :: :ok
   def record_metric(iteration, metric_type, data) when is_integer(iteration) do
     timestamp = DateTime.utc_now()
     key = {:iteration, iteration, metric_type, timestamp}
@@ -50,6 +50,7 @@ defmodule Canopy.JTBD.Metrics do
       Logger.warning(
         "Failed to record metric: iteration=#{iteration}, type=#{metric_type}, error=#{inspect(__STACKTRACE__)}"
       )
+
       :ok
   end
 
@@ -117,7 +118,8 @@ defmodule Canopy.JTBD.Metrics do
       size: size,
       max_entries: @max_entries,
       memory_words: memory,
-      memory_mb: Float.round(memory * 8 / 1_000_000, 2),  # 8 bytes per word
+      # 8 bytes per word
+      memory_mb: Float.round(memory * 8 / 1_000_000, 2),
       bounded: size <= @max_entries,
       utilization_percent: Float.round(size / @max_entries * 100, 1)
     }

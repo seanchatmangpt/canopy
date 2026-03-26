@@ -33,7 +33,15 @@ defmodule Canopy.OCPM.EventLog do
 
   def changeset(event_log, attrs) do
     event_log
-    |> cast(attrs, [:case_id, :activity, :timestamp, :resource, :attributes, :workspace_id, :agent_id])
+    |> cast(attrs, [
+      :case_id,
+      :activity,
+      :timestamp,
+      :resource,
+      :attributes,
+      :workspace_id,
+      :agent_id
+    ])
     |> validate_required([:case_id, :activity, :timestamp, :resource, :workspace_id])
     |> validate_inclusion(:activity, get_valid_activities())
   end

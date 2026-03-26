@@ -50,7 +50,10 @@ defmodule Canopy.OCPM.EventLogTest do
       {:ok, workspace_id: workspace_id, agent_id: agent_id}
     end
 
-    test "valid attributes produce a valid changeset", %{workspace_id: workspace_id, agent_id: agent_id} do
+    test "valid attributes produce a valid changeset", %{
+      workspace_id: workspace_id,
+      agent_id: agent_id
+    } do
       attrs = %{
         case_id: "invoice-001",
         activity: "approve",
@@ -64,7 +67,10 @@ defmodule Canopy.OCPM.EventLogTest do
       assert changeset.valid?
     end
 
-    test "missing required fields produce errors", %{workspace_id: workspace_id, agent_id: agent_id} do
+    test "missing required fields produce errors", %{
+      workspace_id: workspace_id,
+      agent_id: agent_id
+    } do
       # Missing case_id, activity, timestamp, resource
       attrs = %{
         workspace_id: workspace_id,
@@ -95,7 +101,10 @@ defmodule Canopy.OCPM.EventLogTest do
       refute changeset.valid?
     end
 
-    test "attributes field defaults to empty map", %{workspace_id: workspace_id, agent_id: agent_id} do
+    test "attributes field defaults to empty map", %{
+      workspace_id: workspace_id,
+      agent_id: agent_id
+    } do
       attrs = %{
         case_id: "invoice-001",
         activity: "start",

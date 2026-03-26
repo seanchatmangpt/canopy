@@ -64,9 +64,15 @@ defmodule Canopy.AdapterTest do
       for adapter <- Adapter.all() do
         assert Map.has_key?(adapter, :type), "Missing :type in #{inspect(adapter)}"
         assert Map.has_key?(adapter, :name), "Missing :name in #{inspect(adapter)}"
-        assert Map.has_key?(adapter, :supports_session), "Missing :supports_session in #{inspect(adapter)}"
-        assert Map.has_key?(adapter, :supports_concurrent), "Missing :supports_concurrent in #{inspect(adapter)}"
-        assert Map.has_key?(adapter, :capabilities), "Missing :capabilities in #{inspect(adapter)}"
+
+        assert Map.has_key?(adapter, :supports_session),
+               "Missing :supports_session in #{inspect(adapter)}"
+
+        assert Map.has_key?(adapter, :supports_concurrent),
+               "Missing :supports_concurrent in #{inspect(adapter)}"
+
+        assert Map.has_key?(adapter, :capabilities),
+               "Missing :capabilities in #{inspect(adapter)}"
       end
     end
 

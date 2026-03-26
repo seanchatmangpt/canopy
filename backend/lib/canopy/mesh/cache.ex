@@ -16,15 +16,16 @@ defmodule Canopy.Mesh.Cache do
   # ── Public API ──────────────────────────────────────────────────────
 
   def init do
-    ttl_minutes = String.to_integer(System.get_env("MESH_CACHE_TTL_MINUTES", "#{@default_ttl_minutes}"))
+    ttl_minutes =
+      String.to_integer(System.get_env("MESH_CACHE_TTL_MINUTES", "#{@default_ttl_minutes}"))
 
     case :ets.new(@table_name, [
-      :set,
-      :named_table,
-      :public,
-      {:write_concurrency, true},
-      {:read_concurrency, true}
-    ]) do
+           :set,
+           :named_table,
+           :public,
+           {:write_concurrency, true},
+           {:read_concurrency, true}
+         ]) do
       table when is_atom(table) ->
         Logger.info("[Mesh.Cache] Initialized with TTL #{ttl_minutes} minutes")
         {:ok, @table_name}
@@ -163,16 +164,20 @@ defmodule Canopy.Mesh.Cache do
 
     %{
       size: size,
-      memory_bytes: memory * 8,  # ETS returns memory in words, convert to bytes
+      # ETS returns memory in words, convert to bytes
+      memory_bytes: memory * 8,
       entries: size,
-      ttl_minutes: String.to_integer(System.get_env("MESH_CACHE_TTL_MINUTES", "#{@default_ttl_minutes}"))
+      ttl_minutes:
+        String.to_integer(System.get_env("MESH_CACHE_TTL_MINUTES", "#{@default_ttl_minutes}"))
     }
   end
 
   # ── Private Helpers ─────────────────────────────────────────────────
 
   defp is_expired?(cached_at) do
-    ttl_minutes = String.to_integer(System.get_env("MESH_CACHE_TTL_MINUTES", "#{@default_ttl_minutes}"))
+    ttl_minutes =
+      String.to_integer(System.get_env("MESH_CACHE_TTL_MINUTES", "#{@default_ttl_minutes}"))
+
     ttl_seconds = ttl_minutes * 60
 
     age_seconds =

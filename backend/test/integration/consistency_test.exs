@@ -30,7 +30,7 @@ defmodule Canopy.Integration.ConsistencyTest do
       "url" => "http://127.0.0.1:8089",
       "provider" => "groq",
       "model" => "llama-3.3-70b-versatile",
-      "shared_secret" => System.get_env("OSA_SHARED_SECRET", "test-secret-key"),
+      "shared_secret" => System.get_env("OSA_SHARED_SECRET", "test-secret-key")
     }
 
     {:ok, session_config: session_config}
@@ -72,26 +72,30 @@ defmodule Canopy.Integration.ConsistencyTest do
     # Phase 2: Trigger discovery via OSA adapter
     discovery_payload = create_discovery_payload()
 
-    result = case OSA.send_message(%{
-      session_id: "test_session_#{System.unique_integer()}",
-      base_url: config["url"],
-      provider: config["provider"],
-      model: config["model"],
-    }, discovery_payload) do
-      {:ok, events} ->
-        # Consume events until discovery completes
-        Enum.reduce(events, %{}, fn event, acc ->
-          case event do
-            {:discovery_complete, model} -> Map.put(acc, :model, model)
-            {:discovery_failed, error} -> Map.put(acc, :error, error)
-            _ -> acc
-          end
-        end)
+    result =
+      case OSA.send_message(
+             %{
+               session_id: "test_session_#{System.unique_integer()}",
+               base_url: config["url"],
+               provider: config["provider"],
+               model: config["model"]
+             },
+             discovery_payload
+           ) do
+        {:ok, events} ->
+          # Consume events until discovery completes
+          Enum.reduce(events, %{}, fn event, acc ->
+            case event do
+              {:discovery_complete, model} -> Map.put(acc, :model, model)
+              {:discovery_failed, error} -> Map.put(acc, :error, error)
+              _ -> acc
+            end
+          end)
 
-      {:error, reason} ->
-        Logger.warn("Discovery failed: #{inspect(reason)}")
-        {:error, reason}
-    end
+        {:error, reason} ->
+          Logger.warn("Discovery failed: #{inspect(reason)}")
+          {:error, reason}
+      end
 
     case result do
       %{model: _model} ->
@@ -166,10 +170,13 @@ defmodule Canopy.Integration.ConsistencyTest do
     conformance_payload = create_conformance_payload(event_log, model)
 
     # Execute conformance check
-    case OSA.send_message(%{
-      session_id: "test_session_#{System.unique_integer()}",
-      base_url: config["url"],
-    }, conformance_payload) do
+    case OSA.send_message(
+           %{
+             session_id: "test_session_#{System.unique_integer()}",
+             base_url: config["url"]
+           },
+           conformance_payload
+         ) do
       {:ok, events} ->
         Enum.each(events, fn
           {:conformance_result, _result} -> :ok
@@ -203,17 +210,29 @@ defmodule Canopy.Integration.ConsistencyTest do
     # Path 1: Invoice Approval
     invoice_log = create_canonical_invoice_log()
     {_model1, checkpoint1} = perform_discovery(config, invoice_log)
-    assert custom_string_contains?(checkpoint1[:activities], ["invoice_received", "approve_payment"])
+
+    assert custom_string_contains?(checkpoint1[:activities], [
+             "invoice_received",
+             "approve_payment"
+           ])
 
     # Path 2: Customer Onboarding (different log, different activities)
     onboarding_log = create_canonical_onboarding_log()
     {_model2, checkpoint2} = perform_discovery(config, onboarding_log)
-    assert custom_string_contains?(checkpoint2[:activities], ["application_submitted", "orientation_completed"])
+
+    assert custom_string_contains?(checkpoint2[:activities], [
+             "application_submitted",
+             "orientation_completed"
+           ])
 
     # Path 3: Compliance Reporting
     compliance_log = create_canonical_compliance_log()
     {_model3, checkpoint3} = perform_discovery(config, compliance_log)
-    assert custom_string_contains?(checkpoint3[:activities], ["audit_triggered", "report_submitted"])
+
+    assert custom_string_contains?(checkpoint3[:activities], [
+             "audit_triggered",
+             "report_submitted"
+           ])
 
     # Invariant: Each path has distinct activity set (no cross-contamination)
     assert checkpoint1[:state_hash] != checkpoint2[:state_hash]
@@ -264,7 +283,9 @@ defmodule Canopy.Integration.ConsistencyTest do
         assert checkpoint_post_failure[:state_hash] == checkpoint_pre_failure[:state_hash]
 
         # Phase 2: Retry should succeed
-        {:ok, {_model, checkpoint_retry}} = perform_discovery_with_retry(config, event_log, attempt: 2)
+        {:ok, {_model, checkpoint_retry}} =
+          perform_discovery_with_retry(config, event_log, attempt: 2)
+
         assert checkpoint_retry[:case_count] > 0
     end
 
@@ -348,7 +369,7 @@ defmodule Canopy.Integration.ConsistencyTest do
     logs = [
       create_canonical_invoice_log(),
       create_canonical_onboarding_log(),
-      create_canonical_compliance_log(),
+      create_canonical_compliance_log()
     ]
 
     # Launch 3 concurrent discoveries
@@ -419,7 +440,7 @@ defmodule Canopy.Integration.ConsistencyTest do
       activities: [],
       variant_count: 0,
       case_count: 0,
-      state_hash: "#{label}:#{System.system_time(:millisecond)}",
+      state_hash: "#{label}:#{System.system_time(:millisecond)}"
     }
   end
 
@@ -427,7 +448,7 @@ defmodule Canopy.Integration.ConsistencyTest do
     model = %{
       activities: extract_activities(event_log),
       variants: compute_variants(event_log),
-      traces: length(event_log),
+      traces: length(event_log)
     }
 
     checkpoint = %{
@@ -437,7 +458,7 @@ defmodule Canopy.Integration.ConsistencyTest do
       activities: extract_activities(event_log),
       variant_count: map_size(compute_variants(event_log)),
       case_count: length(event_log),
-      state_hash: hash_event_log(event_log),
+      state_hash: hash_event_log(event_log)
     }
 
     {model, checkpoint}
@@ -474,7 +495,7 @@ defmodule Canopy.Integration.ConsistencyTest do
     model = %{
       activities: ["activity1", "activity2"],
       variants: %{"variant_1" => 10},
-      traces: 50,
+      traces: 50
     }
 
     checkpoint = %{
@@ -484,7 +505,7 @@ defmodule Canopy.Integration.ConsistencyTest do
       activities: model[:activities],
       variant_count: map_size(model[:variants]),
       case_count: model[:traces],
-      state_hash: "db_retrieved_#{model_id}",
+      state_hash: "db_retrieved_#{model_id}"
     }
 
     {model, checkpoint}
@@ -498,7 +519,7 @@ defmodule Canopy.Integration.ConsistencyTest do
           "validate_invoice",
           "approve_payment",
           "process_payment",
-          "payment_confirmed",
+          "payment_confirmed"
         ]
       },
       %{
@@ -510,9 +531,9 @@ defmodule Canopy.Integration.ConsistencyTest do
           "validate_invoice",
           "approve_payment",
           "process_payment",
-          "payment_confirmed",
+          "payment_confirmed"
         ]
-      },
+      }
     ]
   end
 
@@ -525,7 +546,7 @@ defmodule Canopy.Integration.ConsistencyTest do
           "background_check_passed",
           "paperwork_sent",
           "orientation_completed",
-          "provisioning_completed",
+          "provisioning_completed"
         ]
       },
       %{
@@ -537,9 +558,9 @@ defmodule Canopy.Integration.ConsistencyTest do
           "appeal_approved",
           "paperwork_sent",
           "orientation_completed",
-          "provisioning_completed",
+          "provisioning_completed"
         ]
-      },
+      }
     ]
   end
 
@@ -551,9 +572,9 @@ defmodule Canopy.Integration.ConsistencyTest do
           "documents_collected",
           "audit_performed",
           "findings_reported",
-          "report_submitted",
+          "report_submitted"
         ]
-      },
+      }
     ]
   end
 
@@ -573,7 +594,7 @@ defmodule Canopy.Integration.ConsistencyTest do
 
   defp extract_activities(traces) do
     traces
-    |> Enum.flat_map(& &1[:events] || [])
+    |> Enum.flat_map(&(&1[:events] || []))
     |> Enum.uniq()
     |> Enum.sort()
   end

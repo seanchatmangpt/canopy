@@ -84,11 +84,11 @@ defmodule Canopy.Work do
     now = DateTime.utc_now() |> DateTime.truncate(:second)
 
     case Repo.update_all(
-      from(i in Issue,
-        where: i.id == ^issue_id and is_nil(i.checked_out_by)
-      ),
-      set: [checked_out_by: agent_id, status: "in_progress", updated_at: now]
-    ) do
+           from(i in Issue,
+             where: i.id == ^issue_id and is_nil(i.checked_out_by)
+           ),
+           set: [checked_out_by: agent_id, status: "in_progress", updated_at: now]
+         ) do
       {1, _} -> {:ok, Repo.get!(Issue, issue_id)}
       {0, _} -> {:error, :already_checked_out}
     end
@@ -165,7 +165,8 @@ defmodule Canopy.Work do
 
   defp build_ancestry(goal_id, visited) do
     if MapSet.member?(visited, goal_id) do
-      []  # Break cycle
+      # Break cycle
+      []
     else
       case Repo.get(Goal, goal_id) do
         nil -> []

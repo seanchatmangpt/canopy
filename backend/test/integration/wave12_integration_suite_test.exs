@@ -108,26 +108,34 @@ defmodule Canopy.Integration.Wave12IntegrationSuiteTest do
         successful = Enum.filter(results, fn r -> match?({:ok, _}, r) end)
         failed = Enum.filter(results, fn r -> match?({:error, _}, r) end)
 
-        Logger.info("[Wave12] Test 1 Results: #{length(successful)}/#{total_executions} succeeded")
+        Logger.info(
+          "[Wave12] Test 1 Results: #{length(successful)}/#{total_executions} succeeded"
+        )
 
         # All scenarios must complete (success or failure detected, no hangs)
         assert length(results) == total_executions,
-          "Expected #{total_executions} results, got #{length(results)}"
+               "Expected #{total_executions} results, got #{length(results)}"
 
         # Log results distribution
         for scenario_id <- @scenarios do
-          scenario_results = Enum.filter(results, fn
-            {:ok, r} -> r[:scenario_id] == scenario_id
-            {:error, _} -> false
-          end)
+          scenario_results =
+            Enum.filter(results, fn
+              {:ok, r} -> r[:scenario_id] == scenario_id
+              {:error, _} -> false
+            end)
+
           count = length(scenario_results)
           Logger.info("[Wave12] Scenario #{scenario_id}: #{count}/#{@max_iterations} executions")
         end
 
         assert length(successful) > 0, "At least one scenario must succeed"
-        OpenTelemetry.Tracer.set_attribute(:"wave12.test.successful_executions", length(successful))
-        OpenTelemetry.Tracer.set_attribute(:"wave12.test.failed_executions", length(failed))
 
+        OpenTelemetry.Tracer.set_attribute(
+          :"wave12.test.successful_executions",
+          length(successful)
+        )
+
+        OpenTelemetry.Tracer.set_attribute(:"wave12.test.failed_executions", length(failed))
       after
         OpenTelemetry.Tracer.end_span(root_span)
       end
@@ -162,26 +170,30 @@ defmodule Canopy.Integration.Wave12IntegrationSuiteTest do
             latency_ms = result[:latency_ms] || 0
             latencies = Map.get(scenario_latencies, scenario_id, [])
             Map.put(scenario_latencies, scenario_id, latencies ++ [latency_ms])
+
           {:error, _} ->
             :ok
         end)
 
         # Verify each scenario stays < 15s
-        slo_violations = Enum.reduce(scenario_latencies, [], fn {scenario_id, latencies}, violations ->
-          max_latency = Enum.max(latencies)
-          avg_latency = div(Enum.sum(latencies), max(1, length(latencies)))
-          p95_latency = calculate_percentile(latencies, 0.95)
+        slo_violations =
+          Enum.reduce(scenario_latencies, [], fn {scenario_id, latencies}, violations ->
+            max_latency = Enum.max(latencies)
+            avg_latency = div(Enum.sum(latencies), max(1, length(latencies)))
+            p95_latency = calculate_percentile(latencies, 0.95)
 
-          Logger.info("[Wave12] Scenario #{scenario_id}: max=#{max_latency}ms avg=#{avg_latency}ms p95=#{p95_latency}ms")
+            Logger.info(
+              "[Wave12] Scenario #{scenario_id}: max=#{max_latency}ms avg=#{avg_latency}ms p95=#{p95_latency}ms"
+            )
 
-          if max_latency > @scenario_slo_ms do
-            [
-              {:scenario_exceeded_slo, scenario_id, max_latency} | violations
-            ]
-          else
-            violations
-          end
-        end)
+            if max_latency > @scenario_slo_ms do
+              [
+                {:scenario_exceeded_slo, scenario_id, max_latency} | violations
+              ]
+            else
+              violations
+            end
+          end)
 
         # Store metrics for Test 5 (stress test analysis)
         Agent.update(:wave12_latencies, fn state ->
@@ -189,10 +201,9 @@ defmodule Canopy.Integration.Wave12IntegrationSuiteTest do
         end)
 
         assert Enum.empty?(slo_violations),
-          "SLO violations: #{inspect(slo_violations)}"
+               "SLO violations: #{inspect(slo_violations)}"
 
         OpenTelemetry.Tracer.set_attribute(:"wave12.test.status", "slo_verified")
-
       after
         OpenTelemetry.Tracer.end_span(root_span)
       end
@@ -209,33 +220,35 @@ defmodule Canopy.Integration.Wave12IntegrationSuiteTest do
         OpenTelemetry.Tracer.set_attribute(:"wave12.test.id", "iteration_slo")
         OpenTelemetry.Tracer.set_attribute(:"wave12.iteration_slo_ms", @iteration_slo_ms)
 
-        iteration_latencies = for iteration <- 1..@max_iterations do
-          start_ms = System.monotonic_time(:millisecond)
+        iteration_latencies =
+          for iteration <- 1..@max_iterations do
+            start_ms = System.monotonic_time(:millisecond)
 
-          Enum.each(@scenarios, fn scenario_id ->
-            Runner.run_scenario(scenario_id, workspace_id: @workspace_id, iteration: iteration)
-          end)
+            Enum.each(@scenarios, fn scenario_id ->
+              Runner.run_scenario(scenario_id, workspace_id: @workspace_id, iteration: iteration)
+            end)
 
-          iteration_time_ms = System.monotonic_time(:millisecond) - start_ms
-          Logger.info("[Wave12] Iteration #{iteration}: #{iteration_time_ms}ms")
+            iteration_time_ms = System.monotonic_time(:millisecond) - start_ms
+            Logger.info("[Wave12] Iteration #{iteration}: #{iteration_time_ms}ms")
 
-          assert iteration_time_ms < @iteration_slo_ms,
-            "Iteration #{iteration} exceeded SLO: #{iteration_time_ms}ms > #{@iteration_slo_ms}ms"
+            assert iteration_time_ms < @iteration_slo_ms,
+                   "Iteration #{iteration} exceeded SLO: #{iteration_time_ms}ms > #{@iteration_slo_ms}ms"
 
-          iteration_time_ms
-        end
+            iteration_time_ms
+          end
 
         # Generate histogram
         avg_iteration = div(Enum.sum(iteration_latencies), max(1, length(iteration_latencies)))
         p95_iteration = calculate_percentile(iteration_latencies, 0.95)
         p99_iteration = calculate_percentile(iteration_latencies, 0.99)
 
-        Logger.info("[Wave12] Iteration Latency: avg=#{avg_iteration}ms p95=#{p95_iteration}ms p99=#{p99_iteration}ms")
+        Logger.info(
+          "[Wave12] Iteration Latency: avg=#{avg_iteration}ms p95=#{p95_iteration}ms p99=#{p99_iteration}ms"
+        )
 
         OpenTelemetry.Tracer.set_attribute(:"wave12.iteration.avg_ms", avg_iteration)
         OpenTelemetry.Tracer.set_attribute(:"wave12.iteration.p95_ms", p95_iteration)
         OpenTelemetry.Tracer.set_attribute(:"wave12.iteration.p99_ms", p99_iteration)
-
       after
         OpenTelemetry.Tracer.end_span(root_span)
       end
@@ -259,22 +272,23 @@ defmodule Canopy.Integration.Wave12IntegrationSuiteTest do
         OpenTelemetry.Tracer.set_attribute(:"wave12.test.id", "resource_ets")
         OpenTelemetry.Tracer.set_attribute(:"wave12.max_ets_entries", @max_ets_entries)
 
-        ets_snapshots = for iteration <- 1..@max_iterations do
-          # Get current ETS entry count
-          ets_count = get_ets_entry_count()
-          Logger.info("[Wave12] Iteration #{iteration}: ETS entries = #{ets_count}")
+        ets_snapshots =
+          for iteration <- 1..@max_iterations do
+            # Get current ETS entry count
+            ets_count = get_ets_entry_count()
+            Logger.info("[Wave12] Iteration #{iteration}: ETS entries = #{ets_count}")
 
-          # Run scenarios for this iteration
-          Enum.each(@scenarios, fn scenario_id ->
-            Runner.run_scenario(scenario_id, workspace_id: @workspace_id, iteration: iteration)
-          end)
+            # Run scenarios for this iteration
+            Enum.each(@scenarios, fn scenario_id ->
+              Runner.run_scenario(scenario_id, workspace_id: @workspace_id, iteration: iteration)
+            end)
 
-          # Verify bounded
-          assert ets_count < @max_ets_entries,
-            "Iteration #{iteration}: ETS entries #{ets_count} >= #{@max_ets_entries}"
+            # Verify bounded
+            assert ets_count < @max_ets_entries,
+                   "Iteration #{iteration}: ETS entries #{ets_count} >= #{@max_ets_entries}"
 
-          {iteration, ets_count}
-        end
+            {iteration, ets_count}
+          end
 
         # Store snapshots for analysis
         Agent.update(:wave12_resource_snapshots, fn state ->
@@ -292,11 +306,14 @@ defmodule Canopy.Integration.Wave12IntegrationSuiteTest do
         Logger.info("[Wave12] ETS growth ratio: #{growth_ratio}")
 
         assert growth_ratio < 2.0,
-          "ETS growth appears exponential: #{growth_ratio}x from iteration 1 to #{@max_iterations}"
+               "ETS growth appears exponential: #{growth_ratio}x from iteration 1 to #{@max_iterations}"
 
-        OpenTelemetry.Tracer.set_attribute(:"wave12.ets.max_entries", Enum.max(Enum.map(ets_snapshots, &elem(&1, 1))))
+        OpenTelemetry.Tracer.set_attribute(
+          :"wave12.ets.max_entries",
+          Enum.max(Enum.map(ets_snapshots, &elem(&1, 1)))
+        )
+
         OpenTelemetry.Tracer.set_attribute(:"wave12.ets.growth_ratio", growth_ratio)
-
       after
         OpenTelemetry.Tracer.end_span(root_span)
       end
@@ -316,33 +333,40 @@ defmodule Canopy.Integration.Wave12IntegrationSuiteTest do
 
         initial_process_count = length(Process.list())
 
-        process_snapshots = for iteration <- 1..@max_iterations do
-          current_count = length(Process.list())
-          Logger.info("[Wave12] Iteration #{iteration}: #{current_count} processes")
+        process_snapshots =
+          for iteration <- 1..@max_iterations do
+            current_count = length(Process.list())
+            Logger.info("[Wave12] Iteration #{iteration}: #{current_count} processes")
 
-          Enum.each(@scenarios, fn scenario_id ->
-            Runner.run_scenario(scenario_id, workspace_id: @workspace_id, iteration: iteration)
-          end)
+            Enum.each(@scenarios, fn scenario_id ->
+              Runner.run_scenario(scenario_id, workspace_id: @workspace_id, iteration: iteration)
+            end)
 
-          # Give cleanup time
-          Process.sleep(100)
+            # Give cleanup time
+            Process.sleep(100)
 
-          {iteration, current_count}
-        end
+            {iteration, current_count}
+          end
 
         process_counts = Enum.map(process_snapshots, &elem(&1, 1))
-        max_process_count = if Enum.empty?(process_counts), do: initial_process_count, else: Enum.max(process_counts)
+
+        max_process_count =
+          if Enum.empty?(process_counts),
+            do: initial_process_count,
+            else: Enum.max(process_counts)
+
         Logger.info("[Wave12] Max process count: #{max_process_count}")
 
         # Verify no runaway growth (linear is OK, exponential is not)
-        growth_ratio = if initial_process_count > 0, do: max_process_count / initial_process_count, else: 1.0
+        growth_ratio =
+          if initial_process_count > 0, do: max_process_count / initial_process_count, else: 1.0
+
         assert growth_ratio < 3.0,
-          "Process count appears to be growing exponentially: #{growth_ratio}x"
+               "Process count appears to be growing exponentially: #{growth_ratio}x"
 
         OpenTelemetry.Tracer.set_attribute(:"wave12.process.max", max_process_count)
         OpenTelemetry.Tracer.set_attribute(:"wave12.process.initial", initial_process_count)
         OpenTelemetry.Tracer.set_attribute(:"wave12.process.growth_ratio", growth_ratio)
-
       after
         OpenTelemetry.Tracer.end_span(root_span)
       end
@@ -380,10 +404,9 @@ defmodule Canopy.Integration.Wave12IntegrationSuiteTest do
 
         # Allow 2.5x growth (linear or sublinear)
         assert growth_ratio < 2.5,
-          "Memory appears to be growing exponentially: #{growth_ratio}x"
+               "Memory appears to be growing exponentially: #{growth_ratio}x"
 
         OpenTelemetry.Tracer.set_attribute(:"wave12.memory.growth_ratio", growth_ratio)
-
       after
         OpenTelemetry.Tracer.end_span(root_span)
       end
@@ -413,20 +436,25 @@ defmodule Canopy.Integration.Wave12IntegrationSuiteTest do
         # Run scenarios and track published outcomes
         Enum.each(1..@max_iterations, fn iteration ->
           Enum.each(@scenarios, fn scenario_id ->
-            case Runner.run_scenario(scenario_id, workspace_id: @workspace_id, iteration: iteration) do
+            case Runner.run_scenario(scenario_id,
+                   workspace_id: @workspace_id,
+                   iteration: iteration
+                 ) do
               {:ok, result} ->
                 # Publish outcome message
                 Agent.update(:wave12_message_log, fn state ->
-                  state ++ [
-                    {:outcome, scenario_id, iteration, result[:outcome]}
-                  ]
+                  state ++
+                    [
+                      {:outcome, scenario_id, iteration, result[:outcome]}
+                    ]
                 end)
 
               {:error, reason} ->
                 Agent.update(:wave12_message_log, fn state ->
-                  state ++ [
-                    {:error, scenario_id, iteration, reason}
-                  ]
+                  state ++
+                    [
+                      {:error, scenario_id, iteration, reason}
+                    ]
                 end)
             end
           end)
@@ -436,14 +464,15 @@ defmodule Canopy.Integration.Wave12IntegrationSuiteTest do
         final_message_count = Agent.get(:wave12_message_log, fn state -> length(state) end)
         messages_received = final_message_count - message_count
 
-        Logger.info("[Wave12] Messages published: #{expected_message_count}, received: #{messages_received}")
+        Logger.info(
+          "[Wave12] Messages published: #{expected_message_count}, received: #{messages_received}"
+        )
 
         assert messages_received == expected_message_count,
-          "Message loss detected: expected #{expected_message_count}, got #{messages_received}"
+               "Message loss detected: expected #{expected_message_count}, got #{messages_received}"
 
         OpenTelemetry.Tracer.set_attribute(:"wave12.messages.published", expected_message_count)
         OpenTelemetry.Tracer.set_attribute(:"wave12.messages.received", messages_received)
-
       after
         OpenTelemetry.Tracer.end_span(root_span)
       end
@@ -461,30 +490,38 @@ defmodule Canopy.Integration.Wave12IntegrationSuiteTest do
 
         expected_executions = length(@scenarios) * @max_iterations
 
-        execution_count = Enum.reduce(1..@max_iterations, 0, fn iteration, count ->
-          Enum.reduce(@scenarios, count, fn scenario_id, acc ->
-            case Runner.run_scenario(scenario_id, workspace_id: @workspace_id, iteration: iteration) do
-              {:ok, _} ->
-                # Execution recorded
-                acc + 1
+        execution_count =
+          Enum.reduce(1..@max_iterations, 0, fn iteration, count ->
+            Enum.reduce(@scenarios, count, fn scenario_id, acc ->
+              case Runner.run_scenario(scenario_id,
+                     workspace_id: @workspace_id,
+                     iteration: iteration
+                   ) do
+                {:ok, _} ->
+                  # Execution recorded
+                  acc + 1
 
-              {:error, reason} ->
-                # Execution recorded as error
-                Logger.warning("[Wave12] Scenario #{scenario_id} iteration #{iteration} failed: #{inspect(reason)}")
-                acc + 1
-            end
+                {:error, reason} ->
+                  # Execution recorded as error
+                  Logger.warning(
+                    "[Wave12] Scenario #{scenario_id} iteration #{iteration} failed: #{inspect(reason)}"
+                  )
+
+                  acc + 1
+              end
+            end)
           end)
-        end)
 
-        Logger.info("[Wave12] Expected #{expected_executions} scenarios, #{execution_count} executed and recorded")
+        Logger.info(
+          "[Wave12] Expected #{expected_executions} scenarios, #{execution_count} executed and recorded"
+        )
 
         # All executions must be recorded (success or failure both count)
         assert execution_count == expected_executions,
-          "Execution count mismatch: expected #{expected_executions}, got #{execution_count}"
+               "Execution count mismatch: expected #{expected_executions}, got #{execution_count}"
 
         OpenTelemetry.Tracer.set_attribute(:"wave12.scenarios.expected", expected_executions)
         OpenTelemetry.Tracer.set_attribute(:"wave12.scenarios.executed", execution_count)
-
       after
         OpenTelemetry.Tracer.end_span(root_span)
       end
@@ -506,27 +543,38 @@ defmodule Canopy.Integration.Wave12IntegrationSuiteTest do
       try do
         OpenTelemetry.Tracer.set_attribute(:"wave12.test.id", "stress_load")
         OpenTelemetry.Tracer.set_attribute(:"wave12.stress_iterations", @max_stress_iterations)
-        OpenTelemetry.Tracer.set_attribute(:"wave12.total_scenarios", length(@scenarios) * @max_stress_iterations)
 
-        {iteration_latencies, crash_count, restart_count} = for iteration <- 1..@max_stress_iterations, reduce: {[], 0, 0} do
-          {latencies, crashes, restarts} ->
-            start_ms = System.monotonic_time(:millisecond)
+        OpenTelemetry.Tracer.set_attribute(
+          :"wave12.total_scenarios",
+          length(@scenarios) * @max_stress_iterations
+        )
 
-            {new_crashes, new_restarts} = Enum.reduce(@scenarios, {crashes, restarts}, fn scenario_id, {c, r} ->
-              case Runner.run_scenario(scenario_id, workspace_id: @workspace_id, iteration: iteration) do
-                {:ok, _} -> {c, r}
-                {:error, _reason} -> {c, r}
+        {iteration_latencies, crash_count, restart_count} =
+          for iteration <- 1..@max_stress_iterations, reduce: {[], 0, 0} do
+            {latencies, crashes, restarts} ->
+              start_ms = System.monotonic_time(:millisecond)
+
+              {new_crashes, new_restarts} =
+                Enum.reduce(@scenarios, {crashes, restarts}, fn scenario_id, {c, r} ->
+                  case Runner.run_scenario(scenario_id,
+                         workspace_id: @workspace_id,
+                         iteration: iteration
+                       ) do
+                    {:ok, _} -> {c, r}
+                    {:error, _reason} -> {c, r}
+                  end
+                end)
+
+              iteration_time_ms = System.monotonic_time(:millisecond) - start_ms
+
+              if rem(iteration, 5) == 0 do
+                Logger.info(
+                  "[Wave12] Stress iteration #{iteration}/#{@max_stress_iterations}: #{iteration_time_ms}ms"
+                )
               end
-            end)
 
-            iteration_time_ms = System.monotonic_time(:millisecond) - start_ms
-
-            if rem(iteration, 5) == 0 do
-              Logger.info("[Wave12] Stress iteration #{iteration}/#{@max_stress_iterations}: #{iteration_time_ms}ms")
-            end
-
-            {latencies ++ [iteration_time_ms], new_crashes, new_restarts}
-        end
+              {latencies ++ [iteration_time_ms], new_crashes, new_restarts}
+          end
 
         # Verify no crashes
         assert crash_count == 0, "Stress test caused #{crash_count} crashes"
@@ -539,25 +587,33 @@ defmodule Canopy.Integration.Wave12IntegrationSuiteTest do
         first_5_avg = div(Enum.sum(first_5_latencies), 5)
         last_5_avg = div(Enum.sum(last_5_latencies), 5)
 
-        Logger.info("[Wave12] Stress test latency: first 5 avg=#{first_5_avg}ms, last 5 avg=#{last_5_avg}ms")
+        Logger.info(
+          "[Wave12] Stress test latency: first 5 avg=#{first_5_avg}ms, last 5 avg=#{last_5_avg}ms"
+        )
 
         # Latency can increase slightly under load (up to 20% degradation acceptable)
         max_acceptable_increase = ceil(first_5_avg * 1.2)
+
         assert last_5_avg <= max_acceptable_increase,
-          "Latency degraded under load: #{last_5_avg}ms > #{max_acceptable_increase}ms"
+               "Latency degraded under load: #{last_5_avg}ms > #{max_acceptable_increase}ms"
 
         # Verify resource bounds maintained (allow for growth but check it's bounded)
         final_process_count = length(Process.list())
-        initial_stress_processes = 351  # Measured from earlier tests
+        # Measured from earlier tests
+        initial_stress_processes = 351
+
         assert final_process_count <= initial_stress_processes + 50,
-          "Stress test spawned unbounded processes: #{final_process_count} (started at ~#{initial_stress_processes})"
+               "Stress test spawned unbounded processes: #{final_process_count} (started at ~#{initial_stress_processes})"
 
         OpenTelemetry.Tracer.set_attribute(:"wave12.stress.crashes", crash_count)
         OpenTelemetry.Tracer.set_attribute(:"wave12.stress.restarts", restart_count)
         OpenTelemetry.Tracer.set_attribute(:"wave12.stress.first_5_avg_ms", first_5_avg)
         OpenTelemetry.Tracer.set_attribute(:"wave12.stress.last_5_avg_ms", last_5_avg)
-        OpenTelemetry.Tracer.set_attribute(:"wave12.stress.final_process_count", final_process_count)
 
+        OpenTelemetry.Tracer.set_attribute(
+          :"wave12.stress.final_process_count",
+          final_process_count
+        )
       after
         OpenTelemetry.Tracer.end_span(root_span)
       end
@@ -569,19 +625,21 @@ defmodule Canopy.Integration.Wave12IntegrationSuiteTest do
   # ============================================================================
 
   defp execute_all_scenarios(max_iterations) do
-    results = for iteration <- 1..max_iterations do
-      Enum.map(@scenarios, fn scenario_id ->
-        result = Runner.run_scenario(scenario_id, workspace_id: @workspace_id, iteration: iteration)
+    results =
+      for iteration <- 1..max_iterations do
+        Enum.map(@scenarios, fn scenario_id ->
+          result =
+            Runner.run_scenario(scenario_id, workspace_id: @workspace_id, iteration: iteration)
 
-        case result do
-          {:ok, scenario_result} ->
-            {:ok, Map.merge(scenario_result, %{scenario_id: scenario_id, iteration: iteration})}
+          case result do
+            {:ok, scenario_result} ->
+              {:ok, Map.merge(scenario_result, %{scenario_id: scenario_id, iteration: iteration})}
 
-          {:error, reason} ->
-            {:error, %{scenario_id: scenario_id, iteration: iteration, reason: reason}}
-        end
-      end)
-    end
+            {:error, reason} ->
+              {:error, %{scenario_id: scenario_id, iteration: iteration, reason: reason}}
+          end
+        end)
+      end
 
     List.flatten(results)
   end
@@ -594,7 +652,8 @@ defmodule Canopy.Integration.Wave12IntegrationSuiteTest do
     50 + iteration * 5
   end
 
-  defp calculate_percentile(values, percentile) when is_list(values) and percentile >= 0 and percentile <= 1 do
+  defp calculate_percentile(values, percentile)
+       when is_list(values) and percentile >= 0 and percentile <= 1 do
     if Enum.empty?(values) do
       0
     else

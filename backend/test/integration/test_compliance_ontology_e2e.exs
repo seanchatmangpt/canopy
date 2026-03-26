@@ -92,6 +92,7 @@ defmodule Canopy.Integration.ComplianceOntologyE2ETest do
         policy_map ->
           # Policy should contain control objectives or requirements
           assert is_map(policy_map)
+
           assert policy_map["objectives"] != nil or policy_map["controls"] != nil or
                    is_list(policy_map["rules"])
       end
@@ -301,7 +302,8 @@ defmodule Canopy.Integration.ComplianceOntologyE2ETest do
       elapsed2 = System.monotonic_time(:microsecond) - start2
 
       # Assert: Cache doesn't regress performance
-      assert elapsed2 <= elapsed1 + 50_000  # +50ms tolerance
+      # +50ms tolerance
+      assert elapsed2 <= elapsed1 + 50_000
     end
 
     test "compliance_report_includes_framework_context: framework metadata in report" do
@@ -545,7 +547,8 @@ defmodule Canopy.Integration.ComplianceOntologyE2ETest do
       elapsed2 = System.monotonic_time(:microsecond) - start2
 
       # Assert: Cache improves latency
-      assert elapsed2 <= elapsed1 + 50_000  # +50ms tolerance
+      # +50ms tolerance
+      assert elapsed2 <= elapsed1 + 50_000
     end
 
     test "integration_violation_report_includes_framework_details: framework data in report" do
@@ -626,8 +629,12 @@ defmodule Canopy.Integration.ComplianceOntologyE2ETest do
     task = Task.async(fn -> load_policy_for_framework(framework) end)
 
     case Task.yield(task, timeout_ms) do
-      {:ok, result} -> result
-      nil -> Task.shutdown(task); nil
+      {:ok, result} ->
+        result
+
+      nil ->
+        Task.shutdown(task)
+        nil
     end
   end
 
@@ -655,8 +662,12 @@ defmodule Canopy.Integration.ComplianceOntologyE2ETest do
     task_process = Task.async(fn -> evaluate_task_compliance(task) end)
 
     case Task.yield(task_process, timeout_ms) do
-      {:ok, result} -> result
-      nil -> Task.shutdown(task_process); {:error, :timeout}
+      {:ok, result} ->
+        result
+
+      nil ->
+        Task.shutdown(task_process)
+        {:error, :timeout}
     end
   end
 
@@ -666,12 +677,13 @@ defmodule Canopy.Integration.ComplianceOntologyE2ETest do
       "violations" => violations,
       "violation_count" => length(violations),
       "generated_at" => DateTime.utc_now(),
-      "remediation" => Enum.map(violations, fn v ->
-        %{
-          "rule_id" => v["rule_id"],
-          "action" => "Review and remediate"
-        }
-      end)
+      "remediation" =>
+        Enum.map(violations, fn v ->
+          %{
+            "rule_id" => v["rule_id"],
+            "action" => "Review and remediate"
+          }
+        end)
     }
   end
 end

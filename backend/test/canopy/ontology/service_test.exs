@@ -236,10 +236,14 @@ defmodule Canopy.Ontology.ServiceTest do
       Service.clear_all_cache()
 
       # 2 hits, 2 misses = 50% hit rate
-      Service.list_ontologies()  # miss
-      Service.list_ontologies()  # hit
-      Service.get_ontology("fibo-core")  # miss
-      Service.get_ontology("fibo-core")  # hit
+      # miss
+      Service.list_ontologies()
+      # hit
+      Service.list_ontologies()
+      # miss
+      Service.get_ontology("fibo-core")
+      # hit
+      Service.get_ontology("fibo-core")
 
       stats = Service.cache_stats()
       assert stats.total == 4

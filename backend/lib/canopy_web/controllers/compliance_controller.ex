@@ -393,7 +393,8 @@ defmodule CanopyWeb.ComplianceController do
     }
   end
 
-  defp generate_recommendations(gaps, framework_name) when is_list(gaps) and is_binary(framework_name) do
+  defp generate_recommendations(gaps, framework_name)
+       when is_list(gaps) and is_binary(framework_name) do
     Enum.map(gaps, fn gap ->
       %{
         "control_id" => gap["id"],

@@ -370,24 +370,24 @@ defmodule OpenTelemetry.SemConv.Incubating.JtbdAttributes do
   | `process_intelligence_query` | `"process_intelligence_query"` | process_intelligence_query |
   """
   @spec jtbd_scenario_id_values() :: %{
-    agent_decision_loop: :agent_decision_loop,
-    process_discovery: :process_discovery,
-    compliance_check: :compliance_check,
-    cross_system_handoff: :cross_system_handoff,
-    workspace_sync: :workspace_sync,
-    consensus_round: :consensus_round,
-    healing_recovery: :healing_recovery,
-    a2a_deal_lifecycle: :a2a_deal_lifecycle,
-    mcp_tool_execution: :mcp_tool_execution,
-    conformance_drift: :conformance_drift,
-    yawl_v6_checkpoint: :yawl_v6_checkpoint,
-    icp_qualification: :icp_qualification,
-    retrofit_complexity_scoring: :retrofit_complexity_scoring,
-    outreach_sequence_execution: :outreach_sequence_execution,
-    deal_progression: :deal_progression,
-    contract_closure: :contract_closure,
-    process_intelligence_query: :process_intelligence_query
-  }
+          agent_decision_loop: :agent_decision_loop,
+          process_discovery: :process_discovery,
+          compliance_check: :compliance_check,
+          cross_system_handoff: :cross_system_handoff,
+          workspace_sync: :workspace_sync,
+          consensus_round: :consensus_round,
+          healing_recovery: :healing_recovery,
+          a2a_deal_lifecycle: :a2a_deal_lifecycle,
+          mcp_tool_execution: :mcp_tool_execution,
+          conformance_drift: :conformance_drift,
+          yawl_v6_checkpoint: :yawl_v6_checkpoint,
+          icp_qualification: :icp_qualification,
+          retrofit_complexity_scoring: :retrofit_complexity_scoring,
+          outreach_sequence_execution: :outreach_sequence_execution,
+          deal_progression: :deal_progression,
+          contract_closure: :contract_closure,
+          process_intelligence_query: :process_intelligence_query
+        }
   def jtbd_scenario_id_values do
     %{
       agent_decision_loop: :agent_decision_loop,
@@ -482,7 +482,6 @@ defmodule OpenTelemetry.SemConv.Incubating.JtbdAttributes do
     @doc "process_intelligence_query"
     @spec process_intelligence_query() :: :process_intelligence_query
     def process_intelligence_query, do: :process_intelligence_query
-
   end
 
   @doc """
@@ -508,11 +507,11 @@ defmodule OpenTelemetry.SemConv.Incubating.JtbdAttributes do
   | `fallback` | `"fallback"` | fallback |
   """
   @spec jtbd_scenario_outcome_values() :: %{
-    success: :success,
-    failure: :failure,
-    timeout: :timeout,
-    fallback: :fallback
-  }
+          success: :success,
+          failure: :failure,
+          timeout: :timeout,
+          fallback: :fallback
+        }
   def jtbd_scenario_outcome_values do
     %{
       success: :success,
@@ -542,7 +541,6 @@ defmodule OpenTelemetry.SemConv.Incubating.JtbdAttributes do
     @doc "fallback"
     @spec fallback() :: :fallback
     def fallback, do: :fallback
-
   end
 
   @doc """
@@ -604,11 +602,11 @@ defmodule OpenTelemetry.SemConv.Incubating.JtbdAttributes do
   | `pm4py_rust` | `"pm4py_rust"` | pm4py_rust |
   """
   @spec jtbd_scenario_system_values() :: %{
-    osa: :osa,
-    businessos: :businessos,
-    canopy: :canopy,
-    pm4py_rust: :pm4py_rust
-  }
+          osa: :osa,
+          businessos: :businessos,
+          canopy: :canopy,
+          pm4py_rust: :pm4py_rust
+        }
   def jtbd_scenario_system_values do
     %{
       osa: :osa,
@@ -638,7 +636,6 @@ defmodule OpenTelemetry.SemConv.Incubating.JtbdAttributes do
     @doc "pm4py_rust"
     @spec pm4py_rust() :: :pm4py_rust
     def pm4py_rust, do: :pm4py_rust
-
   end
 
   @doc """
@@ -724,5 +721,4 @@ defmodule OpenTelemetry.SemConv.Incubating.JtbdAttributes do
   """
   @spec jtbd_scenario_trace_link() :: :"jtbd.scenario.trace_link"
   def jtbd_scenario_trace_link, do: :"jtbd.scenario.trace_link"
-
 end

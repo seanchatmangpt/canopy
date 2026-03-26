@@ -26,7 +26,18 @@ defmodule Canopy.Schemas.AlertRule do
 
   def changeset(rule, attrs) do
     rule
-    |> cast(attrs, [:name, :description, :entity, :field, :operator, :value, :cooldown_minutes, :notify_targets, :enabled, :workspace_id])
+    |> cast(attrs, [
+      :name,
+      :description,
+      :entity,
+      :field,
+      :operator,
+      :value,
+      :cooldown_minutes,
+      :notify_targets,
+      :enabled,
+      :workspace_id
+    ])
     |> validate_required([:name, :entity, :field, :operator, :value, :workspace_id])
     |> validate_inclusion(:entity, ~w(Agent Session Budget System Gateway))
   end

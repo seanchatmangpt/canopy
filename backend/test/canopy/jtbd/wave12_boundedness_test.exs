@@ -15,7 +15,8 @@ defmodule Canopy.JTBD.Wave12BoundednessTest do
 
   use ExUnit.Case, async: false
 
-  @moduletag :skip  # Skipping because requires GenServer initialization
+  # Skipping because requires GenServer initialization
+  @moduletag :skip
 
   setup do
     # Ensure ETS table exists before tests
@@ -28,7 +29,9 @@ defmodule Canopy.JTBD.Wave12BoundednessTest do
           {:write_concurrency, false},
           {:read_concurrency, true}
         ])
-      _tid -> :ok
+
+      _tid ->
+        :ok
     end
 
     on_exit(fn ->
@@ -63,7 +66,8 @@ defmodule Canopy.JTBD.Wave12BoundednessTest do
 
   test "jtbd_wave12_metrics starts empty" do
     tid = :ets.whereis(:jtbd_wave12_metrics)
-    :ets.delete_all_objects(tid)  # Clean slate
+    # Clean slate
+    :ets.delete_all_objects(tid)
     size = :ets.info(tid, :size)
     assert size == 0
   end
@@ -96,7 +100,8 @@ defmodule Canopy.JTBD.Wave12BoundednessTest do
     tid = :ets.whereis(:jtbd_wave12_metrics)
     :ets.delete_all_objects(tid)
 
-    max_entries = 200  # Assuming max_size or manual LRU eviction at 200
+    # Assuming max_size or manual LRU eviction at 200
+    max_entries = 200
 
     # Simulate 100 iterations × 2 entries/iteration = 200 entries
     insert_iteration_metrics(tid, 1, 100, max_entries)
@@ -105,11 +110,11 @@ defmodule Canopy.JTBD.Wave12BoundednessTest do
 
     # Assertion 1: Size should NOT exceed max_entries
     assert size <= max_entries,
-      "ETS table size (#{size}) exceeded max_entries (#{max_entries})"
+           "ETS table size (#{size}) exceeded max_entries (#{max_entries})"
 
     # Assertion 2: Size should be close to 200 (not much less)
     assert size >= max_entries - 10,
-      "ETS table size (#{size}) is suspiciously low, expected near #{max_entries}"
+           "ETS table size (#{size}) is suspiciously low, expected near #{max_entries}"
 
     IO.puts("✓ After 100 iterations: ETS size = #{size} entries (expected ≤ #{max_entries})")
   end
@@ -134,6 +139,7 @@ defmodule Canopy.JTBD.Wave12BoundednessTest do
 
     # Insert iterations 2-100
     now_2 = DateTime.utc_now()
+
     for i <- 2..100 do
       insert_single_iteration(tid, i, now_2, max_entries)
     end
@@ -152,17 +158,15 @@ defmodule Canopy.JTBD.Wave12BoundednessTest do
       size < max_entries ->
         # Not yet at max capacity, iteration 1 might still be there
         assert iter1_entries > 0,
-          "Iteration 1 should still exist (table not yet full at size #{size})"
+               "Iteration 1 should still exist (table not yet full at size #{size})"
 
       size >= max_entries ->
         # At or near max capacity, iteration 1 should be evicted
         assert iter1_entries == 0,
-          "Iteration 1 should have been evicted by LRU (oldest first), but found #{iter1_entries} entries"
+               "Iteration 1 should have been evicted by LRU (oldest first), but found #{iter1_entries} entries"
     end
 
-    IO.puts(
-      "✓ LRU eviction test: Size=#{size}, Iteration 1 entries=#{iter1_entries}"
-    )
+    IO.puts("✓ LRU eviction test: Size=#{size}, Iteration 1 entries=#{iter1_entries}")
   end
 
   # ============================================================================
@@ -196,7 +200,7 @@ defmodule Canopy.JTBD.Wave12BoundednessTest do
     # Assertion 1: All checkpoints should be <= max_entries
     Enum.each(sizes, fn {checkpoint, size} ->
       assert size <= max_entries,
-        "At checkpoint #{checkpoint}: size #{size} exceeds max #{max_entries}"
+             "At checkpoint #{checkpoint}: size #{size} exceeds max #{max_entries}"
     end)
 
     # Assertion 2: Size should NOT grow linearly (should stay bounded)
@@ -217,10 +221,10 @@ defmodule Canopy.JTBD.Wave12BoundednessTest do
 
     # Growth should be small (LRU working)
     assert growth_100_to_200 < 50,
-      "Growth from 100→200 iterations (#{growth_100_to_200}) suggests LRU not evicting"
+           "Growth from 100→200 iterations (#{growth_100_to_200}) suggests LRU not evicting"
 
     assert growth_200_to_300 < 50,
-      "Growth from 200→300 iterations (#{growth_200_to_300}) suggests LRU not evicting"
+           "Growth from 200→300 iterations (#{growth_200_to_300}) suggests LRU not evicting"
   end
 
   # ============================================================================
@@ -259,7 +263,8 @@ defmodule Canopy.JTBD.Wave12BoundednessTest do
     total_growth = mem_300 - mem_100
 
     # Calculate growth rate
-    linear_growth_expected = (mem_100 * 2)  # 3x for 300 vs 100
+    # 3x for 300 vs 100
+    linear_growth_expected = mem_100 * 2
     actual_growth_rate = total_growth / mem_100
 
     IO.puts("✓ Memory boundedness test:")
@@ -272,7 +277,7 @@ defmodule Canopy.JTBD.Wave12BoundednessTest do
     # If linear, growth_rate would be ~2 (3x memory for 3x iterations)
     # With LRU, growth_rate should be < 1.5 (memory doesn't grow much)
     assert actual_growth_rate < 1.5,
-      "Memory growth rate #{Float.round(actual_growth_rate, 2)}x suggests linear growth, not bounded"
+           "Memory growth rate #{Float.round(actual_growth_rate, 2)}x suggests linear growth, not bounded"
   end
 
   # ============================================================================

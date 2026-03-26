@@ -30,9 +30,18 @@ defmodule Canopy.Schemas.Organization do
   def changeset(organization, attrs) do
     organization
     |> cast(attrs, [
-      :name, :slug, :logo_url, :plan, :settings,
-      :mission, :description, :issue_prefix,
-      :budget_monthly_cents, :budget_per_agent_cents, :budget_enforcement, :governance
+      :name,
+      :slug,
+      :logo_url,
+      :plan,
+      :settings,
+      :mission,
+      :description,
+      :issue_prefix,
+      :budget_monthly_cents,
+      :budget_per_agent_cents,
+      :budget_enforcement,
+      :governance
     ])
     |> validate_required([:name, :slug])
     |> validate_format(:slug, ~r/^[a-z0-9-]+$/)

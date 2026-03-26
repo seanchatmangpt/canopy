@@ -70,11 +70,13 @@ defmodule Canopy.JTBD.Scenarios.Scenario11Test do
 
     test "process_intelligence_query validates query is non-empty" do
       query_params = %{
-        "query" => "",  # Invalid: empty
+        # Invalid: empty
+        "query" => "",
         "model_type" => "petri_net"
       }
 
-      assert {:error, :invalid_query} = Canopy.JTBD.Scenarios.Scenario11.execute(query_params, timeout_ms: 10_000)
+      assert {:error, :invalid_query} =
+               Canopy.JTBD.Scenarios.Scenario11.execute(query_params, timeout_ms: 10_000)
     end
 
     test "process_intelligence_query accepts optional model_type" do
@@ -109,14 +111,15 @@ defmodule Canopy.JTBD.Scenarios.Scenario11Test do
       }
 
       # Queue 21 queries (exceeds max 20)
-      tasks = Enum.map(1..21, fn i ->
-        Task.async(fn ->
-          Canopy.JTBD.Scenarios.Scenario11.execute(
-            Map.put(query_template, "query_id", "query-#{i}"),
-            timeout_ms: 10_000
-          )
+      tasks =
+        Enum.map(1..21, fn i ->
+          Task.async(fn ->
+            Canopy.JTBD.Scenarios.Scenario11.execute(
+              Map.put(query_template, "query_id", "query-#{i}"),
+              timeout_ms: 10_000
+            )
+          end)
         end)
-      end)
 
       results = Task.await_many(tasks, 15_000)
 

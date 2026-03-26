@@ -45,5 +45,4 @@ defmodule OpenTelemetry.SemConv.Incubating.ServiceAttributes do
   """
   @spec service_version() :: :"service.version"
   def service_version, do: :"service.version"
-
 end

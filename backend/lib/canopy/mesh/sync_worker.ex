@@ -14,7 +14,8 @@ defmodule Canopy.Mesh.SyncWorker do
 
   alias Canopy.Mesh.Cache
 
-  @sync_interval_ms 5 * 60 * 1000  # 5 minutes
+  # 5 minutes
+  @sync_interval_ms 5 * 60 * 1000
   @osa_timeout_ms 30_000
   @osa_base_url System.get_env("OSA_API_URL", "http://127.0.0.1:8089")
 
@@ -161,7 +162,10 @@ defmodule Canopy.Mesh.SyncWorker do
         {:ok, domains}
 
       {:ok, %{status: status, body: body}} ->
-        Logger.error("[Mesh.SyncWorker] Domain fetch failed (status: #{status}): #{inspect(body)}")
+        Logger.error(
+          "[Mesh.SyncWorker] Domain fetch failed (status: #{status}): #{inspect(body)}"
+        )
+
         {:error, {:osa_error, status, body}}
 
       {:error, reason} ->
@@ -192,9 +196,7 @@ defmodule Canopy.Mesh.SyncWorker do
   end
 
   defp fetch_entity_counts_from_osa(domains) do
-    Logger.debug(
-      "[Mesh.SyncWorker] Fetching entity counts for #{length(domains)} domains"
-    )
+    Logger.debug("[Mesh.SyncWorker] Fetching entity counts for #{length(domains)} domains")
 
     counts =
       Enum.map(domains, fn domain ->

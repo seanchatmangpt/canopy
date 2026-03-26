@@ -211,7 +211,7 @@ defmodule Canopy.Deals.ContractTemplateTest do
   describe "validate_fibo_constraints/1" do
     test "accepts valid amounts and interest rates" do
       terms = %{
-        "amount_cents" => 100000,
+        "amount_cents" => 100_000,
         "interest_rate_percent" => 5.5,
         "currency" => "USD"
       }
@@ -288,7 +288,7 @@ defmodule Canopy.Deals.ContractTemplateTest do
       terms = %{
         "lender" => "Bank ABC",
         "borrower" => "Company XYZ",
-        "principal_amount" => 500000,
+        "principal_amount" => 500_000,
         "interest_rate_percent" => 5.5,
         "term_months" => 60
       }
@@ -314,7 +314,7 @@ defmodule Canopy.Deals.ContractTemplateTest do
       terms = %{
         "company" => "Tech Startup",
         "investor" => "VC Fund",
-        "investment_amount" => 1000000,
+        "investment_amount" => 1_000_000,
         "equity_percentage" => 10.0
       }
 

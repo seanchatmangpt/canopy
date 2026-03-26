@@ -55,9 +55,9 @@ defmodule Canopy.Integration.OntologyE2ETest do
       """
 
       case Req.post("#{@oxigraph_url}/query",
-        form: [query: sparql_query],
-        headers: [{"Accept", "application/sparql-results+json"}]
-      ) do
+             form: [query: sparql_query],
+             headers: [{"Accept", "application/sparql-results+json"}]
+           ) do
         {:ok, %{status: 200, body: body}} ->
           # Response should be valid JSON
           assert is_map(body) or is_list(body)
@@ -85,9 +85,9 @@ defmodule Canopy.Integration.OntologyE2ETest do
       """
 
       case Req.post("#{@oxigraph_url}/query",
-        form: [query: sparql_query],
-        headers: [{"Accept", "application/sparql-results+json"}]
-      ) do
+             form: [query: sparql_query],
+             headers: [{"Accept", "application/sparql-results+json"}]
+           ) do
         {:ok, %{status: 200, body: body}} ->
           assert is_map(body) or is_list(body)
 
@@ -118,9 +118,9 @@ defmodule Canopy.Integration.OntologyE2ETest do
       """
 
       case Req.post("#{@oxigraph_url}/query",
-        form: [query: sparql_query],
-        headers: [{"Accept", "application/sparql-results+json"}]
-      ) do
+             form: [query: sparql_query],
+             headers: [{"Accept", "application/sparql-results+json"}]
+           ) do
         {:ok, %{status: 200, body: body}} ->
           assert is_map(body) or is_list(body)
 
@@ -148,9 +148,9 @@ defmodule Canopy.Integration.OntologyE2ETest do
       """
 
       case Req.post("#{@oxigraph_url}/query",
-        form: [query: sparql_query],
-        headers: [{"Accept", "application/sparql-results+json"}]
-      ) do
+             form: [query: sparql_query],
+             headers: [{"Accept", "application/sparql-results+json"}]
+           ) do
         {:ok, %{status: 200, body: body}} ->
           assert is_map(body) or is_list(body)
 
@@ -178,9 +178,9 @@ defmodule Canopy.Integration.OntologyE2ETest do
       """
 
       case Req.post("#{@oxigraph_url}/query",
-        form: [query: sparql_query],
-        headers: [{"Accept", "application/sparql-results+json"}]
-      ) do
+             form: [query: sparql_query],
+             headers: [{"Accept", "application/sparql-results+json"}]
+           ) do
         {:ok, %{status: 200, body: body}} ->
           assert is_map(body) or is_list(body)
 
@@ -212,9 +212,9 @@ defmodule Canopy.Integration.OntologyE2ETest do
       """
 
       case Req.post("#{@oxigraph_url}/query",
-        form: [query: sparql_query],
-        headers: [{"Accept", "application/sparql-results+json"}]
-      ) do
+             form: [query: sparql_query],
+             headers: [{"Accept", "application/sparql-results+json"}]
+           ) do
         {:ok, %{status: 200, body: body}} ->
           assert is_map(body) or is_list(body)
 
@@ -240,9 +240,9 @@ defmodule Canopy.Integration.OntologyE2ETest do
       """
 
       case Req.post("#{@oxigraph_url}/query",
-        form: [query: sparql_query],
-        headers: [{"Accept", "application/sparql-results+json"}]
-      ) do
+             form: [query: sparql_query],
+             headers: [{"Accept", "application/sparql-results+json"}]
+           ) do
         {:ok, %{status: 200, body: body}} ->
           assert is_map(body) or is_list(body)
 
@@ -269,9 +269,9 @@ defmodule Canopy.Integration.OntologyE2ETest do
       """
 
       case Req.post("#{@oxigraph_url}/query",
-        form: [query: sparql_query],
-        headers: [{"Accept", "application/sparql-results+json"}]
-      ) do
+             form: [query: sparql_query],
+             headers: [{"Accept", "application/sparql-results+json"}]
+           ) do
         {:ok, %{status: 200, body: body}} ->
           assert is_map(body) or is_list(body)
 
@@ -302,9 +302,9 @@ defmodule Canopy.Integration.OntologyE2ETest do
       }
 
       case Req.post("#{@osa_url}/api/v1/agents/dispatch",
-        json: request_body,
-        headers: [{"Content-Type", "application/json"}]
-      ) do
+             json: request_body,
+             headers: [{"Content-Type", "application/json"}]
+           ) do
         {:ok, %{status: 200, body: body}} ->
           assert is_map(body) or is_list(body)
 

@@ -97,7 +97,8 @@ defmodule Canopy.JTBD.Scenarios.Scenario13Test do
 
     test "validates tool_name is non-empty string" do
       input = %{
-        tool_name: "",  # Invalid: empty
+        # Invalid: empty
+        tool_name: "",
         resource_uri: "file:///test.ex",
         timeout_ms: 30_000
       }
@@ -107,7 +108,8 @@ defmodule Canopy.JTBD.Scenarios.Scenario13Test do
 
     test "validates tool_name is not nil" do
       input = %{
-        tool_name: nil,  # Invalid: nil
+        # Invalid: nil
+        tool_name: nil,
         resource_uri: "file:///test.ex",
         timeout_ms: 30_000
       }
@@ -118,7 +120,8 @@ defmodule Canopy.JTBD.Scenarios.Scenario13Test do
     test "validates resource_uri is non-empty string" do
       input = %{
         tool_name: "code-review",
-        resource_uri: "",  # Invalid: empty
+        # Invalid: empty
+        resource_uri: "",
         timeout_ms: 30_000
       }
 
@@ -128,7 +131,8 @@ defmodule Canopy.JTBD.Scenarios.Scenario13Test do
     test "validates resource_uri is not nil" do
       input = %{
         tool_name: "code-review",
-        resource_uri: nil,  # Invalid: nil
+        # Invalid: nil
+        resource_uri: nil,
         timeout_ms: 30_000
       }
 
@@ -139,7 +143,8 @@ defmodule Canopy.JTBD.Scenarios.Scenario13Test do
       input = %{
         tool_name: "code-review",
         resource_uri: "file:///test.ex",
-        timeout_ms: 0  # Invalid: zero
+        # Invalid: zero
+        timeout_ms: 0
       }
 
       result = Canopy.JTBD.Scenarios.Scenario13.execute(input)
@@ -150,7 +155,8 @@ defmodule Canopy.JTBD.Scenarios.Scenario13Test do
       input = %{
         tool_name: "slow-tool",
         resource_uri: "file:///test.ex",
-        timeout_ms: 1000  # 1s timeout, tool sleeps 5s
+        # 1s timeout, tool sleeps 5s
+        timeout_ms: 1000
       }
 
       # With async: true, this may complete due to race, so just verify behavior

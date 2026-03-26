@@ -28,23 +28,23 @@ defmodule Canopy.Workflows.ProcessDiscovery do
           | :retrying
 
   @type discovery_config :: %{
-    event_log: map(),
-    algorithm: String.t(),
-    max_retries: non_neg_integer(),
-    url: String.t(),
-    timeout: non_neg_integer()
-  }
+          event_log: map(),
+          algorithm: String.t(),
+          max_retries: non_neg_integer(),
+          url: String.t(),
+          timeout: non_neg_integer()
+        }
 
   @type workflow_state :: %{
-    workflow_id: String.t(),
-    state: state(),
-    config: discovery_config(),
-    result: map() | nil,
-    error: String.t() | nil,
-    retry_count: non_neg_integer(),
-    started_at: DateTime.t(),
-    completed_at: DateTime.t() | nil
-  }
+          workflow_id: String.t(),
+          state: state(),
+          config: discovery_config(),
+          result: map() | nil,
+          error: String.t() | nil,
+          retry_count: non_neg_integer(),
+          started_at: DateTime.t(),
+          completed_at: DateTime.t() | nil
+        }
 
   # ── Client API ──────────────────────────────────────────────────────
 
@@ -56,16 +56,17 @@ defmodule Canopy.Workflows.ProcessDiscovery do
   def start_discovery(event_log, algorithm \\ "alpha", config \\ %{}) do
     workflow_id = Ecto.UUID.generate()
 
-    config = Map.merge(
-      %{
-        "event_log" => event_log,
-        "algorithm" => algorithm,
-        "max_retries" => 3,
-        "url" => System.get_env("PM4PY_RUST_URL", "http://127.0.0.1:8000"),
-        "timeout" => 30_000
-      },
-      config
-    )
+    config =
+      Map.merge(
+        %{
+          "event_log" => event_log,
+          "algorithm" => algorithm,
+          "max_retries" => 3,
+          "url" => System.get_env("PM4PY_RUST_URL", "http://127.0.0.1:8000"),
+          "timeout" => 30_000
+        },
+        config
+      )
 
     case start_link({workflow_id, config}) do
       {:ok, _pid} ->
@@ -96,7 +97,7 @@ defmodule Canopy.Workflows.ProcessDiscovery do
   def wait_for_completion(workflow_id, timeout \\ 120_000) do
     start_time = System.monotonic_time(:millisecond)
 
-    Enum.reduce_while(Stream.interval(500), nil, fn _,  _ ->
+    Enum.reduce_while(Stream.interval(500), nil, fn _, _ ->
       elapsed = System.monotonic_time(:millisecond) - start_time
 
       if elapsed > timeout do
@@ -251,7 +252,7 @@ defmodule Canopy.Workflows.ProcessDiscovery do
 
       Logger.warning(
         "[ProcessDiscovery] Discovery failed for #{state.workflow_id}, " <>
-        "retrying in #{backoff_ms}ms (attempt #{retry_count}/#{max_retries}): #{inspect(reason)}"
+          "retrying in #{backoff_ms}ms (attempt #{retry_count}/#{max_retries}): #{inspect(reason)}"
       )
 
       new_state = %{state | state: :retrying, retry_count: retry_count}
@@ -264,7 +265,7 @@ defmodule Canopy.Workflows.ProcessDiscovery do
       # Max retries exceeded
       Logger.error(
         "[ProcessDiscovery] Discovery failed for #{state.workflow_id} after #{max_retries} attempts: " <>
-        inspect(reason)
+          inspect(reason)
       )
 
       error_msg = format_error(reason)

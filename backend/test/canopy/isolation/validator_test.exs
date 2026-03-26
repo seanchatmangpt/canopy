@@ -184,7 +184,11 @@ defmodule Canopy.Isolation.ValidatorTest do
 
   # ── Test 11: Agent count retrieval ─────────────────────────────────────
 
-  test "get_agent_count returns correct count for workspace", %{ws1: ws1, agent1_ws1: _, agent2_ws1: _} do
+  test "get_agent_count returns correct count for workspace", %{
+    ws1: ws1,
+    agent1_ws1: _,
+    agent2_ws1: _
+  } do
     count = Validator.get_agent_count(ws1.id)
     assert count == 2
   end
@@ -244,8 +248,8 @@ defmodule Canopy.Isolation.ValidatorTest do
     results = Task.await_many(tasks, 10_000)
 
     assert Enum.all?(results, fn {:ok, report} ->
-      report.result == :pass
-    end)
+             report.result == :pass
+           end)
   end
 
   # ── Test 15: High-concurrency stress test ──────────────────────────────

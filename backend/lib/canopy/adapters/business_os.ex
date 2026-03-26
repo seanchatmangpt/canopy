@@ -63,6 +63,7 @@ defmodule Canopy.Adapters.BusinessOS do
               "data" => status,
               "tokens" => 75
             }
+
             {[event], params}
 
           {:error, reason} ->
@@ -71,6 +72,7 @@ defmodule Canopy.Adapters.BusinessOS do
               "data" => %{"error" => reason, "timestamp" => DateTime.utc_now()},
               "tokens" => 75
             }
+
             {[event], params}
         end
       end,
@@ -80,50 +82,54 @@ defmodule Canopy.Adapters.BusinessOS do
 
   @impl true
   def send_message(_session, message) when is_binary(message) do
-    event = case parse_message(message) do
-      {:process_mining, payload} ->
-        {status, data} = case discover(payload["event_log"], payload) do
-          {:ok, model} -> {"mining_complete", model}
-          {:error, reason} -> {"mining_failed", %{"error" => inspect(reason)}}
-        end
+    event =
+      case parse_message(message) do
+        {:process_mining, payload} ->
+          {status, data} =
+            case discover(payload["event_log"], payload) do
+              {:ok, model} -> {"mining_complete", model}
+              {:error, reason} -> {"mining_failed", %{"error" => inspect(reason)}}
+            end
 
-        %{
-          "event_type" => status,
-          "data" => data,
-          "tokens" => 500
-        }
+          %{
+            "event_type" => status,
+            "data" => data,
+            "tokens" => 500
+          }
 
-      {:conformance, payload} ->
-        {status, data} = case conformance_check(payload["model"], payload["event_log"], payload) do
-          {:ok, result} -> {"conformance_complete", result}
-          {:error, reason} -> {"conformance_failed", %{"error" => inspect(reason)}}
-        end
+        {:conformance, payload} ->
+          {status, data} =
+            case conformance_check(payload["model"], payload["event_log"], payload) do
+              {:ok, result} -> {"conformance_complete", result}
+              {:error, reason} -> {"conformance_failed", %{"error" => inspect(reason)}}
+            end
 
-        %{
-          "event_type" => status,
-          "data" => data,
-          "tokens" => 300
-        }
+          %{
+            "event_type" => status,
+            "data" => data,
+            "tokens" => 300
+          }
 
-      {:compliance, payload} ->
-        {status, data} = case verify_compliance(payload["framework"], payload) do
-          {:ok, result} -> {"compliance_verified", result}
-          {:error, reason} -> {"compliance_failed", %{"error" => inspect(reason)}}
-        end
+        {:compliance, payload} ->
+          {status, data} =
+            case verify_compliance(payload["framework"], payload) do
+              {:ok, result} -> {"compliance_verified", result}
+              {:error, reason} -> {"compliance_failed", %{"error" => inspect(reason)}}
+            end
 
-        %{
-          "event_type" => status,
-          "data" => data,
-          "tokens" => 200
-        }
+          %{
+            "event_type" => status,
+            "data" => data,
+            "tokens" => 200
+          }
 
-      {:error, reason} ->
-        %{
-          "event_type" => "parse_error",
-          "data" => %{"error" => reason},
-          "tokens" => 100
-        }
-    end
+        {:error, reason} ->
+          %{
+            "event_type" => "parse_error",
+            "data" => %{"error" => reason},
+            "tokens" => 100
+          }
+      end
 
     Stream.concat([event])
   end
@@ -274,28 +280,31 @@ defmodule Canopy.Adapters.BusinessOS do
     timeout = params["timeout"] || @default_timeout
 
     # Start two parallel checks: status and discover endpoint
-    status_task = Task.async(fn ->
-      health_check(params)
-    end)
+    status_task =
+      Task.async(fn ->
+        health_check(params)
+      end)
 
-    discover_task = Task.async(fn ->
-      case make_request("GET", "#{url}/api/bos/status", nil, params, timeout) do
-        {:ok, %{status: 200, body: resp_body}} ->
-          {:ok, resp_body}
+    discover_task =
+      Task.async(fn ->
+        case make_request("GET", "#{url}/api/bos/status", nil, params, timeout) do
+          {:ok, %{status: 200, body: resp_body}} ->
+            {:ok, resp_body}
 
-        {:error, reason} ->
-          {:error, inspect(reason)}
-      end
-    end)
+          {:error, reason} ->
+            {:error, inspect(reason)}
+        end
+      end)
 
     # Wait for both with timeout
     case Task.yield_many([status_task, discover_task], timeout) do
       [{:ok, {:ok, status}}, {:ok, {:ok, discover_status}}] ->
-        {:ok, %{
-          "status" => status,
-          "discover_status" => discover_status,
-          "timestamp" => DateTime.utc_now()
-        }}
+        {:ok,
+         %{
+           "status" => status,
+           "discover_status" => discover_status,
+           "timestamp" => DateTime.utc_now()
+         }}
 
       _other ->
         {:error, "Health check timeout or failure"}
@@ -379,7 +388,13 @@ defmodule Canopy.Adapters.BusinessOS do
     url = params["url"] || @default_url
     timeout = params["timeout"] || @default_timeout
 
-    case make_request("POST", "#{url}/api/linkedin/icp-score?min_score=#{min_score}", nil, params, timeout) do
+    case make_request(
+           "POST",
+           "#{url}/api/linkedin/icp-score?min_score=#{min_score}",
+           nil,
+           params,
+           timeout
+         ) do
       {:ok, %{status: status, body: resp_body}} when status in 200..201 ->
         Logger.info("[BusinessOS] ICP scoring completed: qualified=#{resp_body["qualified"]}")
         {:ok, resp_body}
@@ -416,7 +431,10 @@ defmodule Canopy.Adapters.BusinessOS do
 
     case make_request("POST", "#{url}/api/linkedin/outreach/enroll", payload, params, timeout) do
       {:ok, %{status: status, body: resp_body}} when status in 200..201 ->
-        Logger.info("[BusinessOS] Outreach queued: enrolled=#{resp_body["enrolled"]}, skipped=#{resp_body["skipped"]}")
+        Logger.info(
+          "[BusinessOS] Outreach queued: enrolled=#{resp_body["enrolled"]}, skipped=#{resp_body["skipped"]}"
+        )
+
         {:ok, resp_body}
 
       {:ok, %{status: 400, body: resp_body}} ->

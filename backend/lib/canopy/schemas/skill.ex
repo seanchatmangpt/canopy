@@ -22,6 +22,9 @@ defmodule Canopy.Schemas.Skill do
     skill
     |> cast(attrs, [:name, :description, :category, :trigger_rules, :enabled, :workspace_id])
     |> validate_required([:name, :category, :workspace_id])
-    |> validate_inclusion(:category, ~w(Development Research Communication Analysis Operations Custom))
+    |> validate_inclusion(
+      :category,
+      ~w(Development Research Communication Analysis Operations Custom)
+    )
   end
 end

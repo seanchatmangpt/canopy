@@ -69,11 +69,11 @@ defmodule OpenTelemetry.SemConv.Incubating.CanopyAttributes do
   | `webhook` | `"webhook"` | webhook |
   """
   @spec canopy_adapter_type_values() :: %{
-    osa: :osa,
-    mcp: :mcp,
-    business_os: :business_os,
-    webhook: :webhook
-  }
+          osa: :osa,
+          mcp: :mcp,
+          business_os: :business_os,
+          webhook: :webhook
+        }
   def canopy_adapter_type_values do
     %{
       osa: :osa,
@@ -103,7 +103,6 @@ defmodule OpenTelemetry.SemConv.Incubating.CanopyAttributes do
     @doc "webhook"
     @spec webhook() :: :webhook
     def webhook, do: :webhook
-
   end
 
   @doc """
@@ -172,18 +171,18 @@ defmodule OpenTelemetry.SemConv.Incubating.CanopyAttributes do
   | `delegate` | `"delegate"` | delegate |
   """
   @spec canopy_command_type_values() :: %{
-    agent_dispatch: :agent_dispatch,
-    workflow_trigger: :workflow_trigger,
-    data_query: :data_query,
-    heartbeat_check: :heartbeat_check,
-    config_reload: :config_reload,
-    execute: :execute,
-    query: :query,
-    route: :route,
-    broadcast: :broadcast,
-    sync: :sync,
-    delegate: :delegate
-  }
+          agent_dispatch: :agent_dispatch,
+          workflow_trigger: :workflow_trigger,
+          data_query: :data_query,
+          heartbeat_check: :heartbeat_check,
+          config_reload: :config_reload,
+          execute: :execute,
+          query: :query,
+          route: :route,
+          broadcast: :broadcast,
+          sync: :sync,
+          delegate: :delegate
+        }
   def canopy_command_type_values do
     %{
       agent_dispatch: :agent_dispatch,
@@ -248,7 +247,6 @@ defmodule OpenTelemetry.SemConv.Incubating.CanopyAttributes do
     @doc "delegate"
     @spec delegate() :: :delegate
     def delegate, do: :delegate
-
   end
 
   @doc """
@@ -322,11 +320,11 @@ defmodule OpenTelemetry.SemConv.Incubating.CanopyAttributes do
   | `timeout` | `"timeout"` | timeout |
   """
   @spec canopy_heartbeat_status_values() :: %{
-    healthy: :healthy,
-    degraded: :degraded,
-    critical: :critical,
-    timeout: :timeout
-  }
+          healthy: :healthy,
+          degraded: :degraded,
+          critical: :critical,
+          timeout: :timeout
+        }
   def canopy_heartbeat_status_values do
     %{
       healthy: :healthy,
@@ -356,7 +354,6 @@ defmodule OpenTelemetry.SemConv.Incubating.CanopyAttributes do
     @doc "timeout"
     @spec timeout() :: :timeout
     def timeout, do: :timeout
-
   end
 
   @doc """
@@ -382,11 +379,11 @@ defmodule OpenTelemetry.SemConv.Incubating.CanopyAttributes do
   | `low` | `"low"` | low |
   """
   @spec canopy_heartbeat_tier_values() :: %{
-    critical: :critical,
-    high: :high,
-    normal: :normal,
-    low: :low
-  }
+          critical: :critical,
+          high: :high,
+          normal: :normal,
+          low: :low
+        }
   def canopy_heartbeat_tier_values do
     %{
       critical: :critical,
@@ -416,7 +413,6 @@ defmodule OpenTelemetry.SemConv.Incubating.CanopyAttributes do
     @doc "low"
     @spec low() :: :low
     def low, do: :low
-
   end
 
   @doc """
@@ -442,11 +438,11 @@ defmodule OpenTelemetry.SemConv.Incubating.CanopyAttributes do
   | `publish` | `"publish"` | publish |
   """
   @spec canopy_operation_type_values() :: %{
-    read: :read,
-    write: :write,
-    subscribe: :subscribe,
-    publish: :publish
-  }
+          read: :read,
+          write: :write,
+          subscribe: :subscribe,
+          publish: :publish
+        }
   def canopy_operation_type_values do
     %{
       read: :read,
@@ -476,7 +472,6 @@ defmodule OpenTelemetry.SemConv.Incubating.CanopyAttributes do
     @doc "publish"
     @spec publish() :: :publish
     def publish, do: :publish
-
   end
 
   @doc """
@@ -598,11 +593,11 @@ defmodule OpenTelemetry.SemConv.Incubating.CanopyAttributes do
   | `conflict_free` | `"conflict_free"` | conflict_free |
   """
   @spec canopy_sync_strategy_values() :: %{
-    immediate: :immediate,
-    batched: :batched,
-    eventual: :eventual,
-    conflict_free: :conflict_free
-  }
+          immediate: :immediate,
+          batched: :batched,
+          eventual: :eventual,
+          conflict_free: :conflict_free
+        }
   def canopy_sync_strategy_values do
     %{
       immediate: :immediate,
@@ -632,7 +627,6 @@ defmodule OpenTelemetry.SemConv.Incubating.CanopyAttributes do
     @doc "conflict_free"
     @spec conflict_free() :: :conflict_free
     def conflict_free, do: :conflict_free
-
   end
 
   @doc """
@@ -646,5 +640,4 @@ defmodule OpenTelemetry.SemConv.Incubating.CanopyAttributes do
   """
   @spec canopy_workspace_id() :: :"canopy.workspace.id"
   def canopy_workspace_id, do: :"canopy.workspace.id"
-
 end

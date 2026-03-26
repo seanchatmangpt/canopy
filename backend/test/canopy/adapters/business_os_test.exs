@@ -94,9 +94,10 @@ defmodule Canopy.Adapters.BusinessOSTest do
 
   describe "discover/2" do
     test "discovers process model from valid event log" do
-      result = BusinessOS.discover(@sample_event_log, %{
-        "url" => "http://localhost:8765"
-      })
+      result =
+        BusinessOS.discover(@sample_event_log, %{
+          "url" => "http://localhost:8765"
+        })
 
       # Should succeed or fail gracefully if mock not running
       case result do
@@ -112,9 +113,10 @@ defmodule Canopy.Adapters.BusinessOSTest do
     test "fails with empty event log" do
       empty_log = %{"events" => []}
 
-      result = BusinessOS.discover(empty_log, %{
-        "url" => "http://localhost:8765"
-      })
+      result =
+        BusinessOS.discover(empty_log, %{
+          "url" => "http://localhost:8765"
+        })
 
       case result do
         {:error, _} -> true
@@ -123,9 +125,10 @@ defmodule Canopy.Adapters.BusinessOSTest do
     end
 
     test "fails with invalid host" do
-      result = BusinessOS.discover(@sample_event_log, %{
-        "url" => "http://invalid-host-xyz:8000"
-      })
+      result =
+        BusinessOS.discover(@sample_event_log, %{
+          "url" => "http://invalid-host-xyz:8000"
+        })
 
       assert {:error, {:connection_failed, _}} = result
     end
@@ -135,9 +138,10 @@ defmodule Canopy.Adapters.BusinessOSTest do
 
   describe "conformance_check/3" do
     test "checks conformance of model against event log" do
-      result = BusinessOS.conformance_check(@sample_model, @sample_event_log, %{
-        "url" => "http://localhost:8765"
-      })
+      result =
+        BusinessOS.conformance_check(@sample_model, @sample_event_log, %{
+          "url" => "http://localhost:8765"
+        })
 
       case result do
         {:ok, result} ->
@@ -152,10 +156,11 @@ defmodule Canopy.Adapters.BusinessOSTest do
 
     test "supports different conformance methods" do
       for method <- ["token_replay", "alignment"] do
-        result = BusinessOS.conformance_check(@sample_model, @sample_event_log, %{
-          "url" => "http://localhost:8765",
-          "method" => method
-        })
+        result =
+          BusinessOS.conformance_check(@sample_model, @sample_event_log, %{
+            "url" => "http://localhost:8765",
+            "method" => method
+          })
 
         assert is_tuple(result)
       end
@@ -164,9 +169,10 @@ defmodule Canopy.Adapters.BusinessOSTest do
     test "fails with invalid model structure" do
       invalid_model = %{"invalid" => "structure"}
 
-      result = BusinessOS.conformance_check(invalid_model, @sample_event_log, %{
-        "url" => "http://localhost:8765"
-      })
+      result =
+        BusinessOS.conformance_check(invalid_model, @sample_event_log, %{
+          "url" => "http://localhost:8765"
+        })
 
       case result do
         {:error, _} -> true
@@ -179,9 +185,10 @@ defmodule Canopy.Adapters.BusinessOSTest do
 
   describe "verify_compliance/2" do
     test "verifies compliance against framework" do
-      result = BusinessOS.verify_compliance("SOC2", %{
-        "url" => "http://localhost:8765"
-      })
+      result =
+        BusinessOS.verify_compliance("SOC2", %{
+          "url" => "http://localhost:8765"
+        })
 
       case result do
         {:ok, compliance} ->
@@ -195,18 +202,20 @@ defmodule Canopy.Adapters.BusinessOSTest do
 
     test "supports multiple frameworks" do
       for framework <- ["SOC2", "HIPAA", "GDPR"] do
-        result = BusinessOS.verify_compliance(framework, %{
-          "url" => "http://localhost:8765"
-        })
+        result =
+          BusinessOS.verify_compliance(framework, %{
+            "url" => "http://localhost:8765"
+          })
 
         assert is_tuple(result)
       end
     end
 
     test "fails with invalid framework" do
-      result = BusinessOS.verify_compliance("INVALID_FRAMEWORK", %{
-        "url" => "http://localhost:8765"
-      })
+      result =
+        BusinessOS.verify_compliance("INVALID_FRAMEWORK", %{
+          "url" => "http://localhost:8765"
+        })
 
       case result do
         {:error, _} -> true
@@ -226,7 +235,8 @@ defmodule Canopy.Adapters.BusinessOSTest do
     test "heartbeat stream produces events" do
       stream = BusinessOS.execute_heartbeat(%{})
 
-      result = stream
+      result =
+        stream
         |> Stream.take(1)
         |> Enum.to_list()
 
@@ -236,38 +246,41 @@ defmodule Canopy.Adapters.BusinessOSTest do
 
   describe "send_message/2" do
     test "accepts process_mining message" do
-      message = Jason.encode!(%{
-        "type" => "process_mining",
-        "payload" => %{
-          "event_log" => @sample_event_log
-        }
-      })
+      message =
+        Jason.encode!(%{
+          "type" => "process_mining",
+          "payload" => %{
+            "event_log" => @sample_event_log
+          }
+        })
 
       stream = BusinessOS.send_message(%{}, message)
       assert is_function(stream) or match?(%Stream{}, stream)
     end
 
     test "accepts conformance message" do
-      message = Jason.encode!(%{
-        "type" => "conformance",
-        "payload" => %{
-          "event_log" => @sample_event_log,
-          "model" => @sample_model,
-          "method" => "token_replay"
-        }
-      })
+      message =
+        Jason.encode!(%{
+          "type" => "conformance",
+          "payload" => %{
+            "event_log" => @sample_event_log,
+            "model" => @sample_model,
+            "method" => "token_replay"
+          }
+        })
 
       stream = BusinessOS.send_message(%{}, message)
       assert is_function(stream) or match?(%Stream{}, stream)
     end
 
     test "accepts compliance message" do
-      message = Jason.encode!(%{
-        "type" => "compliance",
-        "payload" => %{
-          "framework" => "SOC2"
-        }
-      })
+      message =
+        Jason.encode!(%{
+          "type" => "compliance",
+          "payload" => %{
+            "framework" => "SOC2"
+          }
+        })
 
       stream = BusinessOS.send_message(%{}, message)
       assert is_function(stream) or match?(%Stream{}, stream)
@@ -308,9 +321,10 @@ defmodule Canopy.Adapters.BusinessOSTest do
       System.put_env("BUSINESSOS_API_TOKEN", "test-token-123")
 
       # Config builder should pick up env var
-      result = BusinessOS.discover(@sample_event_log, %{
-        "url" => "http://localhost:8765"
-      })
+      result =
+        BusinessOS.discover(@sample_event_log, %{
+          "url" => "http://localhost:8765"
+        })
 
       assert is_tuple(result)
 
@@ -322,26 +336,29 @@ defmodule Canopy.Adapters.BusinessOSTest do
 
   describe "error handling" do
     test "connection failure is handled gracefully" do
-      result = BusinessOS.discover(@sample_event_log, %{
-        "url" => "http://invalid-host-xyz:8000"
-      })
+      result =
+        BusinessOS.discover(@sample_event_log, %{
+          "url" => "http://invalid-host-xyz:8000"
+        })
 
       assert {:error, {:connection_failed, _}} = result
     end
 
     test "timeout is handled gracefully" do
-      result = BusinessOS.discover(@sample_event_log, %{
-        "url" => "http://httpbin.org/delay/5",
-        "timeout" => 100
-      })
+      result =
+        BusinessOS.discover(@sample_event_log, %{
+          "url" => "http://httpbin.org/delay/5",
+          "timeout" => 100
+        })
 
       assert is_tuple(result) and tuple_size(result) == 2
     end
 
     test "invalid log returns clear error" do
-      result = BusinessOS.discover("not a map", %{
-        "url" => "http://localhost:8765"
-      })
+      result =
+        BusinessOS.discover("not a map", %{
+          "url" => "http://localhost:8765"
+        })
 
       assert is_tuple(result)
     end
@@ -353,25 +370,29 @@ defmodule Canopy.Adapters.BusinessOSTest do
     test "multiple mining calls can run simultaneously" do
       parent = self()
 
-      tasks = for i <- 1..3 do
-        Task.async(fn ->
-          result = BusinessOS.discover(
-            @sample_event_log,
-            %{"url" => "http://localhost:8765"}
-          )
-          send(parent, {:result, i, result})
-        end)
-      end
+      tasks =
+        for i <- 1..3 do
+          Task.async(fn ->
+            result =
+              BusinessOS.discover(
+                @sample_event_log,
+                %{"url" => "http://localhost:8765"}
+              )
+
+            send(parent, {:result, i, result})
+          end)
+        end
 
       Task.await_many(tasks)
 
-      results = for i <- 1..3 do
-        receive do
-          {:result, ^i, result} -> result
-        after
-          5000 -> {:timeout}
+      results =
+        for i <- 1..3 do
+          receive do
+            {:result, ^i, result} -> result
+          after
+            5000 -> {:timeout}
+          end
         end
-      end
 
       assert length(results) == 3
     end
@@ -379,34 +400,42 @@ defmodule Canopy.Adapters.BusinessOSTest do
     test "mining and conformance can run concurrently" do
       parent = self()
 
-      mining_task = Task.async(fn ->
-        result = BusinessOS.discover(@sample_event_log, %{
-          "url" => "http://localhost:8765"
-        })
-        send(parent, {:mining, result})
-      end)
+      mining_task =
+        Task.async(fn ->
+          result =
+            BusinessOS.discover(@sample_event_log, %{
+              "url" => "http://localhost:8765"
+            })
 
-      conf_task = Task.async(fn ->
-        result = BusinessOS.conformance_check(@sample_model, @sample_event_log, %{
-          "url" => "http://localhost:8765"
-        })
-        send(parent, {:conformance, result})
-      end)
+          send(parent, {:mining, result})
+        end)
+
+      conf_task =
+        Task.async(fn ->
+          result =
+            BusinessOS.conformance_check(@sample_model, @sample_event_log, %{
+              "url" => "http://localhost:8765"
+            })
+
+          send(parent, {:conformance, result})
+        end)
 
       Task.await(mining_task)
       Task.await(conf_task)
 
-      mining_result = receive do
-        {:mining, result} -> result
-      after
-        5000 -> {:timeout}
-      end
+      mining_result =
+        receive do
+          {:mining, result} -> result
+        after
+          5000 -> {:timeout}
+        end
 
-      conf_result = receive do
-        {:conformance, result} -> result
-      after
-        5000 -> {:timeout}
-      end
+      conf_result =
+        receive do
+          {:conformance, result} -> result
+        after
+          5000 -> {:timeout}
+        end
 
       assert is_tuple(mining_result)
       assert is_tuple(conf_result)

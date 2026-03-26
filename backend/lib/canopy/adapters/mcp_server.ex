@@ -305,7 +305,9 @@ defmodule Canopy.Adapters.MCPServer do
 
   defp jsonrpc_notify(%{ws_pid: _ws_pid} = state, method, params) do
     case Canopy.Transports.MCPWebsocket.notify(state, method, params) do
-      :ok -> :ok
+      :ok ->
+        :ok
+
       {:error, reason} ->
         Logger.warning("[MCPServer] Notification send failed: #{inspect(reason)}")
         :ok

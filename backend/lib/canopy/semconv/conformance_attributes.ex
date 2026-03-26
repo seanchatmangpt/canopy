@@ -33,5 +33,4 @@ defmodule OpenTelemetry.SemConv.Incubating.ConformanceAttributes do
   """
   @spec conformance_precision() :: :"conformance.precision"
   def conformance_precision, do: :"conformance.precision"
-
 end

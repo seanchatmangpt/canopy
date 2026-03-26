@@ -21,8 +21,9 @@ defmodule CanopyWeb.WorkspaceMemberControllerTest do
 
   describe "GET /api/v1/workspaces/:id/members" do
     test "returns list of workspace members for authorized admin", %{user1: user1, workspace: ws} do
-      conn = build_authenticated_conn(user1)
-      |> get("/api/v1/workspaces/#{ws.id}/members")
+      conn =
+        build_authenticated_conn(user1)
+        |> get("/api/v1/workspaces/#{ws.id}/members")
 
       assert conn.status == 200
       body = json_response(conn, 200)
@@ -34,8 +35,9 @@ defmodule CanopyWeb.WorkspaceMemberControllerTest do
     end
 
     test "rejects access for non-admin user", %{user3: user3, workspace: ws} do
-      conn = build_authenticated_conn(user3)
-      |> get("/api/v1/workspaces/#{ws.id}/members")
+      conn =
+        build_authenticated_conn(user3)
+        |> get("/api/v1/workspaces/#{ws.id}/members")
 
       assert conn.status == 403
       body = json_response(conn, 403)
@@ -43,20 +45,26 @@ defmodule CanopyWeb.WorkspaceMemberControllerTest do
     end
 
     test "rejects access for unauthorized user", %{user4: user4, workspace: ws} do
-      conn = build_authenticated_conn(user4)
-      |> get("/api/v1/workspaces/#{ws.id}/members")
+      conn =
+        build_authenticated_conn(user4)
+        |> get("/api/v1/workspaces/#{ws.id}/members")
 
       assert conn.status == 403
     end
   end
 
   describe "POST /api/v1/workspaces/:id/members" do
-    test "adds new user to workspace as specified role", %{user1: user1, user4: user4, workspace: ws} do
-      conn = build_authenticated_conn(user1)
-      |> post("/api/v1/workspaces/#{ws.id}/members", %{
-        email: user4.email,
-        role: "admin"
-      })
+    test "adds new user to workspace as specified role", %{
+      user1: user1,
+      user4: user4,
+      workspace: ws
+    } do
+      conn =
+        build_authenticated_conn(user1)
+        |> post("/api/v1/workspaces/#{ws.id}/members", %{
+          email: user4.email,
+          role: "admin"
+        })
 
       assert conn.status == 201
       body = json_response(conn, 201)
@@ -68,9 +76,14 @@ defmodule CanopyWeb.WorkspaceMemberControllerTest do
       assert WorkspaceIsolation.can_access_workspace?(user4.id, ws.id)
     end
 
-    test "defaults to 'user' role when not specified", %{user1: user1, user4: user4, workspace: ws} do
-      conn = build_authenticated_conn(user1)
-      |> post("/api/v1/workspaces/#{ws.id}/members", %{email: user4.email})
+    test "defaults to 'user' role when not specified", %{
+      user1: user1,
+      user4: user4,
+      workspace: ws
+    } do
+      conn =
+        build_authenticated_conn(user1)
+        |> post("/api/v1/workspaces/#{ws.id}/members", %{email: user4.email})
 
       assert conn.status == 201
       body = json_response(conn, 201)
@@ -78,21 +91,23 @@ defmodule CanopyWeb.WorkspaceMemberControllerTest do
     end
 
     test "rejects adding member if user not admin", %{user3: user3, user4: user4, workspace: ws} do
-      conn = build_authenticated_conn(user3)
-      |> post("/api/v1/workspaces/#{ws.id}/members", %{
-        email: user4.email,
-        role: "user"
-      })
+      conn =
+        build_authenticated_conn(user3)
+        |> post("/api/v1/workspaces/#{ws.id}/members", %{
+          email: user4.email,
+          role: "user"
+        })
 
       assert conn.status == 403
     end
 
     test "returns 404 if email not found", %{user1: user1, workspace: ws} do
-      conn = build_authenticated_conn(user1)
-      |> post("/api/v1/workspaces/#{ws.id}/members", %{
-        email: "nonexistent@test.com",
-        role: "user"
-      })
+      conn =
+        build_authenticated_conn(user1)
+        |> post("/api/v1/workspaces/#{ws.id}/members", %{
+          email: "nonexistent@test.com",
+          role: "user"
+        })
 
       assert conn.status == 404
       body = json_response(conn, 404)
@@ -101,11 +116,16 @@ defmodule CanopyWeb.WorkspaceMemberControllerTest do
   end
 
   describe "DELETE /api/v1/workspaces/:id/members/:user_id" do
-    test "removes user from workspace when authorized", %{user1: user1, user3: user3, workspace: ws} do
+    test "removes user from workspace when authorized", %{
+      user1: user1,
+      user3: user3,
+      workspace: ws
+    } do
       assert WorkspaceIsolation.can_access_workspace?(user3.id, ws.id)
 
-      conn = build_authenticated_conn(user1)
-      |> delete("/api/v1/workspaces/#{ws.id}/members/#{user3.id}")
+      conn =
+        build_authenticated_conn(user1)
+        |> delete("/api/v1/workspaces/#{ws.id}/members/#{user3.id}")
 
       assert conn.status == 200
 
@@ -113,16 +133,18 @@ defmodule CanopyWeb.WorkspaceMemberControllerTest do
     end
 
     test "rejects removal when user not admin", %{user2: user2, user3: user3, workspace: ws} do
-      conn = build_authenticated_conn(user2)
-      |> delete("/api/v1/workspaces/#{ws.id}/members/#{user3.id}")
+      conn =
+        build_authenticated_conn(user2)
+        |> delete("/api/v1/workspaces/#{ws.id}/members/#{user3.id}")
 
       # user2 is admin, should be allowed
       assert conn.status == 200
     end
 
     test "rejects removal when user is member only", %{user3: user3, user2: user2, workspace: ws} do
-      conn = build_authenticated_conn(user3)
-      |> delete("/api/v1/workspaces/#{ws.id}/members/#{user2.id}")
+      conn =
+        build_authenticated_conn(user3)
+        |> delete("/api/v1/workspaces/#{ws.id}/members/#{user2.id}")
 
       assert conn.status == 403
     end
@@ -131,26 +153,38 @@ defmodule CanopyWeb.WorkspaceMemberControllerTest do
   # Helpers
 
   defp insert_user(attrs \\ %{}) do
-    user_attrs = Map.merge(%{
-      name: "Test User #{System.unique_integer([:positive])}",
-      email: "test#{System.unique_integer([:positive])}@test.com",
-      password: "password123",
-      role: "member",
-      provider: "local"
-    }, attrs)
+    user_attrs =
+      Map.merge(
+        %{
+          name: "Test User #{System.unique_integer([:positive])}",
+          email: "test#{System.unique_integer([:positive])}@test.com",
+          password: "password123",
+          role: "member",
+          provider: "local"
+        },
+        attrs
+      )
 
-    {:ok, user} = Repo.insert(Ecto.Changeset.cast(%User{}, user_attrs, [:name, :email, :password, :role, :provider]))
+    {:ok, user} =
+      Repo.insert(
+        Ecto.Changeset.cast(%User{}, user_attrs, [:name, :email, :password, :role, :provider])
+      )
+
     user
   end
 
   defp insert_workspace(attrs \\ %{}) do
-    ws_attrs = Map.merge(%{
-      name: "Test Workspace #{System.unique_integer([:positive])}",
-      path: "/tmp/workspace#{System.unique_integer([:positive])}",
-      status: "active",
-      is_active: true,
-      isolation_level: "full"
-    }, attrs)
+    ws_attrs =
+      Map.merge(
+        %{
+          name: "Test Workspace #{System.unique_integer([:positive])}",
+          path: "/tmp/workspace#{System.unique_integer([:positive])}",
+          status: "active",
+          is_active: true,
+          isolation_level: "full"
+        },
+        attrs
+      )
 
     {:ok, ws} = Repo.insert(Workspace.changeset(%Workspace{}, ws_attrs))
     ws

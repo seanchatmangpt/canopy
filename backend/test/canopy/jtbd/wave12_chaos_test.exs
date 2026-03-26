@@ -49,13 +49,15 @@ defmodule Canopy.JTBD.Wave12ChaosTest do
       loop_config = %{
         max_iterations: 20,
         iteration_timeout_ms: 5000,
-        otel_timeout_ms: 1000  # Quick timeout for unreachable Jaeger
+        # Quick timeout for unreachable Jaeger
+        otel_timeout_ms: 1000
       }
 
       # Act: Start loop (assumes Jaeger is initially available)
-      start_loop_task = Task.async(fn ->
-        Wave12Loop.execute(loop_config)
-      end)
+      start_loop_task =
+        Task.async(fn ->
+          Wave12Loop.execute(loop_config)
+        end)
 
       # Wait for loop to execute a few iterations
       :timer.sleep(2000)
@@ -90,30 +92,32 @@ defmodule Canopy.JTBD.Wave12ChaosTest do
       loop_config = %{
         max_iterations: 10,
         iteration_timeout_ms: 2000,
-        otel_timeout_ms: 500,  # Short timeout to trigger failures quickly
+        # Short timeout to trigger failures quickly
+        otel_timeout_ms: 500,
         log_level: :debug
       }
 
       # Act: Start loop and capture logs
-      logs = capture_logs(fn ->
-        # Stop Jaeger to simulate collector unavailability
-        :ok = stop_jaeger_container()
+      logs =
+        capture_logs(fn ->
+          # Stop Jaeger to simulate collector unavailability
+          :ok = stop_jaeger_container()
 
-        # Run loop iterations
-        {:ok, result} = Wave12Loop.execute(loop_config)
+          # Run loop iterations
+          {:ok, result} = Wave12Loop.execute(loop_config)
 
-        # Restart Jaeger
-        :ok = start_jaeger_container()
+          # Restart Jaeger
+          :ok = start_jaeger_container()
 
-        {:ok, result}
-      end)
+          {:ok, result}
+        end)
 
       # Assert: Logs contain evidence of span delivery failures
       assert logs =~ "failed to send span" or
-             logs =~ "otel" or
-             logs =~ "jaeger" or
-             logs =~ "unreachable" or
-             logs =~ "timeout"
+               logs =~ "otel" or
+               logs =~ "jaeger" or
+               logs =~ "unreachable" or
+               logs =~ "timeout"
     end
 
     test "wave12_loop iteration counter increases despite OTEL errors" do
@@ -134,9 +138,10 @@ defmodule Canopy.JTBD.Wave12ChaosTest do
           :ok = stop_jaeger_container()
 
           # Execute loop and capture iteration count every 2 seconds
-          loop_task = Task.async(fn ->
-            Wave12Loop.execute(loop_config)
-          end)
+          loop_task =
+            Task.async(fn ->
+              Wave12Loop.execute(loop_config)
+            end)
 
           # Poll iteration counter while loop is running
           iterations_during_outage = poll_iteration_count(loop_task, 10, [])
@@ -176,9 +181,10 @@ defmodule Canopy.JTBD.Wave12ChaosTest do
           :ok = stop_jaeger_container()
 
           # Run first 5 iterations (should fail to deliver spans)
-          loop_task = Task.async(fn ->
-            Wave12Loop.execute(loop_config)
-          end)
+          loop_task =
+            Task.async(fn ->
+              Wave12Loop.execute(loop_config)
+            end)
 
           :timer.sleep(4000)
           spans_during_outage = get_jaeger_span_count()
@@ -192,11 +198,12 @@ defmodule Canopy.JTBD.Wave12ChaosTest do
 
           Task.await(loop_task, 30_000)
 
-          {:ok, %{
-            initial: initial_span_count,
-            during_outage: spans_during_outage,
-            final: final_span_count
-          }}
+          {:ok,
+           %{
+             initial: initial_span_count,
+             during_outage: spans_during_outage,
+             final: final_span_count
+           }}
         end)
 
       # Assert: Spans resumed delivery after Jaeger came back online
@@ -209,9 +216,11 @@ defmodule Canopy.JTBD.Wave12ChaosTest do
       # Arrange: Configure loop with strict timeout
       loop_config = %{
         max_iterations: 10,
-        otel_timeout_ms: 100,  # Very tight — likely to timeout
+        # Very tight — likely to timeout
+        otel_timeout_ms: 100,
         iteration_timeout_ms: 3000,
-        crash_on_error: false  # Graceful degradation
+        # Graceful degradation
+        crash_on_error: false
       }
 
       # Act: Run loop with Jaeger down
@@ -255,8 +264,9 @@ defmodule Canopy.JTBD.Wave12ChaosTest do
         {:ok, spans} ->
           assert length(spans) > 0
           span = hd(spans)
+
           assert span.attributes[:failure_mode] == :otel_unavailable or
-                 span.attributes[:failure_mode] == :timeout
+                   span.attributes[:failure_mode] == :timeout
 
         :error ->
           # Spans not yet delivered — that's OK during this chaos scenario
@@ -267,11 +277,14 @@ defmodule Canopy.JTBD.Wave12ChaosTest do
     test "wave12_loop queue does not overflow when OTEL is slow" do
       # Arrange: Configure loop with bounded span queue
       loop_config = %{
-        max_iterations: 30,  # More iterations than queue capacity
+        # More iterations than queue capacity
+        max_iterations: 30,
         span_queue_max_size: 10,
-        otel_timeout_ms: 5000,  # Slow — likely to back up queue
+        # Slow — likely to back up queue
+        otel_timeout_ms: 5000,
         iteration_timeout_ms: 1000,
-        queue_overflow_action: :drop_oldest  # Graceful backpressure
+        # Graceful backpressure
+        queue_overflow_action: :drop_oldest
       }
 
       # Act: Run loop with slow OTEL delivery
@@ -292,7 +305,8 @@ defmodule Canopy.JTBD.Wave12ChaosTest do
       loop_config = %{
         max_iterations: 10,
         iteration_timeout_ms: 1000,
-        otel_timeout_ms: 100,  # Tight timeout should not block iteration
+        # Tight timeout should not block iteration
+        otel_timeout_ms: 100,
         measure_iteration_latency: true
       }
 
@@ -322,8 +336,13 @@ defmodule Canopy.JTBD.Wave12ChaosTest do
   @doc "Stop the Jaeger Docker container (simulate outage)."
   defp stop_jaeger_container do
     case System.cmd("docker", ["stop", "businessos-jaeger"], stderr_to_stdout: true) do
-      {_output, 0} -> :ok
-      {_output, 1} -> :already_stopped  # Container not running
+      {_output, 0} ->
+        :ok
+
+      # Container not running
+      {_output, 1} ->
+        :already_stopped
+
       {output, code} ->
         Logger.warn("Failed to stop Jaeger: #{output} (code #{code})")
         :error
@@ -335,8 +354,13 @@ defmodule Canopy.JTBD.Wave12ChaosTest do
   @doc "Start the Jaeger Docker container (recovery)."
   defp start_jaeger_container do
     case System.cmd("docker", ["start", "businessos-jaeger"], stderr_to_stdout: true) do
-      {_output, 0} -> :ok
-      {_output, 1} -> :already_started  # Container already running
+      {_output, 0} ->
+        :ok
+
+      # Container already running
+      {_output, 1} ->
+        :already_started
+
       {output, code} ->
         Logger.warn("Failed to start Jaeger: #{output} (code #{code})")
         :error

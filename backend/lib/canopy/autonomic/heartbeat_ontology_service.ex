@@ -83,13 +83,19 @@ defmodule Canopy.Autonomic.HeartbeatOntologyService do
         {:ok, enriched}
 
       {:ok, {:error, reason}} ->
-        Logger.warning("[HeartbeatOntology] Failed to fetch metadata for #{class_name}: #{inspect(reason)}")
+        Logger.warning(
+          "[HeartbeatOntology] Failed to fetch metadata for #{class_name}: #{inspect(reason)}"
+        )
+
         # Fallback: return minimal context with no metadata
         {:ok, minimal_context(agent_type)}
 
       nil ->
         # Timeout after timeout_ms
-        Logger.warning("[HeartbeatOntology] Metadata fetch for #{class_name} timed out after #{timeout_ms}ms")
+        Logger.warning(
+          "[HeartbeatOntology] Metadata fetch for #{class_name} timed out after #{timeout_ms}ms"
+        )
+
         Task.shutdown(Task.async(fn -> nil end), :brutal_kill)
         # Fallback: return minimal context
         {:ok, minimal_context(agent_type)}
@@ -172,11 +178,13 @@ defmodule Canopy.Autonomic.HeartbeatOntologyService do
   """
   def get_task_hierarchy(agent_type, opts \\ []) do
     {:ok, enriched} = enrich_agent(agent_type, opts)
-    {:ok, %{
-      hierarchy: enriched.hierarchy,
-      constraints: enriched.constraints,
-      class_name: enriched.class_name
-    }}
+
+    {:ok,
+     %{
+       hierarchy: enriched.hierarchy,
+       constraints: enriched.constraints,
+       class_name: enriched.class_name
+     }}
   end
 
   @doc """
@@ -195,14 +203,23 @@ defmodule Canopy.Autonomic.HeartbeatOntologyService do
     # Query ontology service with cache
     case Service.get_class(ontology_id, class_name, cache: use_cache) do
       {:ok, class_info, metadata} ->
-        Logger.debug("[HeartbeatOntology] Retrieved #{class_name} from #{if metadata.cache_hit do "cache" else "OSA" end}")
+        Logger.debug(
+          "[HeartbeatOntology] Retrieved #{class_name} from #{if metadata.cache_hit do
+            "cache"
+          else
+            "OSA"
+          end}"
+        )
 
         # Merge ontology metadata with cache hit info
         enriched_metadata = class_info |> Map.merge(%{cache_hit: metadata.cache_hit})
         {:ok, enriched_metadata}
 
       {:error, reason} ->
-        Logger.warning("[HeartbeatOntology] Failed to get class #{class_name}: #{inspect(reason)}")
+        Logger.warning(
+          "[HeartbeatOntology] Failed to get class #{class_name}: #{inspect(reason)}"
+        )
+
         {:error, reason}
     end
   rescue

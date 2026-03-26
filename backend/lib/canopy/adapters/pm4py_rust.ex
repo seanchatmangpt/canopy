@@ -64,6 +64,7 @@ defmodule Canopy.Adapters.PM4pyRust do
               "data" => %{"status" => status, "timestamp" => DateTime.utc_now()},
               "tokens" => 50
             }
+
             {[event], params}
 
           {:error, reason} ->
@@ -72,6 +73,7 @@ defmodule Canopy.Adapters.PM4pyRust do
               "data" => %{"error" => reason, "timestamp" => DateTime.utc_now()},
               "tokens" => 50
             }
+
             {[event], params}
         end
       end,
@@ -81,38 +83,49 @@ defmodule Canopy.Adapters.PM4pyRust do
 
   @impl true
   def send_message(_session, message) when is_binary(message) do
-    event = case parse_message(message) do
-      {:discovery, payload} ->
-        {status, data} = case discover(payload["event_log"], payload["algorithm"] || "alpha", payload) do
-          {:ok, model} -> {"discovery_complete", model}
-          {:error, reason} -> {"discovery_failed", %{"error" => inspect(reason)}}
-        end
+    event =
+      case parse_message(message) do
+        {:discovery, payload} ->
+          {status, data} =
+            case discover(payload["event_log"], payload["algorithm"] || "alpha", payload) do
+              {:ok, model} -> {"discovery_complete", model}
+              {:error, reason} -> {"discovery_failed", %{"error" => inspect(reason)}}
+            end
 
-        %{
-          "event_type" => status,
-          "data" => data,
-          "tokens" => 500
-        }
+          %{
+            "event_type" => status,
+            "data" => data,
+            "tokens" => 500
+          }
 
-      {:conformance, payload} ->
-        {status, data} = case conformance(payload["event_log"], payload["model"], payload["method"] || "token_replay", payload) do
-          {:ok, {fitness, precision}} -> {"conformance_complete", %{"fitness" => fitness, "precision" => precision}}
-          {:error, reason} -> {"conformance_failed", %{"error" => inspect(reason)}}
-        end
+        {:conformance, payload} ->
+          {status, data} =
+            case conformance(
+                   payload["event_log"],
+                   payload["model"],
+                   payload["method"] || "token_replay",
+                   payload
+                 ) do
+              {:ok, {fitness, precision}} ->
+                {"conformance_complete", %{"fitness" => fitness, "precision" => precision}}
 
-        %{
-          "event_type" => status,
-          "data" => data,
-          "tokens" => 200
-        }
+              {:error, reason} ->
+                {"conformance_failed", %{"error" => inspect(reason)}}
+            end
 
-      {:error, reason} ->
-        %{
-          "event_type" => "parse_error",
-          "data" => %{"error" => reason},
-          "tokens" => 100
-        }
-    end
+          %{
+            "event_type" => status,
+            "data" => data,
+            "tokens" => 200
+          }
+
+        {:error, reason} ->
+          %{
+            "event_type" => "parse_error",
+            "data" => %{"error" => reason},
+            "tokens" => 100
+          }
+      end
 
     Stream.concat([event])
   end
@@ -145,11 +158,11 @@ defmodule Canopy.Adapters.PM4pyRust do
     }
 
     case Req.post("#{url}/api/v1/discover",
-      json: payload,
-      receive_timeout: timeout,
-      retry: :transient,
-      max_retries: 2
-    ) do
+           json: payload,
+           receive_timeout: timeout,
+           retry: :transient,
+           max_retries: 2
+         ) do
       {:ok, %{status: status, body: resp_body}} when status in 200..201 ->
         Logger.info("[PM4py-rust] Discovery succeeded with #{algorithm} miner")
         {:ok, resp_body}
@@ -184,11 +197,11 @@ defmodule Canopy.Adapters.PM4pyRust do
     }
 
     case Req.post("#{url}/api/v1/conformance",
-      json: payload,
-      receive_timeout: timeout,
-      retry: :transient,
-      max_retries: 2
-    ) do
+           json: payload,
+           receive_timeout: timeout,
+           retry: :transient,
+           max_retries: 2
+         ) do
       {:ok, %{status: status, body: resp_body}} when status in 200..201 ->
         fitness = resp_body["fitness"] || 0.0
         precision = resp_body["precision"] || 0.0
@@ -246,9 +259,9 @@ defmodule Canopy.Adapters.PM4pyRust do
     }
 
     case Req.post("#{url}/api/v1/statistics",
-      json: payload,
-      receive_timeout: timeout
-    ) do
+           json: payload,
+           receive_timeout: timeout
+         ) do
       {:ok, %{status: status, body: resp_body}} when status in 200..201 ->
         {:ok, resp_body}
 

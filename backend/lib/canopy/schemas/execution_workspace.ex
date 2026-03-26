@@ -20,7 +20,15 @@ defmodule Canopy.Schemas.ExecutionWorkspace do
 
   def changeset(execution_workspace, attrs) do
     execution_workspace
-    |> cast(attrs, [:base_branch, :worktree_path, :status, :cleaned_up_at, :session_id, :agent_id, :workspace_id])
+    |> cast(attrs, [
+      :base_branch,
+      :worktree_path,
+      :status,
+      :cleaned_up_at,
+      :session_id,
+      :agent_id,
+      :workspace_id
+    ])
     |> validate_required([:session_id, :agent_id, :workspace_id])
     |> validate_inclusion(:status, ~w(active cleaning cleaned error))
   end

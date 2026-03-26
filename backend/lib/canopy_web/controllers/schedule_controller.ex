@@ -132,7 +132,11 @@ defmodule CanopyWeb.ScheduleController do
         next_run = compute_next_run_at(schedule.cron_expression)
 
         case schedule
-             |> Ecto.Changeset.change(last_run_at: now, last_run_status: "triggered", next_run_at: next_run)
+             |> Ecto.Changeset.change(
+               last_run_at: now,
+               last_run_status: "triggered",
+               next_run_at: next_run
+             )
              |> Repo.update() do
           {:ok, updated} ->
             Canopy.EventBus.broadcast(

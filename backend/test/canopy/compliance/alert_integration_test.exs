@@ -173,7 +173,7 @@ defmodule Canopy.Compliance.AlertIntegrationTest do
       result = AlertIntegration.evaluate_and_fire_alerts()
 
       assert match?({:ok, _stats}, result) or
-             match?({:error, _reason}, result)
+               match?({:error, _reason}, result)
     end
 
     test "critical count is subset of total violations" do

@@ -25,7 +25,17 @@ defmodule Canopy.Schemas.Issue do
 
   def changeset(issue, attrs) do
     issue
-    |> cast(attrs, [:title, :description, :status, :priority, :workspace_id, :project_id, :goal_id, :assignee_id, :checked_out_by])
+    |> cast(attrs, [
+      :title,
+      :description,
+      :status,
+      :priority,
+      :workspace_id,
+      :project_id,
+      :goal_id,
+      :assignee_id,
+      :checked_out_by
+    ])
     |> validate_required([:title, :workspace_id])
     |> validate_inclusion(:status, ~w(backlog todo in_progress in_review done cancelled closed))
     |> validate_inclusion(:priority, ~w(low medium high critical))

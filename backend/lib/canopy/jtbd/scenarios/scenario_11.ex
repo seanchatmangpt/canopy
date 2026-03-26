@@ -96,9 +96,10 @@ defmodule Canopy.JTBD.Scenarios.Scenario11 do
     start_time = System.monotonic_time(:microsecond)
 
     # Use a task with timeout to enforce timeout constraint
-    task = Task.async(fn ->
-      query_pm4py(query_params, query, model_type)
-    end)
+    task =
+      Task.async(fn ->
+        query_pm4py(query_params, query, model_type)
+      end)
 
     case Task.yield(task, timeout_ms) || Task.shutdown(task, 0) do
       {:ok, {:ok, result}} ->

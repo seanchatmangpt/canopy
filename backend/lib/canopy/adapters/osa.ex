@@ -184,7 +184,10 @@ defmodule Canopy.Adapters.OSA do
         "input" => params
       }
 
-    case Req.post("#{base_url}/api/v1/workflows/#{workflow_id}/signal", json: body, headers: headers) do
+    case Req.post("#{base_url}/api/v1/workflows/#{workflow_id}/signal",
+           json: body,
+           headers: headers
+         ) do
       {:ok, %{status: status}} when status in 200..204 ->
         Logger.info("[OSA Adapter] Sent signal '#{signal}' to workflow #{workflow_id}")
         {:ok, %{workflow_id: workflow_id, signal: signal}}

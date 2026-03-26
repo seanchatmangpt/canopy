@@ -88,7 +88,9 @@ defmodule Canopy.Autonomic.Heartbeat do
           dispatch_agent(agent_type, index, state)
         end)
 
-      Logger.info("[Autonomic] Heartbeat tick complete. Dispatched #{length(dispatch_results)} agents.")
+      Logger.info(
+        "[Autonomic] Heartbeat tick complete. Dispatched #{length(dispatch_results)} agents."
+      )
 
       dispatch_results
     end
@@ -103,8 +105,10 @@ defmodule Canopy.Autonomic.Heartbeat do
   to prevent unbounded loops (WvdA soundness: liveness guarantee).
   """
   def schedule(opts \\ []) do
-    interval_ms = opts[:interval_ms] || 300_000  # 5 minutes default
-    max_iterations = opts[:max_iterations] || 1_000  # ~83 hours at 5min interval
+    # 5 minutes default
+    interval_ms = opts[:interval_ms] || 300_000
+    # ~83 hours at 5min interval
+    max_iterations = opts[:max_iterations] || 1_000
 
     # Spawn supervised task under Canopy.HeartbeatRunner Task.Supervisor
     # (Armstrong: supervised, let-it-crash; WvdA: bounded iteration)
@@ -117,7 +121,8 @@ defmodule Canopy.Autonomic.Heartbeat do
   end
 
   @doc false
-  def loop_heartbeat_supervised(interval_ms, max_iterations, iteration) when iteration < max_iterations do
+  def loop_heartbeat_supervised(interval_ms, max_iterations, iteration)
+      when iteration < max_iterations do
     :timer.sleep(interval_ms)
     tick()
     loop_heartbeat_supervised(interval_ms, max_iterations, iteration + 1)
@@ -126,12 +131,12 @@ defmodule Canopy.Autonomic.Heartbeat do
   def loop_heartbeat_supervised(_interval_ms, max_iterations, _iteration) do
     Logger.warning(
       "[Autonomic] Heartbeat loop reached iteration limit #{max_iterations}, " <>
-      "restarting. (Prevent unbounded loop per WvdA liveness)"
+        "restarting. (Prevent unbounded loop per WvdA liveness)"
     )
+
     # Task supervisor will restart this if configured with :permanent restart strategy
     :ok
   end
-
 
   @doc """
   Get the current budget tiers.
@@ -184,14 +189,22 @@ defmodule Canopy.Autonomic.Heartbeat do
             run_agent(agent_type, %{budget: budget, tier: tier})
           catch
             :exit, reason ->
-              Logger.error("[Autonomic] Agent #{inspect(agent_type)} timed out: #{inspect(reason)}")
+              Logger.error(
+                "[Autonomic] Agent #{inspect(agent_type)} timed out: #{inspect(reason)}"
+              )
+
               %{status: "timeout", agent_type: agent_type, tier: tier}
 
             kind, reason ->
               Logger.error(
                 "[Autonomic] Agent #{inspect(agent_type)} error: #{inspect(kind)}: #{inspect(reason)}"
               )
-              %{status: "error", agent_type: agent_type, error: "#{inspect(kind)}: #{inspect(reason)}"}
+
+              %{
+                status: "error",
+                agent_type: agent_type,
+                error: "#{inspect(kind)}: #{inspect(reason)}"
+              }
           end
         end)
 
@@ -205,7 +218,11 @@ defmodule Canopy.Autonomic.Heartbeat do
         nil ->
           # Task timed out, kill it
           Task.shutdown(task, :brutal_kill)
-          Logger.warning("[Autonomic] Agent #{inspect(agent_type)} exceeded timeout of #{timeout_ms}ms")
+
+          Logger.warning(
+            "[Autonomic] Agent #{inspect(agent_type)} exceeded timeout of #{timeout_ms}ms"
+          )
+
           {agent_type, %{status: "timeout", agent_type: agent_type, timeout_ms: timeout_ms}}
       end
     end

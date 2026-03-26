@@ -12,6 +12,7 @@ defmodule Canopy.GoalDecomposerTest do
 
     test "strips markdown code fences from response" do
       response = "```json\n[{\"title\": \"test\"}]\n```"
+
       cleaned =
         response
         |> String.replace(~r/```json\n?/, "")
@@ -40,6 +41,7 @@ defmodule Canopy.GoalDecomposerTest do
 
     test "non-array JSON returns error shape" do
       json = ~s({"not": "an array"})
+
       case Jason.decode(json) do
         {:ok, map} when is_map(map) -> assert is_map(map)
         _ -> flunk("Expected map decode")
@@ -53,6 +55,7 @@ defmodule Canopy.GoalDecomposerTest do
 
     test "no JSON array found returns empty" do
       response = "Just plain text, no JSON here"
+
       case Regex.run(~r/\[[\s\S]*\]/, response) do
         nil -> :ok
         _ -> flunk("Should not have found a JSON array")
@@ -120,6 +123,7 @@ defmodule Canopy.GoalDecomposerTest do
 
     test "empty agent list produces empty roster" do
       agents = []
+
       roster =
         agents
         |> Enum.map(fn a -> "- #{a.name}" end)
