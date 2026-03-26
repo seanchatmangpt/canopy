@@ -287,7 +287,10 @@ defmodule Canopy.Heartbeat do
           }
         )
 
-        # Adapters emit tokens_input, tokens_output, tokens_cache (or legacy :tokens)
+        # ## Token Tracking & Cost Estimation
+        # Three token types tracked: input (prompt), output (response), cache_read (10x cheaper).
+        # Each event increments totals; cost recomputed per event for real-time tracking.
+        # Adapter can emit legacy :tokens (counts as input) for backwards compat.
         input_tokens = event[:tokens_input] || event[:tokens] || 0
         output_tokens = event[:tokens_output] || 0
         cache_tokens = event[:tokens_cache] || 0
@@ -328,6 +331,10 @@ defmodule Canopy.Heartbeat do
     Canopy.EventBus.broadcast(Canopy.EventBus.workspace_topic(agent.workspace_id), payload)
   end
 
+  # ## Budget Tier Cost Calculation
+  # Three pricing axes: input (prompt), output (response), cache_read (10x cheaper).
+  # Model-specific rates loaded from model_rates/1 (opus, haiku, sonnet, default).
+  # Using ceil/1 prevents rounding down tiny sessions to $0 cost, ensuring visibility.
   # Cost estimation in cents using per-direction pricing.
   # Rates are cents per 1K tokens based on Anthropic API pricing (March 2026).
   # Includes separate cache token rate (cache reads are ~10x cheaper than input).
