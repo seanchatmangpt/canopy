@@ -16,6 +16,20 @@ Canopy is the execution engine and workspace protocol for AI-powered operations.
 
 ---
 
+## New: Canopy-Specific Learning Documents
+
+Fresh additions for understanding and building with Canopy:
+
+| Document | Purpose | Time |
+|----------|---------|------|
+| **[Understand the Workspace Protocol](explanation-workspace-protocol.md)** | Learn the mental model of agent coordination (agents ↔ workspace ↔ protocol) | 15 min |
+| **[Create a New Agent in Canopy](howto-create-agent.md)** | Build a working agent from manifest to production (8-step walkthrough with code) | 20 min |
+| **[Debug an Agent Timeout](howto-debug-agent-timeout.md)** | Diagnose and fix agent timeouts (common causes + fixes, full debugging workflow) | 15 min |
+
+**Start here if you're new to Canopy agent development.**
+
+---
+
 ## Diátaxis Documentation
 
 ### [Tutorials](../../docs/diataxis/tutorials/) — Learn by Doing
@@ -30,6 +44,8 @@ Canopy is the execution engine and workspace protocol for AI-powered operations.
 
 | Guide | Solves | Complexity |
 |-------|--------|------------|
+| [Create a New Agent](howto-create-agent.md) | Add a new agent (document processor, task runner, etc.) | Beginner |
+| [Debug an Agent Timeout](howto-debug-agent-timeout.md) | Agent doesn't respond, HTTP 504 errors | Beginner |
 | [Add S/N Quality Gates](../../docs/diataxis/how-to/add-quality-gates.md) | Reject low-quality agent output | Intermediate |
 | [Create Progressive Disclosure](../../docs/diataxis/how-to/progressive-disclosure.md) | Tiered context loading (L0/L1/L2) | Intermediate |
 | [Map YAWL to Agents](../../docs/diataxis/how-to/yawl-agent-mapping.md) | Compile workflows to agent dispatch | Advanced |
@@ -40,6 +56,7 @@ Canopy is the execution engine and workspace protocol for AI-powered operations.
 
 | Explanation | Topic | Why It Matters |
 |-------------|-------|----------------|
+| [Understand the Workspace Protocol](explanation-workspace-protocol.md) | Agent coordination model: agents ↔ workspace ↔ protocol | Foundation for all agent work |
 | [The Chatman Equation](../../docs/diataxis/explanation/chatman-equation.md) | A=μ(O) mathematical foundation | Coordination soundness |
 | [Signal Theory Complete](../../docs/diataxis/explanation/signal-theory-complete.md) | 5-tuple encoding + 4 constraints | Output quality |
 | [The 7-Layer Architecture](../../docs/diataxis/explanation/seven-layer-architecture.md) | Optimal Systems design | Canopy implements all 7 layers |

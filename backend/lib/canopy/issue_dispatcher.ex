@@ -30,12 +30,14 @@ defmodule Canopy.IssueDispatcher do
 
   @doc "Manually dispatch an issue to its assigned agent."
   def dispatch(issue_id) do
-    GenServer.call(__MODULE__, {:dispatch, issue_id})
+    GenServer.call(__MODULE__, {:dispatch, issue_id}, 5000)
   catch
     # If the GenServer is not running (e.g. during tests or startup), convert
     # the exit signal into a normal error tuple so callers can handle it cleanly
     # instead of crashing with an unhandled exit.
-    :exit, reason -> {:error, {:dispatcher_unavailable, reason}}
+    :exit, reason ->
+      Logger.error("[IssueDispatcher] timeout or process crash: #{inspect(reason)}. See docs/TROUBLESHOOTING.md#genserver-timeout. Tip: check if Canopy.IssueDispatcher is running with 'ps aux | grep beam'")
+      {:error, {:dispatcher_unavailable, reason}}
   end
 
   # ── Server Callbacks ──────────────────────────────────────────────────────────
@@ -104,15 +106,16 @@ defmodule Canopy.IssueDispatcher do
       {:ok, :dispatched}
     else
       nil ->
+        Logger.warning("[IssueDispatcher] Issue not found. Tip: verify issue_id exists and was created. See docs/TROUBLESHOOTING.md#issue-not-found")
         {:error, :not_found}
 
       {:error, reason} ->
-        Logger.warning("[IssueDispatcher] Skipped dispatch: #{inspect(reason)}")
+        Logger.warning("[IssueDispatcher] Skipped dispatch: #{inspect(reason)}. See docs/TROUBLESHOOTING.md#dispatch-failure for common causes")
         {:error, reason}
     end
   end
 
   defp validate_agent(%Agent{status: status}) when status in ["idle", "active"], do: :ok
-  defp validate_agent(%Agent{status: status}), do: {:error, {:agent_not_ready, status}}
+  defp validate_agent(%Agent{status: status}), do: {:error, {:agent_not_ready, "Agent has status '#{status}' — must be 'idle' or 'active'. Check agent configuration and heartbeat schedule. See docs/TROUBLESHOOTING.md#agent-status"}}
 
 end
