@@ -5,11 +5,28 @@ import Config
 # The MIX_TEST_PARTITION environment variable can be used
 # to provide built-in test partitioning in CI environment.
 # Run `mix help test` for more information.
+# Local dev defaults (user `rhl`); CI overrides via POSTGRES_* / DATABASE_* (see .github/workflows/weaver-live-check.yml).
+db_user = System.get_env("POSTGRES_USER") || System.get_env("DATABASE_USER") || "rhl"
+db_pass = System.get_env("POSTGRES_PASSWORD") || System.get_env("DATABASE_PASSWORD") || ""
+db_host = System.get_env("POSTGRES_HOST") || System.get_env("DATABASE_HOST") || "localhost"
+db_port =
+  case Integer.parse(
+         String.trim(
+           System.get_env("POSTGRES_PORT") || System.get_env("DATABASE_PORT") || "5432"
+         )
+       ) do
+    {p, ""} when p in 1..65535 -> p
+    _ -> 5432
+  end
+db_base = System.get_env("POSTGRES_DB") || "canopy_test"
+db_name = "#{db_base}#{System.get_env("MIX_TEST_PARTITION") || ""}"
+
 config :canopy, Canopy.Repo,
-  username: "rhl",
-  password: "",
-  hostname: "localhost",
-  database: "canopy_test#{System.get_env("MIX_TEST_PARTITION")}",
+  username: db_user,
+  password: db_pass,
+  hostname: db_host,
+  port: db_port,
+  database: db_name,
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: System.schedulers_online() * 2
 
@@ -29,3 +46,31 @@ config :phoenix, :plug_init_mode, :runtime
 # Sort query params output of verified routes for robust url comparisons
 config :phoenix,
   sort_verified_routes_query_params: true
+
+# OpenTelemetry (test): no export by default — avoids connection errors to :4317 when no collector.
+# Weaver live-check: gRPC OTLP to WEAVER_OTLP_ENDPOINT (same receiver as OSA / pm4py-rust).
+config :opentelemetry, :resource, service: [name: "canopy", version: "1.0.0"]
+
+config :opentelemetry, tracer: :global
+
+if System.get_env("WEAVER_LIVE_CHECK") == "true" do
+  config :opentelemetry,
+    traces_exporter: :otlp,
+    processors: [
+      otel_simple_processor: %{
+        exporter: {:opentelemetry_exporter, %{}}
+      }
+    ]
+
+  config :opentelemetry_exporter,
+    otlp_protocol: :grpc,
+    otlp_endpoint: System.get_env("WEAVER_OTLP_ENDPOINT", "http://localhost:4317")
+else
+  config :opentelemetry,
+    traces_exporter: :none,
+    processors: [
+      otel_batch_processor: %{
+        exporter: {:opentelemetry_exporter, %{}}
+      }
+    ]
+end

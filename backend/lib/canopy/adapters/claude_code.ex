@@ -158,7 +158,10 @@ defmodule Canopy.Adapters.ClaudeCode do
   # The "result" event contains the final summary with all token counts.
   # Intermediate events may have partial usage in their "usage" field.
   defp extract_usage(%{"usage" => usage}) when is_map(usage) do
-    input = (usage["input_tokens"] || 0) + (usage["cache_read_input_tokens"] || 0) + (usage["cache_creation_input_tokens"] || 0)
+    input =
+      (usage["input_tokens"] || 0) + (usage["cache_read_input_tokens"] || 0) +
+        (usage["cache_creation_input_tokens"] || 0)
+
     output = usage["output_tokens"] || 0
     {input, output}
   end

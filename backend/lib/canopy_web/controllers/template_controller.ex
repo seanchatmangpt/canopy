@@ -33,8 +33,11 @@ defmodule CanopyWeb.TemplateController do
 
   defp first_agent_field(agents, field, default) do
     case agents do
-      [first | _] when is_map(first) -> Map.get(first, field) || Map.get(first, to_string(field)) || default
-      _ -> default
+      [first | _] when is_map(first) ->
+        Map.get(first, field) || Map.get(first, to_string(field)) || default
+
+      _ ->
+        default
     end
   end
 

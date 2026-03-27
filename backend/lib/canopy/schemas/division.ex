@@ -27,9 +27,18 @@ defmodule Canopy.Schemas.Division do
   def changeset(division, attrs) do
     division
     |> cast(attrs, [
-      :name, :slug, :description, :organization_id, :head_agent_id,
-      :budget_monthly_cents, :budget_enforcement, :signal,
-      :mission, :operating_model, :coordination, :escalation_rules
+      :name,
+      :slug,
+      :description,
+      :organization_id,
+      :head_agent_id,
+      :budget_monthly_cents,
+      :budget_enforcement,
+      :signal,
+      :mission,
+      :operating_model,
+      :coordination,
+      :escalation_rules
     ])
     |> validate_required([:name, :slug, :organization_id])
     |> validate_format(:slug, ~r/^[a-z0-9-]+$/)

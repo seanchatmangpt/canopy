@@ -27,9 +27,18 @@ defmodule Canopy.Schemas.Department do
   def changeset(department, attrs) do
     department
     |> cast(attrs, [
-      :name, :slug, :description, :division_id, :head_agent_id,
-      :budget_monthly_cents, :budget_enforcement, :signal,
-      :mission, :teams_overview, :coordination, :escalation_rules
+      :name,
+      :slug,
+      :description,
+      :division_id,
+      :head_agent_id,
+      :budget_monthly_cents,
+      :budget_enforcement,
+      :signal,
+      :mission,
+      :teams_overview,
+      :coordination,
+      :escalation_rules
     ])
     |> validate_required([:name, :slug, :division_id])
     |> validate_format(:slug, ~r/^[a-z0-9-]+$/)

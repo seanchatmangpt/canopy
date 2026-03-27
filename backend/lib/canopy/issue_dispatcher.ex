@@ -1,20 +1,28 @@
 defmodule Canopy.IssueDispatcher do
   @moduledoc """
   Subscribes to workspace PubSub topics and auto-dispatches agents
-  when issues are assigned to them.
+  when issues are assigned to them. Supports org-aware routing via
+  Canopy.Organization.OntologyHierarchy.
 
   Lifecycle:
     1. On init, subscribe to all existing workspace topics
     2. Listen for "issue.assigned" events
     3. Validate agent readiness (status, concurrent runs)
-    4. Build context string from issue + goal
-    5. Spawn heartbeat via Task.Supervisor
+    4. Query org hierarchy for agent's team/department context
+    5. Build context string from issue + goal
+    6. Spawn heartbeat via Task.Supervisor
+
+  Organization Awareness:
+    - Resolves agent department/team from ontology hierarchy
+    - Routes based on org context (if available)
+    - Degrades gracefully if hierarchy unavailable
   """
   use GenServer
   require Logger
 
   alias Canopy.Repo
   alias Canopy.Schemas.{Agent, Issue, Workspace}
+  alias Canopy.Organization.OntologyHierarchy
   import Ecto.Query
 
   # ── Client API ────────────────────────────────────────────────────────────────
@@ -30,12 +38,14 @@ defmodule Canopy.IssueDispatcher do
 
   @doc "Manually dispatch an issue to its assigned agent."
   def dispatch(issue_id) do
-    GenServer.call(__MODULE__, {:dispatch, issue_id})
+    GenServer.call(__MODULE__, {:dispatch, issue_id}, 5000)
   catch
-    # If the GenServer is not running (e.g. during tests or startup), convert
-    # the exit signal into a normal error tuple so callers can handle it cleanly
-    # instead of crashing with an unhandled exit.
-    :exit, reason -> {:error, {:dispatcher_unavailable, reason}}
+    :exit, {:timeout, _} = reason ->
+      Logger.error(
+        "[IssueDispatcher] timeout dispatching issue #{issue_id}. See docs/TROUBLESHOOTING.md#genserver-timeout. Tip: check if Canopy.IssueDispatcher is running with 'ps aux | grep beam'"
+      )
+
+      {:error, {:dispatcher_unavailable, reason}}
   end
 
   # ── Server Callbacks ──────────────────────────────────────────────────────────
@@ -90,29 +100,82 @@ defmodule Canopy.IssueDispatcher do
   # ── Private ───────────────────────────────────────────────────────────────────
 
   defp do_dispatch(issue_id, agent_id) do
-    with %Issue{} = issue <- Repo.get(Issue, issue_id) |> Repo.preload([:workspace, goal: :project]),
+    with %Issue{} = issue <-
+           Repo.get(Issue, issue_id) |> Repo.preload([:workspace, goal: :project]),
          %Agent{} = agent <- Repo.get(Agent, agent_id) |> Repo.preload(:workspace),
          :ok <- validate_agent(agent),
          {:ok, _checked_out_issue} <- Canopy.Work.checkout_issue(issue_id, agent_id) do
+      # Enrich agent context with org hierarchy (timeout 2s, degrade gracefully)
+      org_context = fetch_agent_org_context(agent_id)
+
       context = Canopy.IssueContext.build_context(issue, agent)
+      context = Map.merge(context, org_context)
 
       Task.Supervisor.start_child(Canopy.HeartbeatRunner, fn ->
         Canopy.Heartbeat.run(agent_id, context: context, issue_id: issue_id)
       end)
 
-      Logger.info("[IssueDispatcher] Dispatched agent #{agent.name} for issue: #{issue.title}")
+      Logger.info(
+        "[IssueDispatcher] Dispatched agent #{agent.name} for issue: #{issue.title} with org context"
+      )
+
       {:ok, :dispatched}
     else
       nil ->
+        Logger.warning(
+          "[IssueDispatcher] Issue not found. Tip: verify issue_id exists and was created. See docs/TROUBLESHOOTING.md#issue-not-found"
+        )
+
         {:error, :not_found}
 
       {:error, reason} ->
-        Logger.warning("[IssueDispatcher] Skipped dispatch: #{inspect(reason)}")
+        Logger.warning(
+          "[IssueDispatcher] Skipped dispatch: #{inspect(reason)}. See docs/TROUBLESHOOTING.md#dispatch-failure for common causes"
+        )
+
         {:error, reason}
     end
   end
 
-  defp validate_agent(%Agent{status: status}) when status in ["idle", "active"], do: :ok
-  defp validate_agent(%Agent{status: status}), do: {:error, {:agent_not_ready, status}}
+  # Fetch agent's organizational context from hierarchy (with timeout).
+  # Returns empty map if hierarchy unavailable (graceful degradation).
+  defp fetch_agent_org_context(agent_id) do
+    query_fn = fn -> OntologyHierarchy.get_chain_of_command(agent_id) end
 
+    case OntologyHierarchy.query_with_depth_limit(query_fn, timeout_ms: 2000) do
+      {:ok, chain} ->
+        Logger.debug("[IssueDispatcher] Agent #{agent_id} org context: #{inspect(chain)}")
+
+        %{
+          "org_context" => %{
+            person: Map.get(chain, "person"),
+            role: Map.get(chain, "role"),
+            team: Map.get(chain, "team"),
+            department: Map.get(chain, "department")
+          }
+        }
+
+      {:error, reason} ->
+        Logger.warning(
+          "[IssueDispatcher] Could not fetch org context for #{agent_id}: #{inspect(reason)}. Continuing without org awareness."
+        )
+
+        %{}
+    end
+  catch
+    :exit, {:timeout, _} ->
+      Logger.warning(
+        "[IssueDispatcher] Org context query timed out for #{agent_id}. Continuing without org awareness."
+      )
+
+      %{}
+  end
+
+  defp validate_agent(%Agent{status: status}) when status in ["idle", "active"], do: :ok
+
+  defp validate_agent(%Agent{status: status}),
+    do:
+      {:error,
+       {:agent_not_ready,
+        "Agent has status '#{status}' — must be 'idle' or 'active'. Check agent configuration and heartbeat schedule. See docs/TROUBLESHOOTING.md#agent-status"}}
 end

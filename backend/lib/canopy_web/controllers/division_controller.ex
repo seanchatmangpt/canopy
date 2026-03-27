@@ -9,7 +9,11 @@ defmodule CanopyWeb.DivisionController do
     organization_id = params["organization_id"]
 
     query = from d in Division, order_by: [asc: d.name]
-    query = if organization_id, do: where(query, [d], d.organization_id == ^organization_id), else: query
+
+    query =
+      if organization_id,
+        do: where(query, [d], d.organization_id == ^organization_id),
+        else: query
 
     divisions = Repo.all(query)
     json(conn, %{divisions: Enum.map(divisions, &serialize/1)})

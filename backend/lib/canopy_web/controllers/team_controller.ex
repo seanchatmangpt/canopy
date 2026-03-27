@@ -9,7 +9,9 @@ defmodule CanopyWeb.TeamController do
     department_id = params["department_id"]
 
     query = from t in Team, order_by: [asc: t.name]
-    query = if department_id, do: where(query, [t], t.department_id == ^department_id), else: query
+
+    query =
+      if department_id, do: where(query, [t], t.department_id == ^department_id), else: query
 
     teams = Repo.all(query)
     json(conn, %{teams: Enum.map(teams, &serialize/1)})
@@ -24,7 +26,8 @@ defmodule CanopyWeb.TeamController do
         members =
           Repo.all(
             from tm in TeamMembership,
-              join: a in Agent, on: tm.agent_id == a.id,
+              join: a in Agent,
+              on: tm.agent_id == a.id,
               where: tm.team_id == ^id,
               select: %{
                 id: tm.id,
@@ -110,7 +113,8 @@ defmodule CanopyWeb.TeamController do
         agents =
           Repo.all(
             from a in Agent,
-              join: tm in TeamMembership, on: tm.agent_id == a.id,
+              join: tm in TeamMembership,
+              on: tm.agent_id == a.id,
               where: tm.team_id == ^team_id,
               order_by: [asc: a.name],
               select: %{

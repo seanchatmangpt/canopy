@@ -9,7 +9,10 @@ defmodule Canopy.Repo.Migrations.CreateDocumentRevisions do
       add :message, :string
       add :author_type, :string, null: false
       add :author_id, :binary_id, null: false
-      add :workspace_id, references(:workspaces, type: :binary_id, on_delete: :delete_all), null: false
+
+      add :workspace_id, references(:workspaces, type: :binary_id, on_delete: :delete_all),
+        null: false
+
       timestamps(updated_at: false)
     end
 

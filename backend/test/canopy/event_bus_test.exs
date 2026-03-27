@@ -44,6 +44,7 @@ defmodule Canopy.EventBusTest do
   describe "topic format consistency" do
     test "all scoped topics follow 'scope:id' pattern" do
       id = "test-id"
+
       scoped_topics = [
         EventBus.workspace_topic(id),
         EventBus.agent_topic(id),
@@ -56,7 +57,16 @@ defmodule Canopy.EventBusTest do
 
       for topic <- scoped_topics do
         [prefix, _] = String.split(topic, ":", parts: 2)
-        assert prefix in ["workspace", "agent", "session", "organization", "division", "department", "team"]
+
+        assert prefix in [
+                 "workspace",
+                 "agent",
+                 "session",
+                 "organization",
+                 "division",
+                 "department",
+                 "team"
+               ]
       end
     end
 
@@ -77,6 +87,7 @@ defmodule Canopy.EventBusTest do
   describe "topic uniqueness" do
     test "different scopes produce different topics for same ID" do
       id = "shared-id"
+
       topics = [
         EventBus.workspace_topic(id),
         EventBus.agent_topic(id),

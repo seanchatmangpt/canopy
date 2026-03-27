@@ -22,7 +22,8 @@ defmodule Canopy.Middleware.Idempotency do
   require Logger
 
   @table :canopy_idempotency_cache
-  @ttl_seconds 86_400  # 24 hours
+  # 24 hours
+  @ttl_seconds 86_400
 
   def init(_opts) do
     # Ensure the ETS table exists

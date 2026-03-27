@@ -20,7 +20,7 @@ defmodule Canopy.MixProject do
   def application do
     [
       mod: {Canopy.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+      extra_applications: [:logger, :runtime_tools, :opentelemetry, :opentelemetry_exporter]
     ]
   end
 
@@ -53,6 +53,7 @@ defmodule Canopy.MixProject do
       {:cors_plug, "~> 3.0"},
       {:req, "~> 0.5"},
       {:quantum, "~> 3.5"},
+      {:websocket_client, git: "https://github.com/sanmiguel/websocket_client.git"},
       {:opentelemetry_api, "~> 1.2"},
       {:opentelemetry, "~> 1.2"},
       {:opentelemetry_exporter, "~> 1.6"},
@@ -72,7 +73,33 @@ defmodule Canopy.MixProject do
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
-      precommit: ["compile --warnings-as-errors", "deps.unlock --unused", "format", "test"]
+      precommit: ["compile --warnings-as-errors", "deps.unlock --unused", "format", "test"],
+
+      # Fast feedback loops — unit tests only (no integration/slow)
+      # Usage: mix test.fast
+      "test.fast": [
+        "ecto.create --quiet",
+        "ecto.migrate --quiet",
+        "test",
+        "--exclude",
+        "integration",
+        "--exclude",
+        "slow"
+      ],
+
+      # Integration tests only
+      # Usage: mix test.integration
+      "test.integration": [
+        "ecto.create --quiet",
+        "ecto.migrate --quiet",
+        "test",
+        "--include",
+        "integration"
+      ],
+
+      # Slow tests only
+      # Usage: mix test.slow
+      "test.slow": ["ecto.create --quiet", "ecto.migrate --quiet", "test", "--include", "slow"]
     ]
   end
 end

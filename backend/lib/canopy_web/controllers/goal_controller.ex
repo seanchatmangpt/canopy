@@ -137,13 +137,19 @@ defmodule CanopyWeb.GoalController do
               end
 
             {:error, reason} ->
-              Logger.warning("[GoalDecomposer] Async decompose failed for #{goal_id}: #{inspect(reason)}")
+              Logger.warning(
+                "[GoalDecomposer] Async decompose failed for #{goal_id}: #{inspect(reason)}"
+              )
           end
         end)
 
         conn
         |> put_status(202)
-        |> json(%{status: "accepted", goal_id: goal_id, message: "Decomposition started. Issues will appear when ready."})
+        |> json(%{
+          status: "accepted",
+          goal_id: goal_id,
+          message: "Decomposition started. Issues will appear when ready."
+        })
     end
   end
 
@@ -157,7 +163,8 @@ defmodule CanopyWeb.GoalController do
 
   defp build_ancestry(%Goal{parent_id: parent_id} = goal, acc, depth, visited) do
     if MapSet.member?(visited, goal.id) do
-      acc  # Break cycle
+      # Break cycle
+      acc
     else
       new_visited = MapSet.put(visited, goal.id)
 

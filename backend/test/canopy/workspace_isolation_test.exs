@@ -261,26 +261,38 @@ defmodule Canopy.WorkspaceIsolationTest do
   # Helpers
 
   defp insert_user(attrs \\ %{}) do
-    user_attrs = Map.merge(%{
-      name: "Test User #{System.unique_integer([:positive])}",
-      email: "user#{System.unique_integer([:positive])}@example.com",
-      password: "password123",
-      role: "member",
-      provider: "local"
-    }, attrs)
+    user_attrs =
+      Map.merge(
+        %{
+          name: "Test User #{System.unique_integer([:positive])}",
+          email: "user#{System.unique_integer([:positive])}@example.com",
+          password: "password123",
+          role: "member",
+          provider: "local"
+        },
+        attrs
+      )
 
-    {:ok, user} = Repo.insert(Ecto.Changeset.cast(%User{}, user_attrs, [:name, :email, :password, :role, :provider]))
+    {:ok, user} =
+      Repo.insert(
+        Ecto.Changeset.cast(%User{}, user_attrs, [:name, :email, :password, :role, :provider])
+      )
+
     user
   end
 
   defp insert_workspace(attrs \\ %{}) do
-    ws_attrs = Map.merge(%{
-      name: "Test Workspace #{System.unique_integer([:positive])}",
-      path: "/tmp/workspace#{System.unique_integer([:positive])}",
-      status: "active",
-      is_active: true,
-      isolation_level: "full"
-    }, attrs)
+    ws_attrs =
+      Map.merge(
+        %{
+          name: "Test Workspace #{System.unique_integer([:positive])}",
+          path: "/tmp/workspace#{System.unique_integer([:positive])}",
+          status: "active",
+          is_active: true,
+          isolation_level: "full"
+        },
+        attrs
+      )
 
     {:ok, ws} = Repo.insert(Workspace.changeset(%Workspace{}, ws_attrs))
     ws

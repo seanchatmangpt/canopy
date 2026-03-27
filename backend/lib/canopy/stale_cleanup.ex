@@ -32,12 +32,18 @@ defmodule Canopy.StaleCleanup do
   defp cleanup_stuck_issues do
     cutoff = DateTime.add(DateTime.utc_now(), -@issue_timeout_minutes * 60, :second)
 
-    {count, _} = Repo.update_all(
-      from(i in Issue,
-        where: i.status == "in_progress" and not is_nil(i.checked_out_by) and i.updated_at < ^cutoff
-      ),
-      set: [status: "backlog", checked_out_by: nil, updated_at: DateTime.utc_now() |> DateTime.truncate(:second)]
-    )
+    {count, _} =
+      Repo.update_all(
+        from(i in Issue,
+          where:
+            i.status == "in_progress" and not is_nil(i.checked_out_by) and i.updated_at < ^cutoff
+        ),
+        set: [
+          status: "backlog",
+          checked_out_by: nil,
+          updated_at: DateTime.utc_now() |> DateTime.truncate(:second)
+        ]
+      )
 
     if count > 0, do: Logger.warning("[StaleCleanup] Reset #{count} stuck issues to backlog")
   end
@@ -45,12 +51,13 @@ defmodule Canopy.StaleCleanup do
   defp cleanup_stale_sessions do
     cutoff = DateTime.add(DateTime.utc_now(), -@session_timeout_minutes * 60, :second)
 
-    {count, _} = Repo.update_all(
-      from(s in Session,
-        where: s.status == "active" and s.started_at < ^cutoff
-      ),
-      set: [status: "failed", completed_at: DateTime.utc_now() |> DateTime.truncate(:second)]
-    )
+    {count, _} =
+      Repo.update_all(
+        from(s in Session,
+          where: s.status == "active" and s.started_at < ^cutoff
+        ),
+        set: [status: "failed", completed_at: DateTime.utc_now() |> DateTime.truncate(:second)]
+      )
 
     if count > 0, do: Logger.warning("[StaleCleanup] Failed #{count} stale active sessions")
   end

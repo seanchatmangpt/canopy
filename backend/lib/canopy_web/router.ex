@@ -46,6 +46,7 @@ defmodule CanopyWeb.Router do
 
     # Agents
     get "/agents/hierarchy", AgentController, :hierarchy
+
     resources "/agents", AgentController, except: [:new, :edit] do
       post "/wake", AgentController, :wake, as: :wake
       post "/sleep", AgentController, :sleep, as: :sleep
@@ -67,6 +68,7 @@ defmodule CanopyWeb.Router do
     get "/schedules/queue", ScheduleController, :queue
     post "/schedules/wake-all", ScheduleController, :wake_all
     post "/schedules/pause-all", ScheduleController, :pause_all
+
     resources "/schedules", ScheduleController, except: [:new, :edit] do
       post "/trigger", ScheduleController, :trigger, as: :trigger
     end
@@ -110,6 +112,16 @@ defmodule CanopyWeb.Router do
       get "/workspaces", ProjectController, :workspaces, as: :workspaces
     end
 
+    # Deals (FIBO Contracts)
+    get "/deals/templates", DealsController, :templates
+    post "/deals/render-contract", DealsController, :render_contract
+    post "/deals/validate-contract", DealsController, :validate_contract
+
+    resources "/deals", DealsController, except: [:new, :edit] do
+      post "/sign", DealsController, :sign, as: :sign
+      post "/complete", DealsController, :complete, as: :complete
+    end
+
     # Documents
     get "/documents", DocumentController, :index
     get "/document-revisions", DocumentController, :revisions
@@ -144,6 +156,7 @@ defmodule CanopyWeb.Router do
     post "/skills/bulk-disable", SkillController, :bulk_disable
     get "/skills/categories", SkillController, :categories
     post "/skills/import", SkillController, :import_skill
+
     resources "/skills", SkillController, only: [:index, :show] do
       post "/toggle", SkillController, :toggle, as: :toggle
       post "/inject", SkillController, :inject, as: :inject
@@ -174,6 +187,13 @@ defmodule CanopyWeb.Router do
     post "/integrations/:slug/connect", IntegrationController, :connect
     delete "/integrations/:slug", IntegrationController, :disconnect
     get "/integrations/:slug/status", IntegrationController, :status
+
+    # Ontologies
+    get "/ontologies", OntologyController, :index
+    get "/ontologies/statistics/global", OntologyController, :statistics
+    get "/ontologies/:id", OntologyController, :show
+    post "/ontologies/:id/search", OntologyController, :search
+    get "/ontologies/:id/classes/:class_id", OntologyController, :get_class
 
     # Admin
     resources "/users", UserController, except: [:new, :edit]
@@ -254,12 +274,43 @@ defmodule CanopyWeb.Router do
     delete "/access/:id", AccessController, :revoke
 
     # Execution Workspaces
-    resources "/execution-workspaces", ExecutionWorkspaceController, only: [:index, :create, :delete]
+    resources "/execution-workspaces", ExecutionWorkspaceController,
+      only: [:index, :create, :delete]
 
     # Plugins
     resources "/plugins", PluginController, except: [:new, :edit] do
       get "/logs", PluginController, :logs, as: :logs
     end
+
+    # Healthcare & HIPAA
+    post "/healthcare/phi/track", HealthcareController, :track_phi
+    post "/healthcare/consent/verify", HealthcareController, :verify_consent
+    get "/healthcare/audit/trail", HealthcareController, :audit_trail
+    post "/healthcare/hipaa/verify", HealthcareController, :verify_hipaa
+    post "/healthcare/consent/grant", HealthcareController, :grant_consent
+    post "/healthcare/consent/revoke", HealthcareController, :revoke_consent
+
+    # Compliance
+    get "/compliance/frameworks", ComplianceController, :index
+    get "/compliance/frameworks/:framework", ComplianceController, :show
+    post "/compliance/verify", ComplianceController, :verify
+    post "/compliance/report", ComplianceController, :report
+    get "/compliance/controls/:control_id", ComplianceController, :show_control
+    get "/compliance/status", ComplianceController, :status
+    post "/compliance/reload", ComplianceController, :reload
+
+    # Data Mesh
+    post "/mesh/domains/register", MeshController, :register_domain
+    post "/mesh/discover", MeshController, :discover
+    post "/mesh/lineage", MeshController, :lineage
+    post "/mesh/quality", MeshController, :quality
+    get "/mesh/cache/status", MeshController, :cache_status
+    post "/mesh/cache/invalidate", MeshController, :invalidate_cache
+
+    # Board Chair Intelligence — proxies to OSA board endpoints
+    get "/board/briefing", BoardController, :briefing
+    post "/board/decision", BoardController, :record_decision
+    get "/board/decisions", BoardController, :list_decisions
   end
 
   # SSE streaming endpoints (accept text/event-stream)

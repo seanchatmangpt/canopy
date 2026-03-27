@@ -7,7 +7,10 @@ defmodule Canopy.Repo.Migrations.CreateApprovalComments do
       add :body, :text, null: false
       add :author_type, :string, null: false
       add :author_id, :binary_id, null: false
-      add :approval_id, references(:approvals, type: :binary_id, on_delete: :delete_all), null: false
+
+      add :approval_id, references(:approvals, type: :binary_id, on_delete: :delete_all),
+        null: false
+
       timestamps(updated_at: false)
     end
 

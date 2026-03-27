@@ -26,7 +26,15 @@ defmodule Canopy.Schemas.Workspace do
 
   def changeset(workspace, attrs) do
     workspace
-    |> cast(attrs, [:name, :path, :status, :owner_id, :organization_id, :is_active, :isolation_level])
+    |> cast(attrs, [
+      :name,
+      :path,
+      :status,
+      :owner_id,
+      :organization_id,
+      :is_active,
+      :isolation_level
+    ])
     |> validate_required([:name, :path])
     |> validate_inclusion(:status, ~w(active archived))
     |> validate_inclusion(:isolation_level, ~w(full shared public))

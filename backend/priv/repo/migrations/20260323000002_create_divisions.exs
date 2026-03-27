@@ -4,7 +4,10 @@ defmodule Canopy.Repo.Migrations.CreateDivisions do
   def change do
     create table(:divisions, primary_key: false) do
       add :id, :binary_id, primary_key: true
-      add :organization_id, references(:organizations, type: :binary_id, on_delete: :delete_all), null: false
+
+      add :organization_id, references(:organizations, type: :binary_id, on_delete: :delete_all),
+        null: false
+
       add :name, :string, null: false
       add :slug, :string, null: false
       add :description, :text

@@ -24,7 +24,18 @@ defmodule Canopy.Schemas.Approval do
 
   def changeset(approval, attrs) do
     approval
-    |> cast(attrs, [:title, :description, :status, :decision, :decision_comment, :context, :expires_at, :requested_by, :reviewer_id, :workspace_id])
+    |> cast(attrs, [
+      :title,
+      :description,
+      :status,
+      :decision,
+      :decision_comment,
+      :context,
+      :expires_at,
+      :requested_by,
+      :reviewer_id,
+      :workspace_id
+    ])
     |> validate_required([:title, :status])
     |> validate_inclusion(:status, ~w(pending approved rejected cancelled))
   end

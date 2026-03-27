@@ -52,6 +52,7 @@ defmodule Canopy.Adapters.MCPTest do
       dead_pid = spawn(fn -> :ok end)
       # Wait for process to die
       Process.monitor(dead_pid)
+
       receive do
         {:DOWN, _, :process, ^dead_pid, _} -> :ok
       end
@@ -71,6 +72,7 @@ defmodule Canopy.Adapters.MCPTest do
     test "returns error stream when session pid is dead" do
       dead_pid = spawn(fn -> :ok end)
       Process.monitor(dead_pid)
+
       receive do
         {:DOWN, _, :process, ^dead_pid, _} -> :ok
       end

@@ -3,7 +3,9 @@ defmodule Canopy.Repo.Migrations.CreateWebhookDeliveries do
 
   def change do
     create table(:webhook_deliveries) do
-      add :webhook_id, references(:webhooks, type: :binary_id, on_delete: :delete_all), null: false
+      add :webhook_id, references(:webhooks, type: :binary_id, on_delete: :delete_all),
+        null: false
+
       add :status_code, :integer
       add :payload, :map, null: false
       add :response, :text

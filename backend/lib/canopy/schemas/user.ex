@@ -33,5 +33,6 @@ defmodule Canopy.Schemas.User do
   defp hash_password(%{valid?: true, changes: %{password: password}} = changeset) do
     put_change(changeset, :password_hash, Bcrypt.hash_pwd_salt(password))
   end
+
   defp hash_password(changeset), do: changeset
 end

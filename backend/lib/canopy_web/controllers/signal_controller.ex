@@ -141,8 +141,12 @@ defmodule CanopyWeb.SignalController do
   def stats(conn, params) do
     workspace_id = params["workspace_id"]
 
-    base_query = from e in ActivityEvent
-    base_query = if workspace_id, do: where(base_query, [e], e.workspace_id == ^workspace_id), else: base_query
+    base_query = from(e in ActivityEvent)
+
+    base_query =
+      if workspace_id,
+        do: where(base_query, [e], e.workspace_id == ^workspace_id),
+        else: base_query
 
     total = Repo.aggregate(base_query, :count)
 
@@ -245,9 +249,20 @@ defmodule CanopyWeb.SignalController do
 
   defp detect_noise(message) do
     indicators = []
-    indicators = if message =~ ~r/\bI think\b|\bmaybe\b|\bperhaps\b/i, do: ["hedging" | indicators], else: indicators
-    indicators = if message =~ ~r/\bthat's a great\b|\bthank you for\b/i, do: ["filler" | indicators], else: indicators
-    indicators = if String.length(message) > 2000, do: ["bandwidth_overload" | indicators], else: indicators
+
+    indicators =
+      if message =~ ~r/\bI think\b|\bmaybe\b|\bperhaps\b/i,
+        do: ["hedging" | indicators],
+        else: indicators
+
+    indicators =
+      if message =~ ~r/\bthat's a great\b|\bthank you for\b/i,
+        do: ["filler" | indicators],
+        else: indicators
+
+    indicators =
+      if String.length(message) > 2000, do: ["bandwidth_overload" | indicators], else: indicators
+
     indicators
   end
 

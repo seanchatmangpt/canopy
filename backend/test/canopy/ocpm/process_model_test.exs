@@ -11,7 +11,10 @@ defmodule Canopy.OCPM.ProcessModelTest do
       {:ok, workspace_id: workspace_id, agent_id: agent_id}
     end
 
-    test "valid attributes produce a valid changeset", %{workspace_id: workspace_id, agent_id: agent_id} do
+    test "valid attributes produce a valid changeset", %{
+      workspace_id: workspace_id,
+      agent_id: agent_id
+    } do
       attrs = %{
         nodes: ["create", "review", "approve", "complete"],
         edges: %{"transitions" => [[%{"from" => "create"}, %{"to" => "review"}]]},
@@ -25,7 +28,10 @@ defmodule Canopy.OCPM.ProcessModelTest do
       assert changeset.valid?
     end
 
-    test "missing required fields produce errors", %{workspace_id: workspace_id, agent_id: agent_id} do
+    test "missing required fields produce errors", %{
+      workspace_id: workspace_id,
+      agent_id: agent_id
+    } do
       attrs = %{
         workspace_id: workspace_id,
         agent_id: agent_id
@@ -165,6 +171,7 @@ defmodule Canopy.OCPM.ProcessModelTest do
           [%{"from" => "review"}, %{"to" => "approve"}]
         ]
       }
+
       assert is_map(edges)
     end
 

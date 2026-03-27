@@ -6,10 +6,11 @@ defmodule CanopyWeb.WorkspaceController do
   import Ecto.Query
 
   def index(conn, _params) do
-    workspaces = Repo.all(
-      from w in Workspace,
-        order_by: [desc: w.inserted_at]
-    )
+    workspaces =
+      Repo.all(
+        from w in Workspace,
+          order_by: [desc: w.inserted_at]
+      )
 
     workspace_ids = Enum.map(workspaces, & &1.id)
 
@@ -94,7 +95,11 @@ defmodule CanopyWeb.WorkspaceController do
         json(conn, %{
           workspace:
             serialize(workspace)
-            |> Map.merge(%{agent_count: agent_count, project_count: project_count, skill_count: skill_count})
+            |> Map.merge(%{
+              agent_count: agent_count,
+              project_count: project_count,
+              skill_count: skill_count
+            })
         })
     end
   end

@@ -79,7 +79,7 @@ defmodule Canopy.Autonomic.ComplianceAgent do
           from(ae in Canopy.Schemas.ActivityEvent,
             where:
               ae.inserted_at > ^from_time and
-              (is_nil(ae.signature) or ae.signature == ""),
+                (is_nil(ae.signature) or ae.signature == ""),
             select: count(ae.id)
           )
         ) || 0

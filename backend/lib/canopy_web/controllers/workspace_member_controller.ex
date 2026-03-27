@@ -87,7 +87,8 @@ defmodule CanopyWeb.WorkspaceMemberController do
     new_role = params["role"]
 
     with {:ok, _} <- check_workspace_admin(current_user.id, workspace_id),
-         {:ok, _workspace_user} <- WorkspaceIsolation.update_workspace_user_role(workspace_id, user_id, new_role) do
+         {:ok, _workspace_user} <-
+           WorkspaceIsolation.update_workspace_user_role(workspace_id, user_id, new_role) do
       json(conn, %{
         message: "Member role updated",
         user: %{id: user_id, role: new_role}

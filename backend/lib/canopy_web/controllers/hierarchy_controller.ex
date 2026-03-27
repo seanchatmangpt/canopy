@@ -39,7 +39,9 @@ defmodule CanopyWeb.HierarchyController do
 
   defp render_hierarchy(conn, org) do
     # 1. Fetch all divisions
-    divisions = Repo.all(from d in Division, where: d.organization_id == ^org.id, order_by: [asc: d.name])
+    divisions =
+      Repo.all(from d in Division, where: d.organization_id == ^org.id, order_by: [asc: d.name])
+
     division_ids = Enum.map(divisions, & &1.id)
 
     # 2. Fetch all departments in those divisions
@@ -47,7 +49,9 @@ defmodule CanopyWeb.HierarchyController do
       if division_ids == [] do
         []
       else
-        Repo.all(from d in Department, where: d.division_id in ^division_ids, order_by: [asc: d.name])
+        Repo.all(
+          from d in Department, where: d.division_id in ^division_ids, order_by: [asc: d.name]
+        )
       end
 
     department_ids = Enum.map(departments, & &1.id)
@@ -57,7 +61,9 @@ defmodule CanopyWeb.HierarchyController do
       if department_ids == [] do
         []
       else
-        Repo.all(from t in Team, where: t.department_id in ^department_ids, order_by: [asc: t.name])
+        Repo.all(
+          from t in Team, where: t.department_id in ^department_ids, order_by: [asc: t.name]
+        )
       end
 
     team_ids = Enum.map(teams, & &1.id)
@@ -69,7 +75,8 @@ defmodule CanopyWeb.HierarchyController do
       else
         Repo.all(
           from tm in TeamMembership,
-            join: a in Agent, on: tm.agent_id == a.id,
+            join: a in Agent,
+            on: tm.agent_id == a.id,
             where: tm.team_id in ^team_ids,
             order_by: [asc: a.name],
             select: %{
@@ -105,11 +112,12 @@ defmodule CanopyWeb.HierarchyController do
         }
       end)
 
-    teams_by_dept = Enum.group_by(teams_with_agents, fn t ->
-      # Need the raw team to get department_id
-      team = Enum.find(teams, &(&1.id == t.id))
-      team.department_id
-    end)
+    teams_by_dept =
+      Enum.group_by(teams_with_agents, fn t ->
+        # Need the raw team to get department_id
+        team = Enum.find(teams, &(&1.id == t.id))
+        team.department_id
+      end)
 
     depts_with_teams =
       Enum.map(departments, fn d ->
@@ -126,10 +134,11 @@ defmodule CanopyWeb.HierarchyController do
         }
       end)
 
-    depts_by_div = Enum.group_by(depts_with_teams, fn d ->
-      dept = Enum.find(departments, &(&1.id == d.id))
-      dept.division_id
-    end)
+    depts_by_div =
+      Enum.group_by(depts_with_teams, fn d ->
+        dept = Enum.find(departments, &(&1.id == d.id))
+        dept.division_id
+      end)
 
     divs_with_depts =
       Enum.map(divisions, fn d ->

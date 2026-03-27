@@ -70,7 +70,10 @@ defmodule Canopy.OCPM.Discovery do
       ["create", "approve"]
   """
   def discover_process_model(event_log) when is_list(event_log) do
-    Logger.info("[Discovery] Discovering process model from #{length(event_log)} events via pm4py")
+    Logger.info(
+      "[Discovery] Discovering process model from #{length(event_log)} events via pm4py"
+    )
+
     Pm4pyWrapper.discover_process_model(event_log)
   end
 
@@ -119,7 +122,8 @@ defmodule Canopy.OCPM.Discovery do
       iex> {:ok, model} = Discovery.discover_process_model(events)
       iex> {:ok, deviations} = Discovery.find_deviations(model, events)
   """
-  def find_deviations(process_model, event_log) when is_map(process_model) and is_list(event_log) do
+  def find_deviations(process_model, event_log)
+      when is_map(process_model) and is_list(event_log) do
     Logger.info("[Discovery] Checking conformance via pm4py")
     Pm4pyWrapper.find_deviations(event_log, process_model)
   end

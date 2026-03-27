@@ -116,9 +116,7 @@ defmodule Canopy.Autonomic.HealingAgent do
       end
     rescue
       e ->
-        Logger.error(
-          "[HealingAgent] Error healing #{session_id}: #{Exception.message(e)}"
-        )
+        Logger.error("[HealingAgent] Error healing #{session_id}: #{Exception.message(e)}")
         nil
     end
   end

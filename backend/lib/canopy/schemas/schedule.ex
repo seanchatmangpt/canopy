@@ -23,7 +23,15 @@ defmodule Canopy.Schemas.Schedule do
 
   def changeset(schedule, attrs) do
     schedule
-    |> cast(attrs, [:name, :cron_expression, :context, :enabled, :timezone, :workspace_id, :agent_id])
+    |> cast(attrs, [
+      :name,
+      :cron_expression,
+      :context,
+      :enabled,
+      :timezone,
+      :workspace_id,
+      :agent_id
+    ])
     |> validate_required([:name, :cron_expression, :workspace_id, :agent_id])
   end
 end

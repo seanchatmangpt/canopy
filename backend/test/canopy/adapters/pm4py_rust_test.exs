@@ -124,9 +124,10 @@ defmodule Canopy.Adapters.PM4pyRustTest do
       # Mock HTTP request
       {:ok, _} = start_mock_server()
 
-      result = PM4pyRust.discover(@sample_event_log, "alpha", %{
-        "url" => "http://localhost:8765"
-      })
+      result =
+        PM4pyRust.discover(@sample_event_log, "alpha", %{
+          "url" => "http://localhost:8765"
+        })
 
       # Should succeed or fail gracefully if mock not running
       case result do
@@ -142,9 +143,10 @@ defmodule Canopy.Adapters.PM4pyRustTest do
 
     test "fails with invalid algorithm" do
       # This would fail if server is running
-      result = PM4pyRust.discover(@sample_event_log, "invalid_algo", %{
-        "url" => "http://localhost:8765"
-      })
+      result =
+        PM4pyRust.discover(@sample_event_log, "invalid_algo", %{
+          "url" => "http://localhost:8765"
+        })
 
       # Either succeeds (if mock supports it) or fails gracefully
       assert is_tuple(result) and tuple_size(result) == 2
@@ -153,9 +155,10 @@ defmodule Canopy.Adapters.PM4pyRustTest do
     test "fails with empty event log" do
       empty_log = %{"events" => []}
 
-      result = PM4pyRust.discover(empty_log, "alpha", %{
-        "url" => "http://localhost:8765"
-      })
+      result =
+        PM4pyRust.discover(empty_log, "alpha", %{
+          "url" => "http://localhost:8765"
+        })
 
       # Should either return error or be connection error (server not running)
       case result do
@@ -169,9 +172,10 @@ defmodule Canopy.Adapters.PM4pyRustTest do
 
   describe "conformance/4" do
     test "checks conformance of log against model" do
-      result = PM4pyRust.conformance(@sample_event_log, @sample_model, "token_replay", %{
-        "url" => "http://localhost:8765"
-      })
+      result =
+        PM4pyRust.conformance(@sample_event_log, @sample_model, "token_replay", %{
+          "url" => "http://localhost:8765"
+        })
 
       case result do
         {:ok, {fitness, precision}} ->
@@ -188,9 +192,10 @@ defmodule Canopy.Adapters.PM4pyRustTest do
 
     test "supports different conformance methods" do
       for method <- ["token_replay", "alignment", "footprints"] do
-        result = PM4pyRust.conformance(@sample_event_log, @sample_model, method, %{
-          "url" => "http://localhost:8765"
-        })
+        result =
+          PM4pyRust.conformance(@sample_event_log, @sample_model, method, %{
+            "url" => "http://localhost:8765"
+          })
 
         # Should handle gracefully
         assert is_tuple(result)
@@ -200,9 +205,10 @@ defmodule Canopy.Adapters.PM4pyRustTest do
     test "fails with invalid model structure" do
       invalid_model = %{"invalid" => "structure"}
 
-      result = PM4pyRust.conformance(@sample_event_log, invalid_model, "token_replay", %{
-        "url" => "http://localhost:8765"
-      })
+      result =
+        PM4pyRust.conformance(@sample_event_log, invalid_model, "token_replay", %{
+          "url" => "http://localhost:8765"
+        })
 
       case result do
         {:error, _} -> true
@@ -215,14 +221,16 @@ defmodule Canopy.Adapters.PM4pyRustTest do
 
   describe "statistics/2" do
     test "retrieves statistics from event log" do
-      result = PM4pyRust.statistics(@sample_event_log, %{
-        "url" => "http://localhost:8765"
-      })
+      result =
+        PM4pyRust.statistics(@sample_event_log, %{
+          "url" => "http://localhost:8765"
+        })
 
       case result do
         {:ok, stats} ->
           assert is_map(stats)
-          # Server returns structured stats if running
+
+        # Server returns structured stats if running
 
         {:error, _} ->
           # Server not running
@@ -231,9 +239,10 @@ defmodule Canopy.Adapters.PM4pyRustTest do
     end
 
     test "includes variant analysis when requested" do
-      result = PM4pyRust.statistics(@sample_event_log, %{
-        "url" => "http://localhost:8765"
-      })
+      result =
+        PM4pyRust.statistics(@sample_event_log, %{
+          "url" => "http://localhost:8765"
+        })
 
       assert is_tuple(result) and tuple_size(result) == 2
     end
@@ -252,7 +261,8 @@ defmodule Canopy.Adapters.PM4pyRustTest do
       stream = PM4pyRust.execute_heartbeat(%{})
 
       # Consume one event with timeout to avoid infinite streams
-      result = stream
+      result =
+        stream
         |> Stream.take(1)
         |> Enum.to_list()
 
@@ -263,13 +273,14 @@ defmodule Canopy.Adapters.PM4pyRustTest do
 
   describe "send_message/2" do
     test "accepts discovery message" do
-      message = Jason.encode!(%{
-        "type" => "discovery",
-        "payload" => %{
-          "event_log" => @sample_event_log,
-          "algorithm" => "alpha"
-        }
-      })
+      message =
+        Jason.encode!(%{
+          "type" => "discovery",
+          "payload" => %{
+            "event_log" => @sample_event_log,
+            "algorithm" => "alpha"
+          }
+        })
 
       stream = PM4pyRust.send_message(%{}, message)
       # Streams return functions
@@ -277,14 +288,15 @@ defmodule Canopy.Adapters.PM4pyRustTest do
     end
 
     test "accepts conformance message" do
-      message = Jason.encode!(%{
-        "type" => "conformance",
-        "payload" => %{
-          "event_log" => @sample_event_log,
-          "model" => @sample_model,
-          "method" => "token_replay"
-        }
-      })
+      message =
+        Jason.encode!(%{
+          "type" => "conformance",
+          "payload" => %{
+            "event_log" => @sample_event_log,
+            "model" => @sample_model,
+            "method" => "token_replay"
+          }
+        })
 
       stream = PM4pyRust.send_message(%{}, message)
       # Streams return functions
@@ -340,19 +352,21 @@ defmodule Canopy.Adapters.PM4pyRustTest do
 
   describe "error handling" do
     test "connection failure is handled gracefully" do
-      result = PM4pyRust.discover(@sample_event_log, "alpha", %{
-        "url" => "http://invalid-host-xyz:8000"
-      })
+      result =
+        PM4pyRust.discover(@sample_event_log, "alpha", %{
+          "url" => "http://invalid-host-xyz:8000"
+        })
 
       assert {:error, {:connection_failed, _}} = result
     end
 
     test "timeout is handled gracefully" do
       # Set very short timeout
-      result = PM4pyRust.discover(@sample_event_log, "alpha", %{
-        "url" => "http://httpbin.org/delay/5",
-        "timeout" => 100
-      })
+      result =
+        PM4pyRust.discover(@sample_event_log, "alpha", %{
+          "url" => "http://httpbin.org/delay/5",
+          "timeout" => 100
+        })
 
       assert is_tuple(result) and tuple_size(result) == 2
     end
@@ -361,9 +375,10 @@ defmodule Canopy.Adapters.PM4pyRustTest do
       invalid_log = "not a map"
 
       # This would fail at the type level, but test graceful handling
-      result = PM4pyRust.discover(invalid_log, "alpha", %{
-        "url" => "http://localhost:8765"
-      })
+      result =
+        PM4pyRust.discover(invalid_log, "alpha", %{
+          "url" => "http://localhost:8765"
+        })
 
       # Should either be error or succeed (if server running with fallback)
       assert is_tuple(result)
@@ -376,27 +391,31 @@ defmodule Canopy.Adapters.PM4pyRustTest do
     test "multiple discoveries can run simultaneously" do
       parent = self()
 
-      tasks = for i <- 1..3 do
-        Task.async(fn ->
-          result = PM4pyRust.discover(
-            @sample_event_log,
-            "alpha",
-            %{"url" => "http://localhost:8765"}
-          )
-          send(parent, {:result, i, result})
-        end)
-      end
+      tasks =
+        for i <- 1..3 do
+          Task.async(fn ->
+            result =
+              PM4pyRust.discover(
+                @sample_event_log,
+                "alpha",
+                %{"url" => "http://localhost:8765"}
+              )
+
+            send(parent, {:result, i, result})
+          end)
+        end
 
       Task.await_many(tasks)
 
       # Collect results (allowing for server not running)
-      results = for i <- 1..3 do
-        receive do
-          {:result, ^i, result} -> result
-        after
-          5000 -> {:timeout}
+      results =
+        for i <- 1..3 do
+          receive do
+            {:result, ^i, result} -> result
+          after
+            5000 -> {:timeout}
+          end
         end
-      end
 
       assert length(results) == 3
     end
@@ -404,34 +423,42 @@ defmodule Canopy.Adapters.PM4pyRustTest do
     test "discovery and conformance can run concurrently" do
       parent = self()
 
-      disco_task = Task.async(fn ->
-        result = PM4pyRust.discover(@sample_event_log, "alpha", %{
-          "url" => "http://localhost:8765"
-        })
-        send(parent, {:discovery, result})
-      end)
+      disco_task =
+        Task.async(fn ->
+          result =
+            PM4pyRust.discover(@sample_event_log, "alpha", %{
+              "url" => "http://localhost:8765"
+            })
 
-      conf_task = Task.async(fn ->
-        result = PM4pyRust.conformance(@sample_event_log, @sample_model, "token_replay", %{
-          "url" => "http://localhost:8765"
-        })
-        send(parent, {:conformance, result})
-      end)
+          send(parent, {:discovery, result})
+        end)
+
+      conf_task =
+        Task.async(fn ->
+          result =
+            PM4pyRust.conformance(@sample_event_log, @sample_model, "token_replay", %{
+              "url" => "http://localhost:8765"
+            })
+
+          send(parent, {:conformance, result})
+        end)
 
       Task.await(disco_task)
       Task.await(conf_task)
 
-      disco_result = receive do
-        {:discovery, result} -> result
-      after
-        5000 -> {:timeout}
-      end
+      disco_result =
+        receive do
+          {:discovery, result} -> result
+        after
+          5000 -> {:timeout}
+        end
 
-      conf_result = receive do
-        {:conformance, result} -> result
-      after
-        5000 -> {:timeout}
-      end
+      conf_result =
+        receive do
+          {:conformance, result} -> result
+        after
+          5000 -> {:timeout}
+        end
 
       assert is_tuple(disco_result)
       assert is_tuple(conf_result)

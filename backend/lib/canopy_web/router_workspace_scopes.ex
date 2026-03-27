@@ -48,6 +48,7 @@ defmodule CanopyWeb.RouterWorkspaceScopes do
         get "/schedules/queue", ScheduleController, :queue
         post "/schedules/wake-all", ScheduleController, :wake_all
         post "/schedules/pause-all", ScheduleController, :pause_all
+
         resources "/schedules", ScheduleController, except: [:new, :edit] do
           post "/trigger", ScheduleController, :trigger, as: :trigger
         end
@@ -114,6 +115,7 @@ defmodule CanopyWeb.RouterWorkspaceScopes do
         post "/skills/bulk-disable", SkillController, :bulk_disable
         get "/skills/categories", SkillController, :categories
         post "/skills/import", SkillController, :import_skill
+
         resources "/skills", SkillController, only: [:index, :show] do
           post "/toggle", SkillController, :toggle, as: :toggle
           post "/inject", SkillController, :inject, as: :inject
@@ -144,7 +146,8 @@ defmodule CanopyWeb.RouterWorkspaceScopes do
         resources "/users", UserController, except: [:new, :edit]
         get "/audit", AuditController, :index
 
-        resources "/gateways", GatewayController, only: [:index, :show, :create, :update, :delete] do
+        resources "/gateways", GatewayController,
+          only: [:index, :show, :create, :update, :delete] do
           post "/probe", GatewayController, :probe, as: :probe
         end
 
@@ -200,7 +203,8 @@ defmodule CanopyWeb.RouterWorkspaceScopes do
         post "/access/assign", AccessController, :assign
         delete "/access/:id", AccessController, :revoke
 
-        resources "/execution-workspaces", ExecutionWorkspaceController, only: [:index, :create, :delete]
+        resources "/execution-workspaces", ExecutionWorkspaceController,
+          only: [:index, :create, :delete]
 
         resources "/plugins", PluginController, except: [:new, :edit] do
           get "/logs", PluginController, :logs, as: :logs

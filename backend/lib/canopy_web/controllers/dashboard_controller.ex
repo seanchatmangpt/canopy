@@ -13,9 +13,14 @@ defmodule CanopyWeb.DashboardController do
 
     agents_query =
       cond do
-        workspace_id -> where(agents_query, [a], a.workspace_id == ^workspace_id)
-        user_workspace_ids != [] -> where(agents_query, [a], a.workspace_id in ^user_workspace_ids)
-        true -> agents_query
+        workspace_id ->
+          where(agents_query, [a], a.workspace_id == ^workspace_id)
+
+        user_workspace_ids != [] ->
+          where(agents_query, [a], a.workspace_id in ^user_workspace_ids)
+
+        true ->
+          agents_query
       end
 
     agents = Repo.all(agents_query)
@@ -42,9 +47,14 @@ defmodule CanopyWeb.DashboardController do
 
     live_runs_query =
       cond do
-        workspace_id -> where(live_runs_query, [s, a], a.workspace_id == ^workspace_id)
-        user_workspace_ids != [] -> where(live_runs_query, [s, a], a.workspace_id in ^user_workspace_ids)
-        true -> live_runs_query
+        workspace_id ->
+          where(live_runs_query, [s, a], a.workspace_id == ^workspace_id)
+
+        user_workspace_ids != [] ->
+          where(live_runs_query, [s, a], a.workspace_id in ^user_workspace_ids)
+
+        true ->
+          live_runs_query
       end
 
     live_runs = Repo.all(live_runs_query)
@@ -69,9 +79,14 @@ defmodule CanopyWeb.DashboardController do
 
     recent_activity_query =
       cond do
-        workspace_id -> where(recent_activity_query, [e], e.workspace_id == ^workspace_id)
-        user_workspace_ids != [] -> where(recent_activity_query, [e], e.workspace_id in ^user_workspace_ids)
-        true -> recent_activity_query
+        workspace_id ->
+          where(recent_activity_query, [e], e.workspace_id == ^workspace_id)
+
+        user_workspace_ids != [] ->
+          where(recent_activity_query, [e], e.workspace_id in ^user_workspace_ids)
+
+        true ->
+          recent_activity_query
       end
 
     recent_activity = Repo.all(recent_activity_query)
@@ -101,7 +116,7 @@ defmodule CanopyWeb.DashboardController do
             where: a.workspace_id in ^user_workspace_ids
 
         true ->
-          from ce in Canopy.Schemas.CostEvent
+          from(ce in Canopy.Schemas.CostEvent)
       end
 
     today_cost =
@@ -130,9 +145,14 @@ defmodule CanopyWeb.DashboardController do
 
     open_issues_query =
       cond do
-        workspace_id -> where(open_issues_query, [i], i.workspace_id == ^workspace_id)
-        user_workspace_ids != [] -> where(open_issues_query, [i], i.workspace_id in ^user_workspace_ids)
-        true -> open_issues_query
+        workspace_id ->
+          where(open_issues_query, [i], i.workspace_id == ^workspace_id)
+
+        user_workspace_ids != [] ->
+          where(open_issues_query, [i], i.workspace_id in ^user_workspace_ids)
+
+        true ->
+          open_issues_query
       end
 
     open_issues = Repo.aggregate(open_issues_query, :count)
@@ -145,9 +165,14 @@ defmodule CanopyWeb.DashboardController do
 
     workspace_policy_query =
       cond do
-        workspace_id -> where(workspace_policy_query, [bp], bp.scope_id == ^workspace_id)
-        user_workspace_ids != [] -> where(workspace_policy_query, [bp], bp.scope_id in ^user_workspace_ids)
-        true -> workspace_policy_query
+        workspace_id ->
+          where(workspace_policy_query, [bp], bp.scope_id == ^workspace_id)
+
+        user_workspace_ids != [] ->
+          where(workspace_policy_query, [bp], bp.scope_id in ^user_workspace_ids)
+
+        true ->
+          workspace_policy_query
       end
 
     workspace_policy = Repo.one(workspace_policy_query)

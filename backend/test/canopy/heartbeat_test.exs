@@ -101,6 +101,7 @@ defmodule Canopy.HeartbeatTest do
 
     test "work.* prefixed events are tracked" do
       events = ["work.create", "work.update", "work.delete"]
+
       for event <- events do
         assert String.starts_with?(event, "work.")
       end
@@ -108,6 +109,7 @@ defmodule Canopy.HeartbeatTest do
 
     test "task.* prefixed events are tracked" do
       events = ["task.start", "task.complete"]
+
       for event <- events do
         assert String.starts_with?(event, "task.")
       end

@@ -54,7 +54,13 @@ defmodule CanopyWeb.SpawnController do
     json(conn, %{
       instances:
         Enum.map(sessions, fn s ->
-          %{id: s.id, agent_id: s.agent_id, model: s.model, status: s.status, started_at: s.started_at}
+          %{
+            id: s.id,
+            agent_id: s.agent_id,
+            model: s.model,
+            status: s.status,
+            started_at: s.started_at
+          }
         end)
     })
   end
@@ -66,7 +72,10 @@ defmodule CanopyWeb.SpawnController do
 
       session ->
         case session
-             |> Ecto.Changeset.change(status: "cancelled", completed_at: DateTime.utc_now() |> DateTime.truncate(:second))
+             |> Ecto.Changeset.change(
+               status: "cancelled",
+               completed_at: DateTime.utc_now() |> DateTime.truncate(:second)
+             )
              |> Repo.update() do
           {:ok, _} ->
             json(conn, %{ok: true})

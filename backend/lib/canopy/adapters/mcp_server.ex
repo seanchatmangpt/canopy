@@ -37,6 +37,11 @@ defmodule Canopy.Adapters.MCPServer do
     - `:transport` — `:http`
     - `:url` — MCP server URL
     - `:headers` — map of HTTP headers
+
+  For WebSocket transport:
+    - `:transport` — `:websocket`
+    - `:url` — MCP server WebSocket URL (e.g., `"ws://localhost:3000/mcp"`)
+    - `:headers` — map of HTTP headers (optional)
   """
   def start_link(opts) when is_map(opts) do
     GenServer.start_link(__MODULE__, opts)
@@ -160,6 +165,27 @@ defmodule Canopy.Adapters.MCPServer do
     end
   end
 
+  defp initialize_transport(:websocket, opts) do
+    url = Map.get(opts, :url)
+    headers = Map.get(opts, :headers, %{})
+
+    if url do
+      case Canopy.Transports.MCPWebsocket.init(%{url: url, headers: headers}) do
+        {:ok, ws_state} ->
+          {:ok, ws_state}
+
+        {:error, reason} ->
+          {:error, reason}
+      end
+    else
+      {:error, :missing_url}
+    end
+  end
+
+  defp initialize_transport(transport, _opts) do
+    {:error, {:unsupported_transport, transport}}
+  end
+
   defp find_executable(command) do
     case System.find_executable(command) do
       nil -> command
@@ -250,6 +276,16 @@ defmodule Canopy.Adapters.MCPServer do
     end
   end
 
+  defp jsonrpc_request(%{ws_pid: _ws_pid} = state, method, params) do
+    case Canopy.Transports.MCPWebsocket.request(state, method, params) do
+      {:ok, result, new_state} ->
+        {:ok, result, new_state}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
   defp jsonrpc_notify(%{port: _port}, _method, _params) do
     # For stdio, we could send a notification but it's fire-and-forget
     # The initialized notification is optional for many servers
@@ -265,6 +301,17 @@ defmodule Canopy.Adapters.MCPServer do
     Req.post(url, json: notification, headers: req_headers, receive_timeout: 5_000)
 
     :ok
+  end
+
+  defp jsonrpc_notify(%{ws_pid: _ws_pid} = state, method, params) do
+    case Canopy.Transports.MCPWebsocket.notify(state, method, params) do
+      :ok ->
+        :ok
+
+      {:error, reason} ->
+        Logger.warning("[MCPServer] Notification send failed: #{inspect(reason)}")
+        :ok
+    end
   end
 
   # ── Stdio response handling ─────────────────────────────────────────
@@ -378,6 +425,11 @@ defmodule Canopy.Adapters.MCPServer do
   end
 
   defp cleanup_transport(:http, _state), do: :ok
+
+  defp cleanup_transport(:websocket, state) do
+    Canopy.Transports.MCPWebsocket.close(state)
+  end
+
   defp cleanup_transport(_, _state), do: :ok
 
   defp send_port_data(port, data) do

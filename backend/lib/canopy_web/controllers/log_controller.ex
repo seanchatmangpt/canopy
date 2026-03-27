@@ -10,7 +10,8 @@ defmodule CanopyWeb.LogController do
 
     query =
       from e in Canopy.Schemas.ActivityEvent,
-        left_join: a in Canopy.Schemas.Agent, on: e.agent_id == a.id,
+        left_join: a in Canopy.Schemas.Agent,
+        on: e.agent_id == a.id,
         order_by: [desc: e.inserted_at],
         limit: ^limit,
         offset: ^offset,
@@ -35,9 +36,10 @@ defmodule CanopyWeb.LogController do
         true -> query
       end
 
-    query = if params["level"],
-      do: where(query, [e], e.level == ^params["level"]),
-      else: query
+    query =
+      if params["level"],
+        do: where(query, [e], e.level == ^params["level"]),
+        else: query
 
     entries = Repo.all(query)
     json(conn, %{entries: entries})

@@ -10,8 +10,9 @@ defmodule Canopy.WorkspaceIsolation do
   def get_user_workspaces(user_id) do
     Repo.all(
       from w in Workspace,
-        left_join: wu in WorkspaceUser, on: wu.workspace_id == w.id and wu.user_id == ^user_id,
-        where: w.owner_id == ^user_id or (wu.user_id == ^user_id and w.is_active == true),
+        left_join: wu in WorkspaceUser,
+        on: wu.workspace_id == w.id and wu.user_id == ^user_id,
+        where: (w.owner_id == ^user_id or wu.user_id == ^user_id) and w.is_active == true,
         distinct: true,
         order_by: [desc: w.inserted_at]
     )
@@ -20,7 +21,8 @@ defmodule Canopy.WorkspaceIsolation do
   def get_user_workspace(user_id, workspace_id) do
     Repo.one(
       from w in Workspace,
-        left_join: wu in WorkspaceUser, on: wu.workspace_id == w.id and wu.user_id == ^user_id,
+        left_join: wu in WorkspaceUser,
+        on: wu.workspace_id == w.id and wu.user_id == ^user_id,
         where: (w.owner_id == ^user_id or wu.user_id == ^user_id) and w.id == ^workspace_id,
         select: w
     )
@@ -28,13 +30,20 @@ defmodule Canopy.WorkspaceIsolation do
 
   def user_workspace_role(user_id, workspace_id) do
     case Repo.one(
-      from wu in WorkspaceUser,
-        where: wu.user_id == ^user_id and wu.workspace_id == ^workspace_id,
-        select: wu.role
-    ) do
+           from wu in WorkspaceUser,
+             join: w in Workspace,
+             on: w.id == wu.workspace_id,
+             where:
+               wu.user_id == ^user_id and wu.workspace_id == ^workspace_id and w.is_active == true,
+             select: wu.role
+         ) do
       nil ->
         # Check if user owns the workspace
-        case Repo.one(from w in Workspace, where: w.id == ^workspace_id and w.owner_id == ^user_id, select: true) do
+        case Repo.one(
+               from w in Workspace,
+                 where: w.id == ^workspace_id and w.owner_id == ^user_id and w.is_active == true,
+                 select: true
+             ) do
           true -> "owner"
           nil -> nil
         end
@@ -67,17 +76,22 @@ defmodule Canopy.WorkspaceIsolation do
   end
 
   def update_workspace_user_role(workspace_id, user_id, role) do
-    case Repo.one(
-      from wu in WorkspaceUser,
-        where: wu.workspace_id == ^workspace_id and wu.user_id == ^user_id
-    ) do
-      nil ->
-        {:error, :not_found}
+    try do
+      case Repo.one(
+             from wu in WorkspaceUser,
+               where: wu.workspace_id == ^workspace_id and wu.user_id == ^user_id
+           ) do
+        nil ->
+          {:error, :not_found}
 
-      workspace_user ->
-        workspace_user
-        |> WorkspaceUser.changeset(%{role: role})
-        |> Repo.update()
+        workspace_user ->
+          workspace_user
+          |> WorkspaceUser.changeset(%{role: role})
+          |> Repo.update()
+      end
+    rescue
+      _e in Ecto.Query.CastError ->
+        {:error, :not_found}
     end
   end
 

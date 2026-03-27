@@ -9,20 +9,32 @@ defmodule CanopyWeb.Plugs.ErrorHandler do
     conn
   rescue
     _e in Ecto.NoResultsError ->
-      conn |> put_status(404) |> json_error("not_found", "Resource not found")
+      msg =
+        "Resource not found. Tip: verify resource ID exists and you have permission to access it."
+
+      conn |> put_status(404) |> json_error("not_found", msg)
 
     _e in Ecto.Query.CastError ->
-      conn |> put_status(400) |> json_error("invalid_id", "Invalid ID format")
+      msg =
+        "Invalid ID format. Tip: check query parameters are valid UUIDs or integers. See docs/TROUBLESHOOTING.md#ecto-cast-errors"
+
+      conn |> put_status(400) |> json_error("invalid_id", msg)
 
     _e in Phoenix.Router.NoRouteError ->
-      conn |> put_status(404) |> json_error("not_found", "Endpoint not found")
+      msg =
+        "Endpoint not found. Tip: check the request path is spelled correctly and HTTP method matches the route definition."
+
+      conn |> put_status(404) |> json_error("not_found", msg)
 
     e ->
       Logger.error(
         "[ErrorHandler] Unhandled: #{Exception.message(e)}\n#{Exception.format_stacktrace(__STACKTRACE__)}"
       )
 
-      conn |> put_status(500) |> json_error("internal_error", Exception.message(e))
+      msg =
+        "Internal server error. See docs/TROUBLESHOOTING.md for common issues. Check server logs for full stack trace."
+
+      conn |> put_status(500) |> json_error("internal_error", msg)
   end
 
   defp json_error(conn, code, message) do

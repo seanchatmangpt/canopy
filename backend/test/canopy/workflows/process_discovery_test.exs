@@ -3,7 +3,8 @@ defmodule Canopy.Workflows.ProcessDiscoveryTest do
 
   alias Canopy.Workflows.ProcessDiscovery
 
-  @moduletag :skip  # Requires GenServer/Registry/PubSub to be running
+  # Requires GenServer/Registry/PubSub to be running
+  @moduletag :skip
 
   # ── Test Fixtures ───────────────────────────────────────────────────
 
@@ -130,25 +131,29 @@ defmodule Canopy.Workflows.ProcessDiscoveryTest do
   test "workflow with invalid event log transitions to failed" do
     invalid_log = %{"events" => []}
 
-    {:ok, workflow_id} = ProcessDiscovery.start_discovery(invalid_log, "alpha", %{
-      "url" => "http://invalid-host:8000"
-    })
+    {:ok, workflow_id} =
+      ProcessDiscovery.start_discovery(invalid_log, "alpha", %{
+        "url" => "http://invalid-host:8000"
+      })
 
     # Wait for failure
     case ProcessDiscovery.wait_for_completion(workflow_id, 5000) do
       {:error, {:discovery_failed, _}} -> true
-      {:error, :timeout} -> true  # Might not complete if server unavailable
-      {:ok, _} -> true  # Might succeed if server is running
+      # Might not complete if server unavailable
+      {:error, :timeout} -> true
+      # Might succeed if server is running
+      {:ok, _} -> true
     end
   end
 
   # ── Wait for Completion Tests ───────────────────────────────────────
 
   test "wait_for_completion blocks until workflow completes" do
-    {:ok, workflow_id} = ProcessDiscovery.start_discovery(@sample_event_log, "alpha", %{
-      "url" => "http://localhost:8765",
-      "max_retries" => 1
-    })
+    {:ok, workflow_id} =
+      ProcessDiscovery.start_discovery(@sample_event_log, "alpha", %{
+        "url" => "http://localhost:8765",
+        "max_retries" => 1
+      })
 
     start_time = System.monotonic_time(:millisecond)
 
@@ -159,7 +164,8 @@ defmodule Canopy.Workflows.ProcessDiscoveryTest do
     # Should either complete or timeout
     case result do
       {:ok, _model} ->
-        assert elapsed > 100  # Should have waited some time
+        # Should have waited some time
+        assert elapsed > 100
         true
 
       {:error, {:discovery_failed, _}} ->
@@ -209,17 +215,20 @@ defmodule Canopy.Workflows.ProcessDiscoveryTest do
   test "multiple workflows can run concurrently" do
     parent = self()
 
-    tasks = for i <- 1..3 do
-      Task.async(fn ->
-        {:ok, workflow_id} = ProcessDiscovery.start_discovery(
-          @sample_event_log,
-          "alpha",
-          %{"url" => "http://localhost:#{8000 + i}"}
-        )
-        send(parent, {:workflow_created, i, workflow_id})
-        workflow_id
-      end)
-    end
+    tasks =
+      for i <- 1..3 do
+        Task.async(fn ->
+          {:ok, workflow_id} =
+            ProcessDiscovery.start_discovery(
+              @sample_event_log,
+              "alpha",
+              %{"url" => "http://localhost:#{8000 + i}"}
+            )
+
+          send(parent, {:workflow_created, i, workflow_id})
+          workflow_id
+        end)
+      end
 
     workflow_ids = Task.await_many(tasks)
 
@@ -242,25 +251,27 @@ defmodule Canopy.Workflows.ProcessDiscoveryTest do
   test "concurrent discoveries don't interfere with each other" do
     parent = self()
 
-    tasks = for _i <- 1..2 do
-      Task.async(fn ->
-        {:ok, workflow_id} = ProcessDiscovery.start_discovery(@sample_event_log)
+    tasks =
+      for _i <- 1..2 do
+        Task.async(fn ->
+          {:ok, workflow_id} = ProcessDiscovery.start_discovery(@sample_event_log)
 
-        result = ProcessDiscovery.wait_for_completion(workflow_id, 10_000)
+          result = ProcessDiscovery.wait_for_completion(workflow_id, 10_000)
 
-        send(parent, {:workflow_result, workflow_id, result})
-      end)
-    end
+          send(parent, {:workflow_result, workflow_id, result})
+        end)
+      end
 
     Task.await_many(tasks)
 
-    results = for _ <- 1..2 do
-      receive do
-        {:workflow_result, wid, result} -> {wid, result}
-      after
-        15000 -> flunk("Workflow completion timeout")
+    results =
+      for _ <- 1..2 do
+        receive do
+          {:workflow_result, wid, result} -> {wid, result}
+        after
+          15000 -> flunk("Workflow completion timeout")
+        end
       end
-    end
 
     assert length(results) == 2
 
@@ -272,10 +283,11 @@ defmodule Canopy.Workflows.ProcessDiscoveryTest do
   # ── Error Recovery Tests ────────────────────────────────────────────
 
   test "workflow retries on transient failure" do
-    {:ok, workflow_id} = ProcessDiscovery.start_discovery(@sample_event_log, "alpha", %{
-      "url" => "http://invalid-host:8000",
-      "max_retries" => 3
-    })
+    {:ok, workflow_id} =
+      ProcessDiscovery.start_discovery(@sample_event_log, "alpha", %{
+        "url" => "http://invalid-host:8000",
+        "max_retries" => 3
+      })
 
     Process.sleep(500)
 
@@ -286,10 +298,11 @@ defmodule Canopy.Workflows.ProcessDiscoveryTest do
   end
 
   test "workflow respects max_retries" do
-    {:ok, workflow_id} = ProcessDiscovery.start_discovery(@sample_event_log, "alpha", %{
-      "url" => "http://invalid-host:8000",
-      "max_retries" => 2
-    })
+    {:ok, workflow_id} =
+      ProcessDiscovery.start_discovery(@sample_event_log, "alpha", %{
+        "url" => "http://invalid-host:8000",
+        "max_retries" => 2
+      })
 
     # Wait for retries to exhaust
     case ProcessDiscovery.wait_for_completion(workflow_id, 30_000) do
@@ -298,18 +311,21 @@ defmodule Canopy.Workflows.ProcessDiscoveryTest do
         assert state.retry_count <= 2
 
       {:error, :timeout} ->
-        true  # Still retrying
+        # Still retrying
+        true
 
       {:ok, _} ->
-        true  # Succeeded
+        # Succeeded
+        true
     end
   end
 
   test "retry uses exponential backoff" do
-    {:ok, workflow_id} = ProcessDiscovery.start_discovery(@sample_event_log, "alpha", %{
-      "url" => "http://invalid-host:8000",
-      "max_retries" => 2
-    })
+    {:ok, workflow_id} =
+      ProcessDiscovery.start_discovery(@sample_event_log, "alpha", %{
+        "url" => "http://invalid-host:8000",
+        "max_retries" => 2
+      })
 
     start_time = System.monotonic_time(:millisecond)
 
@@ -319,26 +335,29 @@ defmodule Canopy.Workflows.ProcessDiscoveryTest do
 
     # With exponential backoff (1s, 2s) should take at least 3s
     # But be lenient since timing is unpredictable in tests
-    assert elapsed > 500 or elapsed <= 500  # Just check it runs
+    # Just check it runs
+    assert elapsed > 500 or elapsed <= 500
   end
 
   # ── Algorithm Support Tests ─────────────────────────────────────────
 
   test "workflow supports alpha miner" do
-    {:ok, workflow_id} = ProcessDiscovery.start_discovery(@sample_event_log, "alpha", %{
-      "url" => "http://localhost:8765",
-      "max_retries" => 1
-    })
+    {:ok, workflow_id} =
+      ProcessDiscovery.start_discovery(@sample_event_log, "alpha", %{
+        "url" => "http://localhost:8765",
+        "max_retries" => 1
+      })
 
     {:ok, state} = ProcessDiscovery.get_state(workflow_id)
     assert state.config["algorithm"] == "alpha"
   end
 
   test "workflow supports inductive miner" do
-    {:ok, workflow_id} = ProcessDiscovery.start_discovery(@sample_event_log, "inductive", %{
-      "url" => "http://localhost:8765",
-      "max_retries" => 1
-    })
+    {:ok, workflow_id} =
+      ProcessDiscovery.start_discovery(@sample_event_log, "inductive", %{
+        "url" => "http://localhost:8765",
+        "max_retries" => 1
+      })
 
     {:ok, state} = ProcessDiscovery.get_state(workflow_id)
     assert state.config["algorithm"] == "inductive"
@@ -349,9 +368,10 @@ defmodule Canopy.Workflows.ProcessDiscoveryTest do
   test "workflow uses custom URL from config" do
     custom_url = "http://custom.example.com:8000"
 
-    {:ok, workflow_id} = ProcessDiscovery.start_discovery(@sample_event_log, "alpha", %{
-      "url" => custom_url
-    })
+    {:ok, workflow_id} =
+      ProcessDiscovery.start_discovery(@sample_event_log, "alpha", %{
+        "url" => custom_url
+      })
 
     {:ok, state} = ProcessDiscovery.get_state(workflow_id)
 
@@ -359,9 +379,10 @@ defmodule Canopy.Workflows.ProcessDiscoveryTest do
   end
 
   test "workflow uses custom timeout from config" do
-    {:ok, workflow_id} = ProcessDiscovery.start_discovery(@sample_event_log, "alpha", %{
-      "timeout" => 60_000
-    })
+    {:ok, workflow_id} =
+      ProcessDiscovery.start_discovery(@sample_event_log, "alpha", %{
+        "timeout" => 60_000
+      })
 
     {:ok, state} = ProcessDiscovery.get_state(workflow_id)
 
@@ -434,38 +455,39 @@ defmodule Canopy.Workflows.ProcessDiscoveryTest do
     receive do
       {:discovery_state_changed, state} ->
         assert state.workflow_id == workflow_id
-
-      after
-        5000 -> flunk("State change event not received")
+    after
+      5000 -> flunk("State change event not received")
     end
   end
 
   test "workflow broadcasts completion events" do
     Phoenix.PubSub.subscribe(Canopy.PubSub, "process_discovery:events")
 
-    {:ok, workflow_id} = ProcessDiscovery.start_discovery(@sample_event_log, "alpha", %{
-      "url" => "http://localhost:8765",
-      "max_retries" => 1
-    })
+    {:ok, workflow_id} =
+      ProcessDiscovery.start_discovery(@sample_event_log, "alpha", %{
+        "url" => "http://localhost:8765",
+        "max_retries" => 1
+      })
 
     # Wait for completion or failure event
     receive do
       {:discovery_event, event} ->
         assert event["workflow_id"] == workflow_id
         assert event["event_type"] in ["discovery_complete", "discovery_failed"]
-
-      after
-        15000 -> true  # Event might not be received if server not running
+    after
+      # Event might not be received if server not running
+      15000 -> true
     end
   end
 
   # ── Integration Tests ───────────────────────────────────────────────
 
   test "complete workflow lifecycle" do
-    {:ok, workflow_id} = ProcessDiscovery.start_discovery(@sample_event_log, "alpha", %{
-      "url" => "http://localhost:8765",
-      "max_retries" => 1
-    })
+    {:ok, workflow_id} =
+      ProcessDiscovery.start_discovery(@sample_event_log, "alpha", %{
+        "url" => "http://localhost:8765",
+        "max_retries" => 1
+      })
 
     # Initial state
     {:ok, state0} = ProcessDiscovery.get_state(workflow_id)
@@ -476,7 +498,7 @@ defmodule Canopy.Workflows.ProcessDiscoveryTest do
 
     # Check intermediate state
     {:ok, state1} = ProcessDiscovery.get_state(workflow_id)
-    assert is_non_neg_integer(state1.retry_count)
+    assert is_integer(state1.retry_count) and state1.retry_count >= 0
 
     # Try to wait for completion
     result = ProcessDiscovery.wait_for_completion(workflow_id, 5000)

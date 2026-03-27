@@ -3,7 +3,9 @@ defmodule Canopy.Repo.Migrations.CreateSessionEvents do
 
   def change do
     create table(:session_events) do
-      add :session_id, references(:sessions, type: :binary_id, on_delete: :delete_all), null: false
+      add :session_id, references(:sessions, type: :binary_id, on_delete: :delete_all),
+        null: false
+
       add :event_type, :string, null: false
       add :data, :map, null: false
       add :tokens, :integer, default: 0

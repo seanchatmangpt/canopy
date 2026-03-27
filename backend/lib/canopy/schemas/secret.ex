@@ -20,7 +20,15 @@ defmodule Canopy.Schemas.Secret do
 
   def changeset(secret, attrs) do
     secret
-    |> cast(attrs, [:name, :key, :encrypted_value, :provider, :workspace_id, :created_by, :last_used_at])
+    |> cast(attrs, [
+      :name,
+      :key,
+      :encrypted_value,
+      :provider,
+      :workspace_id,
+      :created_by,
+      :last_used_at
+    ])
     |> validate_required([:name, :key, :encrypted_value])
   end
 end

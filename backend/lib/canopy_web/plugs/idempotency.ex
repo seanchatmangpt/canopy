@@ -54,7 +54,5 @@ defmodule CanopyWeb.Plugs.Idempotency do
     :ets.select_delete(@table, [
       {{:"$1", {:"$2", :"$3", :"$4"}}, [{:<, :"$4", cutoff}], [true]}
     ])
-  rescue
-    _e -> :ok
   end
 end

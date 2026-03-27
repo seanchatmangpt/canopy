@@ -22,7 +22,18 @@ defmodule Canopy.Schemas.BudgetIncident do
 
   def changeset(incident, attrs) do
     incident
-    |> cast(attrs, [:incident_type, :threshold_pct, :actual_pct, :resolved, :resolved_at, :policy_id, :agent_id, :resolved_by, :scope_type, :scope_id])
+    |> cast(attrs, [
+      :incident_type,
+      :threshold_pct,
+      :actual_pct,
+      :resolved,
+      :resolved_at,
+      :policy_id,
+      :agent_id,
+      :resolved_by,
+      :scope_type,
+      :scope_id
+    ])
     |> validate_required([:incident_type, :threshold_pct, :actual_pct, :policy_id])
     |> validate_inclusion(:incident_type, ~w(warning hard_stop))
   end

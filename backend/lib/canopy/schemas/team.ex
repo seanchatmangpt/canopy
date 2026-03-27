@@ -28,9 +28,18 @@ defmodule Canopy.Schemas.Team do
   def changeset(team, attrs) do
     team
     |> cast(attrs, [
-      :name, :slug, :description, :department_id, :manager_agent_id,
-      :budget_monthly_cents, :budget_enforcement, :signal,
-      :mission, :coordination, :escalation_rules, :handoff_protocols
+      :name,
+      :slug,
+      :description,
+      :department_id,
+      :manager_agent_id,
+      :budget_monthly_cents,
+      :budget_enforcement,
+      :signal,
+      :mission,
+      :coordination,
+      :escalation_rules,
+      :handoff_protocols
     ])
     |> validate_required([:name, :slug, :department_id])
     |> validate_format(:slug, ~r/^[a-z0-9-]+$/)

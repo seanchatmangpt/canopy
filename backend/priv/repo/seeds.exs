@@ -85,7 +85,9 @@ IO.puts("    \"OSA Development\" (#{workspace.id})")
 IO.puts("[3/10] Agents...")
 
 # Orchestrator must be inserted first so subordinates can reference its id.
-unless Repo.exists?(from a in Agent, where: a.workspace_id == ^workspace.id and a.slug == "orchestrator") do
+unless Repo.exists?(
+         from a in Agent, where: a.workspace_id == ^workspace.id and a.slug == "orchestrator"
+       ) do
   Repo.insert!(
     Agent.changeset(%Agent{}, %{
       slug: "orchestrator",
@@ -151,7 +153,9 @@ subordinate_agents = [
 ]
 
 for attrs <- subordinate_agents do
-  unless Repo.exists?(from a in Agent, where: a.workspace_id == ^workspace.id and a.slug == ^attrs.slug) do
+  unless Repo.exists?(
+           from a in Agent, where: a.workspace_id == ^workspace.id and a.slug == ^attrs.slug
+         ) do
     Repo.insert!(Agent.changeset(%Agent{}, Map.put(attrs, :workspace_id, workspace.id)))
   end
 end
@@ -161,7 +165,9 @@ reviewer = Repo.get_by!(Agent, workspace_id: workspace.id, slug: "reviewer")
 devops = Repo.get_by!(Agent, workspace_id: workspace.id, slug: "devops")
 researcher = Repo.get_by!(Agent, workspace_id: workspace.id, slug: "researcher")
 
-IO.puts("    6 agents: orchestrator (osa), researcher, developer, reviewer (claude-code), devops (bash), api-monitor (http)")
+IO.puts(
+  "    6 agents: orchestrator (osa), researcher, developer, reviewer (claude-code), devops (bash), api-monitor (http)"
+)
 
 # ---------------------------------------------------------------------------
 # SECTION 3.5: Autonomic Coordination Agents (Vision 2030)
@@ -321,7 +327,9 @@ autonomic_agents = [
 ]
 
 for attrs <- autonomic_agents do
-  unless Repo.exists?(from a in Agent, where: a.workspace_id == ^workspace.id and a.slug == ^attrs.slug) do
+  unless Repo.exists?(
+           from a in Agent, where: a.workspace_id == ^workspace.id and a.slug == ^attrs.slug
+         ) do
     Repo.insert!(Agent.changeset(%Agent{}, Map.put(attrs, :workspace_id, workspace.id)))
   end
 end
@@ -331,7 +339,9 @@ crm_automation = Repo.get_by!(Agent, workspace_id: workspace.id, slug: "crm-auto
 project_coordinator = Repo.get_by!(Agent, workspace_id: workspace.id, slug: "project-coordinator")
 compliance_monitor = Repo.get_by!(Agent, workspace_id: workspace.id, slug: "compliance-monitor")
 
-IO.puts("    6 autonomic agents: health-monitor, crm-automation, project-coordinator, app-generator, process-healer, compliance-monitor")
+IO.puts(
+  "    6 autonomic agents: health-monitor, crm-automation, project-coordinator, app-generator, process-healer, compliance-monitor"
+)
 
 # ---------------------------------------------------------------------------
 # SECTION 4: Schedules
@@ -343,7 +353,8 @@ schedules = [
   %{
     name: "Morning standup",
     cron_expression: "0 9 * * 1-5",
-    context: "Run daily standup: summarize yesterday's completed issues, flag blockers, list today's priorities.",
+    context:
+      "Run daily standup: summarize yesterday's completed issues, flag blockers, list today's priorities.",
     enabled: false,
     workspace_id: workspace.id,
     agent_id: researcher.id
@@ -359,7 +370,8 @@ schedules = [
   %{
     name: "Infrastructure check",
     cron_expression: "*/30 * * * *",
-    context: "Check service health endpoints, disk usage, and container status. Alert on anomalies.",
+    context:
+      "Check service health endpoints, disk usage, and container status. Alert on anomalies.",
     enabled: false,
     workspace_id: workspace.id,
     agent_id: devops.id
@@ -367,12 +379,16 @@ schedules = [
 ]
 
 for attrs <- schedules do
-  unless Repo.exists?(from s in Schedule, where: s.workspace_id == ^workspace.id and s.name == ^attrs.name) do
+  unless Repo.exists?(
+           from s in Schedule, where: s.workspace_id == ^workspace.id and s.name == ^attrs.name
+         ) do
     Repo.insert!(Schedule.changeset(%Schedule{}, attrs))
   end
 end
 
-IO.puts("    3 schedules (all disabled): morning standup, nightly code review, infrastructure check")
+IO.puts(
+  "    3 schedules (all disabled): morning standup, nightly code review, infrastructure check"
+)
 
 # Autonomic Coordination Schedules (Vision 2030)
 autonomic_schedules = [
@@ -415,12 +431,16 @@ autonomic_schedules = [
 ]
 
 for attrs <- autonomic_schedules do
-  unless Repo.exists?(from s in Schedule, where: s.workspace_id == ^workspace.id and s.name == ^attrs.name) do
+  unless Repo.exists?(
+           from s in Schedule, where: s.workspace_id == ^workspace.id and s.name == ^attrs.name
+         ) do
     Repo.insert!(Schedule.changeset(%Schedule{}, attrs))
   end
 end
 
-IO.puts("    4 autonomic schedules (enabled): health-check (5min), crm-sync (15min), project-status (30min), compliance-scan (6hr)")
+IO.puts(
+  "    4 autonomic schedules (enabled): health-check (5min), crm-sync (15min), project-status (30min), compliance-scan (6hr)"
+)
 
 # ---------------------------------------------------------------------------
 # SECTION 5: Projects
@@ -428,7 +448,9 @@ IO.puts("    4 autonomic schedules (enabled): health-check (5min), crm-sync (15m
 
 IO.puts("[5/10] Projects...")
 
-unless Repo.exists?(from p in Project, where: p.workspace_id == ^workspace.id and p.name == "Canopy Platform") do
+unless Repo.exists?(
+         from p in Project, where: p.workspace_id == ^workspace.id and p.name == "Canopy Platform"
+       ) do
   Repo.insert!(%Project{
     name: "Canopy Platform",
     description: "The Canopy Command Center desktop application and backend API.",
@@ -437,7 +459,9 @@ unless Repo.exists?(from p in Project, where: p.workspace_id == ^workspace.id an
   })
 end
 
-unless Repo.exists?(from p in Project, where: p.workspace_id == ^workspace.id and p.name == "Infrastructure") do
+unless Repo.exists?(
+         from p in Project, where: p.workspace_id == ^workspace.id and p.name == "Infrastructure"
+       ) do
   Repo.insert!(%Project{
     name: "Infrastructure",
     description: "CI/CD pipelines, deployment automation, and monitoring setup.",
@@ -457,10 +481,13 @@ IO.puts("    2 projects: \"Canopy Platform\", \"Infrastructure\"")
 
 IO.puts("[6/10] Goals...")
 
-unless Repo.exists?(from g in Goal, where: g.workspace_id == ^workspace.id and g.title == "Launch MVP") do
+unless Repo.exists?(
+         from g in Goal, where: g.workspace_id == ^workspace.id and g.title == "Launch MVP"
+       ) do
   Repo.insert!(%Goal{
     title: "Launch MVP",
-    description: "Ship the first production-ready release of Canopy with core agent management features.",
+    description:
+      "Ship the first production-ready release of Canopy with core agent management features.",
     status: "active",
     workspace_id: workspace.id,
     project_id: canopy_project.id
@@ -469,10 +496,14 @@ end
 
 launch_mvp = Repo.get_by!(Goal, workspace_id: workspace.id, title: "Launch MVP")
 
-unless Repo.exists?(from g in Goal, where: g.workspace_id == ^workspace.id and g.title == "Implement Adapter System") do
+unless Repo.exists?(
+         from g in Goal,
+           where: g.workspace_id == ^workspace.id and g.title == "Implement Adapter System"
+       ) do
   Repo.insert!(%Goal{
     title: "Implement Adapter System",
-    description: "Build the pluggable adapter layer supporting osa, claude-code, bash, http, and codex adapters.",
+    description:
+      "Build the pluggable adapter layer supporting osa, claude-code, bash, http, and codex adapters.",
     status: "active",
     workspace_id: workspace.id,
     project_id: canopy_project.id,
@@ -480,7 +511,9 @@ unless Repo.exists?(from g in Goal, where: g.workspace_id == ^workspace.id and g
   })
 end
 
-unless Repo.exists?(from g in Goal, where: g.workspace_id == ^workspace.id and g.title == "Setup CI/CD") do
+unless Repo.exists?(
+         from g in Goal, where: g.workspace_id == ^workspace.id and g.title == "Setup CI/CD"
+       ) do
   Repo.insert!(%Goal{
     title: "Setup CI/CD",
     description: "Automated build, test, and deployment pipeline via GitHub Actions.",
@@ -490,7 +523,9 @@ unless Repo.exists?(from g in Goal, where: g.workspace_id == ^workspace.id and g
   })
 end
 
-unless Repo.exists?(from g in Goal, where: g.workspace_id == ^workspace.id and g.title == "Security Audit") do
+unless Repo.exists?(
+         from g in Goal, where: g.workspace_id == ^workspace.id and g.title == "Security Audit"
+       ) do
   Repo.insert!(%Goal{
     title: "Security Audit",
     description: "OWASP Top 10 review, JWT hardening, tenant isolation validation.",
@@ -515,7 +550,8 @@ security_goal = Repo.get_by!(Goal, workspace_id: workspace.id, title: "Security 
 issues = [
   %{
     title: "Implement OSA adapter",
-    description: "Wire up the OSA adapter to the agent execution engine. Support tool calling and streaming responses.",
+    description:
+      "Wire up the OSA adapter to the agent execution engine. Support tool calling and streaming responses.",
     status: "todo",
     priority: "high",
     workspace_id: workspace.id,
@@ -525,7 +561,8 @@ issues = [
   },
   %{
     title: "Write integration tests",
-    description: "Integration test suite covering adapter execution, session lifecycle, and budget enforcement.",
+    description:
+      "Integration test suite covering adapter execution, session lifecycle, and budget enforcement.",
     status: "backlog",
     priority: "medium",
     workspace_id: workspace.id,
@@ -534,7 +571,8 @@ issues = [
   },
   %{
     title: "Fix SSE connection drops",
-    description: "SSE stream disconnects after ~30s under load. Suspected Bandit keepalive timeout misconfiguration.",
+    description:
+      "SSE stream disconnects after ~30s under load. Suspected Bandit keepalive timeout misconfiguration.",
     status: "in_progress",
     priority: "critical",
     workspace_id: workspace.id,
@@ -544,7 +582,8 @@ issues = [
   },
   %{
     title: "Add budget enforcement UI",
-    description: "Budget policy editor in the Canopy UI: set monthly limits, warning thresholds, and view spend history.",
+    description:
+      "Budget policy editor in the Canopy UI: set monthly limits, warning thresholds, and view spend history.",
     status: "todo",
     priority: "medium",
     workspace_id: workspace.id,
@@ -553,7 +592,8 @@ issues = [
   },
   %{
     title: "Review auth flow",
-    description: "Audit JWT issuance, refresh token rotation, and Guardian plug configuration for production readiness.",
+    description:
+      "Audit JWT issuance, refresh token rotation, and Guardian plug configuration for production readiness.",
     status: "in_review",
     priority: "high",
     workspace_id: workspace.id,
@@ -563,7 +603,8 @@ issues = [
   },
   %{
     title: "Setup monitoring dashboards",
-    description: "Grafana dashboards for agent session throughput, budget burn rate, and BEAM VM health metrics.",
+    description:
+      "Grafana dashboards for agent session throughput, budget burn rate, and BEAM VM health metrics.",
     status: "backlog",
     priority: "low",
     workspace_id: workspace.id,
@@ -574,7 +615,9 @@ issues = [
 ]
 
 for attrs <- issues do
-  unless Repo.exists?(from i in Issue, where: i.workspace_id == ^workspace.id and i.title == ^attrs.title) do
+  unless Repo.exists?(
+           from i in Issue, where: i.workspace_id == ^workspace.id and i.title == ^attrs.title
+         ) do
     Repo.insert!(Issue.changeset(%Issue{}, attrs))
   end
 end
@@ -587,7 +630,9 @@ IO.puts("    6 issues: 2 todo, 1 in_progress (critical), 1 in_review, 2 backlog"
 
 IO.puts("[8/10] Budget policies...")
 
-unless Repo.exists?(from b in BudgetPolicy, where: b.scope_type == "agent" and b.scope_id == ^orchestrator.id) do
+unless Repo.exists?(
+         from b in BudgetPolicy, where: b.scope_type == "agent" and b.scope_id == ^orchestrator.id
+       ) do
   Repo.insert!(
     BudgetPolicy.changeset(%BudgetPolicy{}, %{
       scope_type: "agent",
@@ -599,7 +644,10 @@ unless Repo.exists?(from b in BudgetPolicy, where: b.scope_type == "agent" and b
   )
 end
 
-unless Repo.exists?(from b in BudgetPolicy, where: b.scope_type == "workspace" and b.scope_id == ^workspace.id) do
+unless Repo.exists?(
+         from b in BudgetPolicy,
+           where: b.scope_type == "workspace" and b.scope_id == ^workspace.id
+       ) do
   Repo.insert!(
     BudgetPolicy.changeset(%BudgetPolicy{}, %{
       scope_type: "workspace",
@@ -655,7 +703,9 @@ skills = [
 ]
 
 for attrs <- skills do
-  unless Repo.exists?(from s in Skill, where: s.workspace_id == ^workspace.id and s.name == ^attrs.name) do
+  unless Repo.exists?(
+           from s in Skill, where: s.workspace_id == ^workspace.id and s.name == ^attrs.name
+         ) do
     Repo.insert!(Skill.changeset(%Skill{}, attrs))
   end
 end
@@ -719,7 +769,11 @@ activity_seeds = [
     event_type: "issue.status_changed",
     message: "Issue 'Fix SSE connection drops' moved to in_progress by Developer Agent.",
     level: "info",
-    metadata: %{from_status: "todo", to_status: "in_progress", issue_title: "Fix SSE connection drops"},
+    metadata: %{
+      from_status: "todo",
+      to_status: "in_progress",
+      issue_title: "Fix SSE connection drops"
+    },
     workspace_id: workspace.id,
     agent_id: developer.id,
     inserted_at: DateTime.add(now, -3_600 * 6, :second)
@@ -776,7 +830,9 @@ integrations = [
 ]
 
 for attrs <- integrations do
-  unless Repo.exists?(from i in Integration, where: i.workspace_id == ^workspace.id and i.slug == ^attrs.slug) do
+  unless Repo.exists?(
+           from i in Integration, where: i.workspace_id == ^workspace.id and i.slug == ^attrs.slug
+         ) do
     Repo.insert!(
       Integration.changeset(%Integration{}, Map.drop(attrs, [:last_synced_at]))
       |> then(fn cs ->
@@ -830,7 +886,10 @@ IO.puts("    MIOSA Labs (enterprise), Acme Corp (pro)")
 
 IO.puts("[12/17] Organization memberships...")
 
-unless Repo.exists?(from m in OrganizationMembership, where: m.organization_id == ^miosa_org.id and m.user_id == ^admin.id) do
+unless Repo.exists?(
+         from m in OrganizationMembership,
+           where: m.organization_id == ^miosa_org.id and m.user_id == ^admin.id
+       ) do
   Repo.insert!(
     OrganizationMembership.changeset(%OrganizationMembership{}, %{
       organization_id: miosa_org.id,
@@ -840,7 +899,10 @@ unless Repo.exists?(from m in OrganizationMembership, where: m.organization_id =
   )
 end
 
-unless Repo.exists?(from m in OrganizationMembership, where: m.organization_id == ^acme_org.id and m.user_id == ^admin.id) do
+unless Repo.exists?(
+         from m in OrganizationMembership,
+           where: m.organization_id == ^acme_org.id and m.user_id == ^admin.id
+       ) do
   Repo.insert!(
     OrganizationMembership.changeset(%OrganizationMembership{}, %{
       organization_id: acme_org.id,
@@ -886,7 +948,9 @@ secrets = [
 ]
 
 for attrs <- secrets do
-  unless Repo.exists?(from s in Secret, where: s.workspace_id == ^workspace.id and s.key == ^attrs.key) do
+  unless Repo.exists?(
+           from s in Secret, where: s.workspace_id == ^workspace.id and s.key == ^attrs.key
+         ) do
     Repo.insert!(Secret.changeset(%Secret{}, attrs))
   end
 end
@@ -900,20 +964,24 @@ IO.puts("    3 secrets: OPENAI_API_KEY, GITHUB_TOKEN, ANTHROPIC_API_KEY")
 IO.puts("[14/17] Labels...")
 
 labels = [
-  %{name: "bug",           color: "#ef4444", workspace_id: workspace.id},
-  %{name: "feature",       color: "#3b82f6", workspace_id: workspace.id},
-  %{name: "urgent",        color: "#f97316", workspace_id: workspace.id},
+  %{name: "bug", color: "#ef4444", workspace_id: workspace.id},
+  %{name: "feature", color: "#3b82f6", workspace_id: workspace.id},
+  %{name: "urgent", color: "#f97316", workspace_id: workspace.id},
   %{name: "documentation", color: "#22c55e", workspace_id: workspace.id},
-  %{name: "enhancement",   color: "#8b5cf6", workspace_id: workspace.id}
+  %{name: "enhancement", color: "#8b5cf6", workspace_id: workspace.id}
 ]
 
 for attrs <- labels do
-  unless Repo.exists?(from l in Label, where: l.workspace_id == ^workspace.id and l.name == ^attrs.name) do
+  unless Repo.exists?(
+           from l in Label, where: l.workspace_id == ^workspace.id and l.name == ^attrs.name
+         ) do
     Repo.insert!(Label.changeset(%Label{}, attrs))
   end
 end
 
-IO.puts("    5 labels: bug (red), feature (blue), urgent (orange), documentation (green), enhancement (purple)")
+IO.puts(
+  "    5 labels: bug (red), feature (blue), urgent (orange), documentation (green), enhancement (purple)"
+)
 
 # ---------------------------------------------------------------------------
 # SECTION 15: Approvals
@@ -921,29 +989,39 @@ IO.puts("    5 labels: bug (red), feature (blue), urgent (orange), documentation
 
 IO.puts("[15/17] Approvals...")
 
-unless Repo.exists?(from a in Approval, where: a.workspace_id == ^workspace.id and a.title == "Deploy v2.1 to production") do
+unless Repo.exists?(
+         from a in Approval,
+           where: a.workspace_id == ^workspace.id and a.title == "Deploy v2.1 to production"
+       ) do
   Repo.insert!(
     Approval.changeset(%Approval{}, %{
       title: "Deploy v2.1 to production",
-      description: "Requesting approval to deploy Canopy v2.1 to the production environment. Includes adapter system, budget UI, and SSE fixes.",
+      description:
+        "Requesting approval to deploy Canopy v2.1 to the production environment. Includes adapter system, budget UI, and SSE fixes.",
       status: "pending",
       context: %{version: "2.1.0", environment: "production", risk: "medium"},
       requested_by: orchestrator.id,
       reviewer_id: admin.id,
       workspace_id: workspace.id,
-      expires_at: DateTime.add(DateTime.utc_now() |> DateTime.truncate(:second), 86_400 * 3, :second)
+      expires_at:
+        DateTime.add(DateTime.utc_now() |> DateTime.truncate(:second), 86_400 * 3, :second)
     })
   )
 end
 
-unless Repo.exists?(from a in Approval, where: a.workspace_id == ^workspace.id and a.title == "Update agent budget limits") do
+unless Repo.exists?(
+         from a in Approval,
+           where: a.workspace_id == ^workspace.id and a.title == "Update agent budget limits"
+       ) do
   Repo.insert!(
     Approval.changeset(%Approval{}, %{
       title: "Update agent budget limits",
-      description: "Increase orchestrator monthly budget from $50 to $100 to accommodate higher session volume.",
+      description:
+        "Increase orchestrator monthly budget from $50 to $100 to accommodate higher session volume.",
       status: "approved",
       decision: "approved",
-      decision_comment: "Approved. Usage has been consistently hitting the old cap. $100 ceiling is reasonable.",
+      decision_comment:
+        "Approved. Usage has been consistently hitting the old cap. $100 ceiling is reasonable.",
       context: %{old_limit_cents: 5_000, new_limit_cents: 10_000, scope: "agent"},
       requested_by: orchestrator.id,
       reviewer_id: admin.id,
@@ -952,7 +1030,9 @@ unless Repo.exists?(from a in Approval, where: a.workspace_id == ^workspace.id a
   )
 end
 
-IO.puts("    2 approvals: \"Deploy v2.1 to production\" (pending), \"Update agent budget limits\" (approved)")
+IO.puts(
+  "    2 approvals: \"Deploy v2.1 to production\" (pending), \"Update agent budget limits\" (approved)"
+)
 
 # ---------------------------------------------------------------------------
 # SECTION 16: Plugins
@@ -974,7 +1054,10 @@ plugins = [
     name: "Slack",
     version: "1.2.0",
     enabled: true,
-    config: %{channel: "#canopy-alerts", notify_on: ["session.completed", "budget.warning", "agent.error"]},
+    config: %{
+      channel: "#canopy-alerts",
+      notify_on: ["session.completed", "budget.warning", "agent.error"]
+    },
     workspace_id: workspace.id
   },
   %{
@@ -988,12 +1071,16 @@ plugins = [
 ]
 
 for attrs <- plugins do
-  unless Repo.exists?(from p in Plugin, where: p.workspace_id == ^workspace.id and p.slug == ^attrs.slug) do
+  unless Repo.exists?(
+           from p in Plugin, where: p.workspace_id == ^workspace.id and p.slug == ^attrs.slug
+         ) do
     Repo.insert!(Plugin.changeset(%Plugin{}, attrs))
   end
 end
 
-IO.puts("    3 plugins: github (v1.0.0, enabled), slack (v1.2.0, enabled), jira (v0.9.0, disabled)")
+IO.puts(
+  "    3 plugins: github (v1.0.0, enabled), slack (v1.2.0, enabled), jira (v0.9.0, disabled)"
+)
 
 # ---------------------------------------------------------------------------
 # SECTION 17: Templates
@@ -1005,12 +1092,18 @@ unless Repo.exists?(from t in Template, where: t.name == "Full-Stack Development
   Repo.insert!(
     Template.changeset(%Template{}, %{
       name: "Full-Stack Development Team",
-      description: "A complete dev team setup with orchestrator, frontend, backend, reviewer, and devops agents. Includes code generation, PR review, and deployment skills.",
+      description:
+        "A complete dev team setup with orchestrator, frontend, backend, reviewer, and devops agents. Includes code generation, PR review, and deployment skills.",
       category: "development",
       is_builtin: true,
       agents: [
         %{name: "orchestrator", role: "orchestrator", adapter: "osa", model: "claude-opus-4-6"},
-        %{name: "frontend", role: "developer", adapter: "claude-code", model: "claude-sonnet-4-6"},
+        %{
+          name: "frontend",
+          role: "developer",
+          adapter: "claude-code",
+          model: "claude-sonnet-4-6"
+        },
         %{name: "backend", role: "developer", adapter: "claude-code", model: "claude-sonnet-4-6"},
         %{name: "reviewer", role: "reviewer", adapter: "claude-code", model: "claude-sonnet-4-6"},
         %{name: "devops", role: "devops", adapter: "bash", model: "bash"}
@@ -1032,12 +1125,18 @@ unless Repo.exists?(from t in Template, where: t.name == "Research Assistant") d
   Repo.insert!(
     Template.changeset(%Template{}, %{
       name: "Research Assistant",
-      description: "A focused research team: one orchestrator coordinating a researcher and a writer. Optimised for document synthesis, literature review, and report generation.",
+      description:
+        "A focused research team: one orchestrator coordinating a researcher and a writer. Optimised for document synthesis, literature review, and report generation.",
       category: "research",
       is_builtin: true,
       agents: [
         %{name: "orchestrator", role: "orchestrator", adapter: "osa", model: "claude-opus-4-6"},
-        %{name: "researcher", role: "researcher", adapter: "claude-code", model: "claude-sonnet-4-6"},
+        %{
+          name: "researcher",
+          role: "researcher",
+          adapter: "claude-code",
+          model: "claude-sonnet-4-6"
+        },
         %{name: "writer", role: "writer", adapter: "claude-code", model: "claude-sonnet-4-6"}
       ],
       skills: [

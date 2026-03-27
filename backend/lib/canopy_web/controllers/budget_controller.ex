@@ -22,10 +22,13 @@ defmodule CanopyWeb.BudgetController do
     case existing do
       nil ->
         changeset =
-          BudgetPolicy.changeset(%BudgetPolicy{}, Map.merge(params, %{
-            "scope_type" => scope_type,
-            "scope_id" => scope_id
-          }))
+          BudgetPolicy.changeset(
+            %BudgetPolicy{},
+            Map.merge(params, %{
+              "scope_type" => scope_type,
+              "scope_id" => scope_id
+            })
+          )
 
         case Repo.insert(changeset) do
           {:ok, policy} ->
@@ -75,7 +78,10 @@ defmodule CanopyWeb.BudgetController do
 
       incident ->
         case incident
-             |> Ecto.Changeset.change(resolved: true, resolved_at: DateTime.utc_now() |> DateTime.truncate(:second))
+             |> Ecto.Changeset.change(
+               resolved: true,
+               resolved_at: DateTime.utc_now() |> DateTime.truncate(:second)
+             )
              |> Repo.update() do
           {:ok, updated} ->
             Canopy.EventBus.broadcast(
