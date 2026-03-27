@@ -81,13 +81,21 @@ defmodule Canopy.Middleware.Tracing do
   end
 
   @doc """
-  Propagate traceparent to downstream services.
+  Propagate traceparent and correlation ID to downstream services.
 
-  Returns {:ok, headers} with traceparent set
+  Returns {:ok, headers} with traceparent and x-correlation-id set.
+  The correlation ID is read from the process dictionary (set by WeaverLiveCheck
+  or the OSA adapter), then from the CHATMANGPT_CORRELATION_ID env var, and
+  finally a random fallback is generated and stored for the process lifetime.
   """
   def propagate_to_downstream(span, headers) when is_map(span) and is_map(headers) do
     traceparent = encode_traceparent(span)
-    {:ok, Map.put(headers, "traceparent", traceparent)}
+    correlation_id = get_or_create_correlation_id()
+
+    {:ok,
+     headers
+     |> Map.put("traceparent", traceparent)
+     |> Map.put("x-correlation-id", correlation_id)}
   end
 
   @doc """
@@ -168,5 +176,24 @@ defmodule Canopy.Middleware.Tracing do
 
   defp organize_spans(spans) do
     spans |> Enum.sort_by(fn s -> s.start_time || DateTime.utc_now() end)
+  end
+
+  # Retrieve or generate a correlation ID for the current process.
+  # Stored in the process dictionary so all downstream calls within the same
+  # process share the same ID (consistent with OSA and WeaverLiveCheck behaviour).
+  defp get_or_create_correlation_id do
+    case Process.get(:chatmangpt_correlation_id) do
+      nil ->
+        id = System.get_env("CHATMANGPT_CORRELATION_ID") || generate_random_id()
+        Process.put(:chatmangpt_correlation_id, id)
+        id
+
+      id ->
+        id
+    end
+  end
+
+  defp generate_random_id do
+    :crypto.strong_rand_bytes(16) |> Base.encode16(case: :lower)
   end
 end

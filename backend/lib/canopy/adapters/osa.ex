@@ -250,9 +250,52 @@ defmodule Canopy.Adapters.OSA do
   defp build_headers(config) do
     base = [{"Content-Type", "application/json"}]
 
-    case config["shared_secret"] || System.get_env("OSA_SHARED_SECRET") do
-      nil -> base
-      secret -> [{"X-Shared-Secret", secret} | base]
+    # Add shared secret if configured
+    base =
+      case config["shared_secret"] || System.get_env("OSA_SHARED_SECRET") do
+        nil -> base
+        secret -> [{"X-Shared-Secret", secret} | base]
+      end
+
+    # Inject correlation ID for cross-system trace correlation
+    correlation_id = get_or_create_correlation_id()
+    base = [{"X-Correlation-ID", correlation_id} | base]
+
+    # Inject W3C traceparent from the current OpenTelemetry context so the
+    # Canopy→OSA boundary is traceable end-to-end.
+    inject_traceparent(base)
+  end
+
+  # Retrieve or create a correlation ID for the current process.
+  defp get_or_create_correlation_id do
+    case Process.get(:chatmangpt_correlation_id) do
+      nil ->
+        id = System.get_env("CHATMANGPT_CORRELATION_ID") || generate_correlation_id()
+        Process.put(:chatmangpt_correlation_id, id)
+        id
+
+      id ->
+        id
+    end
+  end
+
+  defp generate_correlation_id do
+    :crypto.strong_rand_bytes(16) |> Base.encode16(case: :lower)
+  end
+
+  # Inject W3C traceparent header using the OpenTelemetry propagator.
+  # Falls back gracefully if the OTel SDK is not available at call time.
+  defp inject_traceparent(headers) do
+    try do
+      # Use :otel_propagator_text_map to inject current context into a header list.
+      # The carrier accumulator appends {key, value} tuples to the list.
+      :otel_propagator_text_map.inject(headers, fn carrier, key, value ->
+        [{key, value} | carrier]
+      end)
+    rescue
+      _ -> headers
+    catch
+      _, _ -> headers
     end
   end
 

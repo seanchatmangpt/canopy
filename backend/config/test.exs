@@ -9,6 +9,15 @@ import Config
 db_user = System.get_env("POSTGRES_USER") || System.get_env("DATABASE_USER") || "rhl"
 db_pass = System.get_env("POSTGRES_PASSWORD") || System.get_env("DATABASE_PASSWORD") || ""
 db_host = System.get_env("POSTGRES_HOST") || System.get_env("DATABASE_HOST") || "localhost"
+db_port =
+  case Integer.parse(
+         String.trim(
+           System.get_env("POSTGRES_PORT") || System.get_env("DATABASE_PORT") || "5432"
+         )
+       ) do
+    {p, ""} when p in 1..65535 -> p
+    _ -> 5432
+  end
 db_base = System.get_env("POSTGRES_DB") || "canopy_test"
 db_name = "#{db_base}#{System.get_env("MIX_TEST_PARTITION") || ""}"
 
@@ -16,6 +25,7 @@ config :canopy, Canopy.Repo,
   username: db_user,
   password: db_pass,
   hostname: db_host,
+  port: db_port,
   database: db_name,
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: System.schedulers_online() * 2
