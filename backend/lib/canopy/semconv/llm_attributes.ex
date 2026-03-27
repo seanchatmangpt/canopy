@@ -45,11 +45,11 @@ defmodule OpenTelemetry.SemConv.Incubating.LlmAttributes do
   | `selective` | `"selective"` | selective |
   """
   @spec llm_context_compression_strategy_values() :: %{
-          summarize: :summarize,
-          truncate: :truncate,
-          sliding_window: :sliding_window,
-          selective: :selective
-        }
+    summarize: :summarize,
+    truncate: :truncate,
+    sliding_window: :sliding_window,
+    selective: :selective
+  }
   def llm_context_compression_strategy_values do
     %{
       summarize: :summarize,
@@ -79,6 +79,7 @@ defmodule OpenTelemetry.SemConv.Incubating.LlmAttributes do
     @doc "selective"
     @spec selective() :: :selective
     def selective, do: :selective
+
   end
 
   @doc """
@@ -141,12 +142,12 @@ defmodule OpenTelemetry.SemConv.Incubating.LlmAttributes do
   | `ia3` | `"ia3"` | ia3 |
   """
   @spec llm_adapter_type_values() :: %{
-          lora: :lora,
-          prefix: :prefix,
-          prompt_tuning: :prompt_tuning,
-          adapter: :adapter,
-          ia3: :ia3
-        }
+    lora: :lora,
+    prefix: :prefix,
+    prompt_tuning: :prompt_tuning,
+    adapter: :adapter,
+    ia3: :ia3
+  }
   def llm_adapter_type_values do
     %{
       lora: :lora,
@@ -181,6 +182,7 @@ defmodule OpenTelemetry.SemConv.Incubating.LlmAttributes do
     @doc "ia3"
     @spec ia3() :: :ia3
     def ia3, do: :ia3
+
   end
 
   @doc """
@@ -241,10 +243,10 @@ defmodule OpenTelemetry.SemConv.Incubating.LlmAttributes do
   | `low` | `"low"` | low |
   """
   @spec llm_batch_priority_values() :: %{
-          high: :high,
-          normal: :normal,
-          low: :low
-        }
+    high: :high,
+    normal: :normal,
+    low: :low
+  }
   def llm_batch_priority_values do
     %{
       high: :high,
@@ -269,6 +271,7 @@ defmodule OpenTelemetry.SemConv.Incubating.LlmAttributes do
     @doc "low"
     @spec low() :: :low
     def low, do: :low
+
   end
 
   @doc """
@@ -305,10 +308,10 @@ defmodule OpenTelemetry.SemConv.Incubating.LlmAttributes do
   | `invalidated` | `"invalidated"` | invalidated |
   """
   @spec llm_cache_eviction_reason_values() :: %{
-          ttl_expired: :ttl_expired,
-          capacity: :capacity,
-          invalidated: :invalidated
-        }
+    ttl_expired: :ttl_expired,
+    capacity: :capacity,
+    invalidated: :invalidated
+  }
   def llm_cache_eviction_reason_values do
     %{
       ttl_expired: :ttl_expired,
@@ -333,6 +336,7 @@ defmodule OpenTelemetry.SemConv.Incubating.LlmAttributes do
     @doc "invalidated"
     @spec invalidated() :: :invalidated
     def invalidated, do: :invalidated
+
   end
 
   @doc """
@@ -455,12 +459,12 @@ defmodule OpenTelemetry.SemConv.Incubating.LlmAttributes do
   | `sliding_window` | `"sliding_window"` | sliding_window |
   """
   @spec llm_context_overflow_strategy_values() :: %{
-          truncate: :truncate,
-          summarize: :summarize,
-          compress: :compress,
-          reject: :reject,
-          sliding_window: :sliding_window
-        }
+    truncate: :truncate,
+    summarize: :summarize,
+    compress: :compress,
+    reject: :reject,
+    sliding_window: :sliding_window
+  }
   def llm_context_overflow_strategy_values do
     %{
       truncate: :truncate,
@@ -495,6 +499,7 @@ defmodule OpenTelemetry.SemConv.Incubating.LlmAttributes do
     @doc "sliding_window"
     @spec sliding_window() :: :sliding_window
     def sliding_window, do: :sliding_window
+
   end
 
   @doc """
@@ -687,10 +692,10 @@ defmodule OpenTelemetry.SemConv.Incubating.LlmAttributes do
   | `neutral` | `"neutral"` | neutral |
   """
   @spec llm_feedback_thumbs_values() :: %{
-          up: :up,
-          down: :down,
-          neutral: :neutral
-        }
+    up: :up,
+    down: :down,
+    neutral: :neutral
+  }
   def llm_feedback_thumbs_values do
     %{
       up: :up,
@@ -715,6 +720,7 @@ defmodule OpenTelemetry.SemConv.Incubating.LlmAttributes do
     @doc "neutral"
     @spec neutral() :: :neutral
     def neutral, do: :neutral
+
   end
 
   @doc """
@@ -764,11 +770,11 @@ defmodule OpenTelemetry.SemConv.Incubating.LlmAttributes do
   | `stratified` | `"stratified"` | stratified |
   """
   @spec llm_few_shot_selection_strategy_values() :: %{
-          random: :random,
-          similarity: :similarity,
-          diverse: :diverse,
-          stratified: :stratified
-        }
+    random: :random,
+    similarity: :similarity,
+    diverse: :diverse,
+    stratified: :stratified
+  }
   def llm_few_shot_selection_strategy_values do
     %{
       random: :random,
@@ -798,6 +804,7 @@ defmodule OpenTelemetry.SemConv.Incubating.LlmAttributes do
     @doc "stratified"
     @spec stratified() :: :stratified
     def stratified, do: :stratified
+
   end
 
   @doc """
@@ -907,11 +914,11 @@ defmodule OpenTelemetry.SemConv.Incubating.LlmAttributes do
   | `sequential` | `"sequential"` | sequential |
   """
   @spec llm_function_call_routing_strategy_values() :: %{
-          direct: :direct,
-          fallback: :fallback,
-          parallel: :parallel,
-          sequential: :sequential
-        }
+    direct: :direct,
+    fallback: :fallback,
+    parallel: :parallel,
+    sequential: :sequential
+  }
   def llm_function_call_routing_strategy_values do
     %{
       direct: :direct,
@@ -941,6 +948,7 @@ defmodule OpenTelemetry.SemConv.Incubating.LlmAttributes do
     @doc "sequential"
     @spec sequential() :: :sequential
     def sequential, do: :sequential
+
   end
 
   @doc """
@@ -979,12 +987,12 @@ defmodule OpenTelemetry.SemConv.Incubating.LlmAttributes do
   | `rate_limit` | `"rate_limit"` | rate_limit |
   """
   @spec llm_guardrail_type_values() :: %{
-          content_filter: :content_filter,
-          pii_detection: :pii_detection,
-          prompt_injection: :prompt_injection,
-          hallucination_check: :hallucination_check,
-          rate_limit: :rate_limit
-        }
+    content_filter: :content_filter,
+    pii_detection: :pii_detection,
+    prompt_injection: :prompt_injection,
+    hallucination_check: :hallucination_check,
+    rate_limit: :rate_limit
+  }
   def llm_guardrail_type_values do
     %{
       content_filter: :content_filter,
@@ -1019,6 +1027,7 @@ defmodule OpenTelemetry.SemConv.Incubating.LlmAttributes do
     @doc "rate_limit"
     @spec rate_limit() :: :rate_limit
     def rate_limit, do: :rate_limit
+
   end
 
   @doc """
@@ -1141,12 +1150,12 @@ defmodule OpenTelemetry.SemConv.Incubating.LlmAttributes do
   | `mistral` | `"mistral"` | mistral |
   """
   @spec llm_model_family_values() :: %{
-          gpt: :gpt,
-          claude: :claude,
-          gemini: :gemini,
-          llama: :llama,
-          mistral: :mistral
-        }
+    gpt: :gpt,
+    claude: :claude,
+    gemini: :gemini,
+    llama: :llama,
+    mistral: :mistral
+  }
   def llm_model_family_values do
     %{
       gpt: :gpt,
@@ -1181,6 +1190,7 @@ defmodule OpenTelemetry.SemConv.Incubating.LlmAttributes do
     @doc "mistral"
     @spec mistral() :: :mistral
     def mistral, do: :mistral
+
   end
 
   @doc """
@@ -1219,12 +1229,12 @@ defmodule OpenTelemetry.SemConv.Incubating.LlmAttributes do
   | `document` | `"document"` | document |
   """
   @spec llm_multimodal_input_type_values() :: %{
-          text: :text,
-          image: :image,
-          audio: :audio,
-          video: :video,
-          document: :document
-        }
+    text: :text,
+    image: :image,
+    audio: :audio,
+    video: :video,
+    document: :document
+  }
   def llm_multimodal_input_type_values do
     %{
       text: :text,
@@ -1259,6 +1269,7 @@ defmodule OpenTelemetry.SemConv.Incubating.LlmAttributes do
     @doc "document"
     @spec document() :: :document
     def document, do: :document
+
   end
 
   @doc """
@@ -1489,12 +1500,12 @@ defmodule OpenTelemetry.SemConv.Incubating.LlmAttributes do
   | `tool_use` | `"tool_use"` | tool_use |
   """
   @spec llm_stop_reason_values() :: %{
-          max_tokens: :max_tokens,
-          stop_sequence: :stop_sequence,
-          length: :length,
-          end_turn: :end_turn,
-          tool_use: :tool_use
-        }
+    max_tokens: :max_tokens,
+    stop_sequence: :stop_sequence,
+    length: :length,
+    end_turn: :end_turn,
+    tool_use: :tool_use
+  }
   def llm_stop_reason_values do
     %{
       max_tokens: :max_tokens,
@@ -1529,6 +1540,7 @@ defmodule OpenTelemetry.SemConv.Incubating.LlmAttributes do
     @doc "tool_use"
     @spec tool_use() :: :tool_use
     def tool_use, do: :tool_use
+
   end
 
   @doc """
@@ -1601,11 +1613,11 @@ defmodule OpenTelemetry.SemConv.Incubating.LlmAttributes do
   | `markdown` | `"markdown"` | markdown |
   """
   @spec llm_structured_output_format_values() :: %{
-          json: :json,
-          xml: :xml,
-          yaml: :yaml,
-          markdown: :markdown
-        }
+    json: :json,
+    xml: :xml,
+    yaml: :yaml,
+    markdown: :markdown
+  }
   def llm_structured_output_format_values do
     %{
       json: :json,
@@ -1635,6 +1647,7 @@ defmodule OpenTelemetry.SemConv.Incubating.LlmAttributes do
     @doc "markdown"
     @spec markdown() :: :markdown
     def markdown, do: :markdown
+
   end
 
   @doc """
@@ -1780,11 +1793,11 @@ defmodule OpenTelemetry.SemConv.Incubating.LlmAttributes do
   | `retry` | `"retry"` | retry |
   """
   @spec llm_tool_orchestration_strategy_values() :: %{
-          sequential: :sequential,
-          parallel: :parallel,
-          conditional: :conditional,
-          retry: :retry
-        }
+    sequential: :sequential,
+    parallel: :parallel,
+    conditional: :conditional,
+    retry: :retry
+  }
   def llm_tool_orchestration_strategy_values do
     %{
       sequential: :sequential,
@@ -1814,6 +1827,7 @@ defmodule OpenTelemetry.SemConv.Incubating.LlmAttributes do
     @doc "retry"
     @spec retry() :: :retry
     def retry, do: :retry
+
   end
 
   @doc """
@@ -1863,11 +1877,11 @@ defmodule OpenTelemetry.SemConv.Incubating.LlmAttributes do
   | `enum_violation` | `"enum"` | enum |
   """
   @spec llm_validation_error_type_values() :: %{
-          format: :format,
-          type_mismatch: :type,
-          required_field: :required,
-          enum_violation: :enum
-        }
+    format: :format,
+    type_mismatch: :type,
+    required_field: :required,
+    enum_violation: :enum
+  }
   def llm_validation_error_type_values do
     %{
       format: :format,
@@ -1897,6 +1911,7 @@ defmodule OpenTelemetry.SemConv.Incubating.LlmAttributes do
     @doc "enum"
     @spec enum_violation() :: :enum
     def enum_violation, do: :enum
+
   end
 
   @doc """
@@ -1922,4 +1937,5 @@ defmodule OpenTelemetry.SemConv.Incubating.LlmAttributes do
   """
   @spec llm_validation_schema_id() :: :"llm.validation.schema_id"
   def llm_validation_schema_id, do: :"llm.validation.schema_id"
+
 end

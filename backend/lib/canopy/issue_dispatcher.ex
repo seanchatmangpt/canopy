@@ -40,12 +40,9 @@ defmodule Canopy.IssueDispatcher do
   def dispatch(issue_id) do
     GenServer.call(__MODULE__, {:dispatch, issue_id}, 5000)
   catch
-    # If the GenServer is not running (e.g. during tests or startup), convert
-    # the exit signal into a normal error tuple so callers can handle it cleanly
-    # instead of crashing with an unhandled exit.
-    :exit, reason ->
+    :exit, {:timeout, _} = reason ->
       Logger.error(
-        "[IssueDispatcher] timeout or process crash: #{inspect(reason)}. See docs/TROUBLESHOOTING.md#genserver-timeout. Tip: check if Canopy.IssueDispatcher is running with 'ps aux | grep beam'"
+        "[IssueDispatcher] timeout dispatching issue #{issue_id}. See docs/TROUBLESHOOTING.md#genserver-timeout. Tip: check if Canopy.IssueDispatcher is running with 'ps aux | grep beam'"
       )
 
       {:error, {:dispatcher_unavailable, reason}}
@@ -166,9 +163,9 @@ defmodule Canopy.IssueDispatcher do
         %{}
     end
   catch
-    :exit, reason ->
+    :exit, {:timeout, _} ->
       Logger.warning(
-        "[IssueDispatcher] Org context query crashed: #{inspect(reason)}. Continuing without org awareness."
+        "[IssueDispatcher] Org context query timed out for #{agent_id}. Continuing without org awareness."
       )
 
       %{}

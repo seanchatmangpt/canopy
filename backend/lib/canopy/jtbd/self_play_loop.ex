@@ -36,19 +36,9 @@ defmodule Canopy.JTBD.SelfPlayLoop do
   require Logger
   alias Phoenix.PubSub
 
-  # Graceful degradation helper: emit telemetry with timeout + fallback
+  # Emit telemetry event for instrumentation
   defp emit_telemetry(event, measurements) do
-    try do
-      :telemetry.execute(event, measurements)
-    rescue
-      _e ->
-        Logger.debug("[SelfPlayLoop] Telemetry emission failed for event: #{inspect(event)}")
-        :ok
-    catch
-      :exit, _reason ->
-        Logger.debug("[SelfPlayLoop] Telemetry exit for event: #{inspect(event)}")
-        :ok
-    end
+    :telemetry.execute(event, measurements)
   end
 
   @scenarios [
@@ -84,32 +74,18 @@ defmodule Canopy.JTBD.SelfPlayLoop do
       :ok -> {:ok, self()}
       error -> error
     end
-  rescue
-    _e -> {:error, :not_started}
-  catch
-    :exit, {:timeout, _} ->
-      Logger.error("[SelfPlayLoop] start_loop timeout after 30000ms")
-      {:error, :timeout}
   end
 
   @doc "Stop the self-play loop gracefully"
   @spec stop() :: :ok
   def stop do
     GenServer.call(__MODULE__, :stop_loop, 60_000)
-  rescue
-    _e -> :ok
   end
 
   @doc "Get current loop state"
   @spec get_state() :: map()
   def get_state do
     GenServer.call(__MODULE__, :get_state, 5000)
-  rescue
-    _e -> %{status: :not_running}
-  catch
-    :exit, {:timeout, _} ->
-      Logger.error("[SelfPlayLoop] get_state timeout after 5000ms")
-      %{status: :timeout}
   end
 
   # Server Callbacks

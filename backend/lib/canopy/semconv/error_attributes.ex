@@ -33,11 +33,11 @@ defmodule OpenTelemetry.SemConv.Incubating.ErrorAttributes do
   | `unavailable` | `"unavailable"` | unavailable |
   """
   @spec error_type_values() :: %{
-          timeout: :timeout,
-          cancelled: :cancelled,
-          internal: :internal,
-          unavailable: :unavailable
-        }
+    timeout: :timeout,
+    cancelled: :cancelled,
+    internal: :internal,
+    unavailable: :unavailable
+  }
   def error_type_values do
     %{
       timeout: :timeout,
@@ -67,5 +67,7 @@ defmodule OpenTelemetry.SemConv.Incubating.ErrorAttributes do
     @doc "unavailable"
     @spec unavailable() :: :unavailable
     def unavailable, do: :unavailable
+
   end
+
 end

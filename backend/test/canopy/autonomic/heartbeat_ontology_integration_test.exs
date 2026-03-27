@@ -146,9 +146,9 @@ defmodule Canopy.Autonomic.HeartbeatOntologyIntegrationTest do
       assert stats_after_hit.hits >= stats_after_miss.hits
     end
 
-    @tag :skip
+    @tag :integration
     test "enrich_agent_respects_cache_false: bypasses cache when requested" do
-      # Requires OSA service running to test cache bypass behavior
+      # Requires OSA service running on localhost:8089 (external service)
       # Arrange
       agent_type = :adaptation_agent
       stats_before = Service.cache_stats()
@@ -419,9 +419,9 @@ defmodule Canopy.Autonomic.HeartbeatOntologyIntegrationTest do
       assert match?({:error, :max_agents_exceeded}, result)
     end
 
-    @tag :skip
+    @tag :integration
     test "wvda_bounded_memory_per_batch: doesn't accumulate unbounded cache" do
-      # Requires OSA service running to test cache behavior
+      # Requires OSA service running on localhost:8089 (external service)
       # Arrange
       agent_types = [:health_agent, :healing_agent, :data_agent]
       stats_before = Service.cache_stats()
@@ -553,9 +553,9 @@ defmodule Canopy.Autonomic.HeartbeatOntologyIntegrationTest do
   end
 
   describe "Cache Efficiency" do
-    @tag :skip
+    @tag :integration
     test "cache_efficiency_multiple_queries_hit_cache: repeated agent enrichment hits cache" do
-      # Requires OSA service running to test cache behavior
+      # Requires OSA service running on localhost:8089 (external service)
       # Arrange
       agent_type = :health_agent
       Service.clear_all_cache()

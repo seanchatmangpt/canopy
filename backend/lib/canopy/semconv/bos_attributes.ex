@@ -58,12 +58,12 @@ defmodule OpenTelemetry.SemConv.Incubating.BosAttributes do
   | `gap_detection` | `"gap_detection"` | gap_detection |
   """
   @spec bos_audit_event_type_values() :: %{
-          data_access: :data_access,
-          config_change: :config_change,
-          permission_grant: :permission_grant,
-          compliance_check: :compliance_check,
-          gap_detection: :gap_detection
-        }
+    data_access: :data_access,
+    config_change: :config_change,
+    permission_grant: :permission_grant,
+    compliance_check: :compliance_check,
+    gap_detection: :gap_detection
+  }
   def bos_audit_event_type_values do
     %{
       data_access: :data_access,
@@ -98,6 +98,7 @@ defmodule OpenTelemetry.SemConv.Incubating.BosAttributes do
     @doc "gap_detection"
     @spec gap_detection() :: :gap_detection
     def gap_detection, do: :gap_detection
+
   end
 
   @doc """
@@ -148,12 +149,12 @@ defmodule OpenTelemetry.SemConv.Incubating.BosAttributes do
   | `custom` | `"CUSTOM"` | CUSTOM |
   """
   @spec bos_compliance_framework_values() :: %{
-          soc2: :SOC2,
-          hipaa: :HIPAA,
-          gdpr: :GDPR,
-          sox: :SOX,
-          custom: :CUSTOM
-        }
+    soc2: :SOC2,
+    hipaa: :HIPAA,
+    gdpr: :GDPR,
+    sox: :SOX,
+    custom: :CUSTOM
+  }
   def bos_compliance_framework_values do
     %{
       soc2: :SOC2,
@@ -188,6 +189,7 @@ defmodule OpenTelemetry.SemConv.Incubating.BosAttributes do
     @doc "CUSTOM"
     @spec custom() :: :CUSTOM
     def custom, do: :CUSTOM
+
   end
 
   @doc """
@@ -236,11 +238,11 @@ defmodule OpenTelemetry.SemConv.Incubating.BosAttributes do
   | `low` | `"low"` | low |
   """
   @spec bos_compliance_severity_values() :: %{
-          critical: :critical,
-          high: :high,
-          medium: :medium,
-          low: :low
-        }
+    critical: :critical,
+    high: :high,
+    medium: :medium,
+    low: :low
+  }
   def bos_compliance_severity_values do
     %{
       critical: :critical,
@@ -270,6 +272,7 @@ defmodule OpenTelemetry.SemConv.Incubating.BosAttributes do
     @doc "low"
     @spec low() :: :low
     def low, do: :low
+
   end
 
   @doc """
@@ -307,11 +310,11 @@ defmodule OpenTelemetry.SemConv.Incubating.BosAttributes do
   | `escalated` | `"escalated"` | escalated |
   """
   @spec bos_decision_outcome_values() :: %{
-          approved: :approved,
-          rejected: :rejected,
-          deferred: :deferred,
-          escalated: :escalated
-        }
+    approved: :approved,
+    rejected: :rejected,
+    deferred: :deferred,
+    escalated: :escalated
+  }
   def bos_decision_outcome_values do
     %{
       approved: :approved,
@@ -341,6 +344,7 @@ defmodule OpenTelemetry.SemConv.Incubating.BosAttributes do
     @doc "escalated"
     @spec escalated() :: :escalated
     def escalated, do: :escalated
+
   end
 
   @doc """
@@ -366,11 +370,11 @@ defmodule OpenTelemetry.SemConv.Incubating.BosAttributes do
   | `compliance` | `"compliance"` | compliance |
   """
   @spec bos_decision_type_values() :: %{
-          architectural: :architectural,
-          operational: :operational,
-          strategic: :strategic,
-          compliance: :compliance
-        }
+    architectural: :architectural,
+    operational: :operational,
+    strategic: :strategic,
+    compliance: :compliance
+  }
   def bos_decision_type_values do
     %{
       architectural: :architectural,
@@ -400,6 +404,7 @@ defmodule OpenTelemetry.SemConv.Incubating.BosAttributes do
     @doc "compliance"
     @spec compliance() :: :compliance
     def compliance, do: :compliance
+
   end
 
   @doc """
@@ -449,11 +454,11 @@ defmodule OpenTelemetry.SemConv.Incubating.BosAttributes do
   | `low` | `"low"` | low |
   """
   @spec bos_gap_severity_values() :: %{
-          critical: :critical,
-          high: :high,
-          medium: :medium,
-          low: :low
-        }
+    critical: :critical,
+    high: :high,
+    medium: :medium,
+    low: :low
+  }
   def bos_gap_severity_values do
     %{
       critical: :critical,
@@ -483,6 +488,7 @@ defmodule OpenTelemetry.SemConv.Incubating.BosAttributes do
     @doc "low"
     @spec low() :: :low
     def low, do: :low
+
   end
 
   @doc """
@@ -508,11 +514,11 @@ defmodule OpenTelemetry.SemConv.Incubating.BosAttributes do
   | `accepted_risk` | `"accepted_risk"` | accepted_risk |
   """
   @spec bos_gap_status_values() :: %{
-          open: :open,
-          in_remediation: :in_remediation,
-          resolved: :resolved,
-          accepted_risk: :accepted_risk
-        }
+    open: :open,
+    in_remediation: :in_remediation,
+    resolved: :resolved,
+    accepted_risk: :accepted_risk
+  }
   def bos_gap_status_values do
     %{
       open: :open,
@@ -542,6 +548,7 @@ defmodule OpenTelemetry.SemConv.Incubating.BosAttributes do
     @doc "accepted_risk"
     @spec accepted_risk() :: :accepted_risk
     def accepted_risk, do: :accepted_risk
+
   end
 
   @doc """
@@ -579,4 +586,5 @@ defmodule OpenTelemetry.SemConv.Incubating.BosAttributes do
   """
   @spec bos_workspace_name() :: :"bos.workspace.name"
   def bos_workspace_name, do: :"bos.workspace.name"
+
 end

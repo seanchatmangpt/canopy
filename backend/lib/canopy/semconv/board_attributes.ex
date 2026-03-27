@@ -54,8 +54,8 @@ defmodule OpenTelemetry.SemConv.Incubating.BoardAttributes do
   | `conway_violation` | `"conway_violation"` | Structural org boundary bottleneck requiring board decision |
   """
   @spec board_escalation_type_values() :: %{
-          conway_violation: :conway_violation
-        }
+    conway_violation: :conway_violation
+  }
   def board_escalation_type_values do
     %{
       conway_violation: :conway_violation
@@ -70,6 +70,7 @@ defmodule OpenTelemetry.SemConv.Incubating.BoardAttributes do
     @doc "Structural org boundary bottleneck requiring board decision"
     @spec conway_violation() :: :conway_violation
     def conway_violation, do: :conway_violation
+
   end
 
   @doc """
@@ -167,4 +168,5 @@ defmodule OpenTelemetry.SemConv.Incubating.BoardAttributes do
   """
   @spec board_structural_issue_count() :: :"board.structural_issue_count"
   def board_structural_issue_count, do: :"board.structural_issue_count"
+
 end

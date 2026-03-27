@@ -99,20 +99,7 @@ defmodule Canopy.MixProject do
 
       # Slow tests only
       # Usage: mix test.slow
-      "test.slow": ["ecto.create --quiet", "ecto.migrate --quiet", "test", "--include", "slow"],
-
-      # Unit tests without app startup
-      # Usage: mix test.unit
-      "test.unit": [
-        "ecto.create --quiet",
-        "ecto.migrate --quiet",
-        "test",
-        "--no-start",
-        "--exclude",
-        "integration",
-        "--exclude",
-        "slow"
-      ]
+      "test.slow": ["ecto.create --quiet", "ecto.migrate --quiet", "test", "--include", "slow"]
     ]
   end
 end

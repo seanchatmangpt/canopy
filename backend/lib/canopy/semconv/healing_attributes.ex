@@ -57,11 +57,11 @@ defmodule OpenTelemetry.SemConv.Incubating.HealingAttributes do
   | `constant` | `"constant"` | Constant backoff (base_ms) |
   """
   @spec healing_retry_adaptive_strategy_values() :: %{
-          exponential: :exponential,
-          linear: :linear,
-          fibonacci: :fibonacci,
-          constant: :constant
-        }
+    exponential: :exponential,
+    linear: :linear,
+    fibonacci: :fibonacci,
+    constant: :constant
+  }
   def healing_retry_adaptive_strategy_values do
     %{
       exponential: :exponential,
@@ -91,6 +91,7 @@ defmodule OpenTelemetry.SemConv.Incubating.HealingAttributes do
     @doc "Constant backoff (base_ms)"
     @spec constant() :: :constant
     def constant, do: :constant
+
   end
 
   @doc """
@@ -188,11 +189,11 @@ defmodule OpenTelemetry.SemConv.Incubating.HealingAttributes do
   | `hybrid` | `"hybrid"` | hybrid |
   """
   @spec healing_anomaly_detection_method_values() :: %{
-          statistical: :statistical,
-          ml: :ml,
-          rule_based: :rule_based,
-          hybrid: :hybrid
-        }
+    statistical: :statistical,
+    ml: :ml,
+    rule_based: :rule_based,
+    hybrid: :hybrid
+  }
   def healing_anomaly_detection_method_values do
     %{
       statistical: :statistical,
@@ -222,6 +223,7 @@ defmodule OpenTelemetry.SemConv.Incubating.HealingAttributes do
     @doc "hybrid"
     @spec hybrid() :: :hybrid
     def hybrid, do: :hybrid
+
   end
 
   @doc """
@@ -308,12 +310,12 @@ defmodule OpenTelemetry.SemConv.Incubating.HealingAttributes do
   | `critical` | `"critical"` | critical |
   """
   @spec healing_backpressure_level_values() :: %{
-          none: :none,
-          low: :low,
-          medium: :medium,
-          high: :high,
-          critical: :critical
-        }
+    none: :none,
+    low: :low,
+    medium: :medium,
+    high: :high,
+    critical: :critical
+  }
   def healing_backpressure_level_values do
     %{
       none: :none,
@@ -348,6 +350,7 @@ defmodule OpenTelemetry.SemConv.Incubating.HealingAttributes do
     @doc "critical"
     @spec critical() :: :critical
     def critical, do: :critical
+
   end
 
   @doc """
@@ -492,10 +495,10 @@ defmodule OpenTelemetry.SemConv.Incubating.HealingAttributes do
   | `half_open` | `"half_open"` | half_open |
   """
   @spec healing_circuit_breaker_state_values() :: %{
-          closed: :closed,
-          open: :open,
-          half_open: :half_open
-        }
+    closed: :closed,
+    open: :open,
+    half_open: :half_open
+  }
   def healing_circuit_breaker_state_values do
     %{
       closed: :closed,
@@ -520,6 +523,7 @@ defmodule OpenTelemetry.SemConv.Incubating.HealingAttributes do
     @doc "half_open"
     @spec half_open() :: :half_open
     def half_open, do: :half_open
+
   end
 
   @doc """
@@ -569,11 +573,11 @@ defmodule OpenTelemetry.SemConv.Incubating.HealingAttributes do
   | `failed` | `"failed"` | failed |
   """
   @spec healing_cold_standby_readiness_values() :: %{
-          cold: :cold,
-          warming: :warming,
-          ready: :ready,
-          failed: :failed
-        }
+    cold: :cold,
+    warming: :warming,
+    ready: :ready,
+    failed: :failed
+  }
   def healing_cold_standby_readiness_values do
     %{
       cold: :cold,
@@ -603,6 +607,7 @@ defmodule OpenTelemetry.SemConv.Incubating.HealingAttributes do
     @doc "failed"
     @spec failed() :: :failed
     def failed, do: :failed
+
   end
 
   @doc """
@@ -664,11 +669,11 @@ defmodule OpenTelemetry.SemConv.Incubating.HealingAttributes do
   | `escalation` | `"escalation"` | Escalation to human operator |
   """
   @spec healing_diagnosis_stage_values() :: %{
-          detection: :detection,
-          classification: :classification,
-          verification: :verification,
-          escalation: :escalation
-        }
+    detection: :detection,
+    classification: :classification,
+    verification: :verification,
+    escalation: :escalation
+  }
   def healing_diagnosis_stage_values do
     %{
       detection: :detection,
@@ -698,6 +703,7 @@ defmodule OpenTelemetry.SemConv.Incubating.HealingAttributes do
     @doc "Escalation to human operator"
     @spec escalation() :: :escalation
     def escalation, do: :escalation
+
   end
 
   @doc """
@@ -723,11 +729,11 @@ defmodule OpenTelemetry.SemConv.Incubating.HealingAttributes do
   | `page` | `"page"` | page |
   """
   @spec healing_escalation_level_values() :: %{
-          none: :none,
-          warn: :warn,
-          critical: :critical,
-          page: :page
-        }
+    none: :none,
+    warn: :warn,
+    critical: :critical,
+    page: :page
+  }
   def healing_escalation_level_values do
     %{
       none: :none,
@@ -757,6 +763,7 @@ defmodule OpenTelemetry.SemConv.Incubating.HealingAttributes do
     @doc "page"
     @spec page() :: :page
     def page, do: :page
+
   end
 
   @doc """
@@ -830,11 +837,11 @@ defmodule OpenTelemetry.SemConv.Incubating.HealingAttributes do
   | `geographic` | `"geographic"` | geographic |
   """
   @spec healing_failover_type_values() :: %{
-          warm_to_cold: :warm_to_cold,
-          primary_to_warm: :primary_to_warm,
-          primary_to_cold: :primary_to_cold,
-          geographic: :geographic
-        }
+    warm_to_cold: :warm_to_cold,
+    primary_to_warm: :primary_to_warm,
+    primary_to_cold: :primary_to_cold,
+    geographic: :geographic
+  }
   def healing_failover_type_values do
     %{
       warm_to_cold: :warm_to_cold,
@@ -864,6 +871,7 @@ defmodule OpenTelemetry.SemConv.Incubating.HealingAttributes do
     @doc "geographic"
     @spec geographic() :: :geographic
     def geographic, do: :geographic
+
   end
 
   @doc """
@@ -892,14 +900,14 @@ defmodule OpenTelemetry.SemConv.Incubating.HealingAttributes do
   | `livelock` | `"livelock"` | Processes active but making no progress |
   """
   @spec healing_failure_mode_values() :: %{
-          deadlock: :deadlock,
-          timeout: :timeout,
-          race_condition: :race_condition,
-          memory_leak: :memory_leak,
-          cascading_failure: :cascading_failure,
-          stagnation: :stagnation,
-          livelock: :livelock
-        }
+    deadlock: :deadlock,
+    timeout: :timeout,
+    race_condition: :race_condition,
+    memory_leak: :memory_leak,
+    cascading_failure: :cascading_failure,
+    stagnation: :stagnation,
+    livelock: :livelock
+  }
   def healing_failure_mode_values do
     %{
       deadlock: :deadlock,
@@ -944,6 +952,7 @@ defmodule OpenTelemetry.SemConv.Incubating.HealingAttributes do
     @doc "Processes active but making no progress"
     @spec livelock() :: :livelock
     def livelock, do: :livelock
+
   end
 
   @doc """
@@ -980,10 +989,10 @@ defmodule OpenTelemetry.SemConv.Incubating.HealingAttributes do
   | `failed` | `"failed"` | failed |
   """
   @spec healing_fix_result_values() :: %{
-          success: :success,
-          partial: :partial,
-          failed: :failed
-        }
+    success: :success,
+    partial: :partial,
+    failed: :failed
+  }
   def healing_fix_result_values do
     %{
       success: :success,
@@ -1008,6 +1017,7 @@ defmodule OpenTelemetry.SemConv.Incubating.HealingAttributes do
     @doc "failed"
     @spec failed() :: :failed
     def failed, do: :failed
+
   end
 
   @doc """
@@ -1045,11 +1055,11 @@ defmodule OpenTelemetry.SemConv.Incubating.HealingAttributes do
   | `escalated` | `"escalated"` | escalated |
   """
   @spec healing_intervention_outcome_values() :: %{
-          success: :success,
-          partial: :partial,
-          failed: :failed,
-          escalated: :escalated
-        }
+    success: :success,
+    partial: :partial,
+    failed: :failed,
+    escalated: :escalated
+  }
   def healing_intervention_outcome_values do
     %{
       success: :success,
@@ -1079,6 +1089,7 @@ defmodule OpenTelemetry.SemConv.Incubating.HealingAttributes do
     @doc "escalated"
     @spec escalated() :: :escalated
     def escalated, do: :escalated
+
   end
 
   @doc """
@@ -1116,11 +1127,11 @@ defmodule OpenTelemetry.SemConv.Incubating.HealingAttributes do
   | `deferred` | `"deferred"` | deferred |
   """
   @spec healing_intervention_type_values() :: %{
-          automatic: :automatic,
-          manual: :manual,
-          assisted: :assisted,
-          deferred: :deferred
-        }
+    automatic: :automatic,
+    manual: :manual,
+    assisted: :assisted,
+    deferred: :deferred
+  }
   def healing_intervention_type_values do
     %{
       automatic: :automatic,
@@ -1150,6 +1161,7 @@ defmodule OpenTelemetry.SemConv.Incubating.HealingAttributes do
     @doc "deferred"
     @spec deferred() :: :deferred
     def deferred, do: :deferred
+
   end
 
   @doc """
@@ -1198,10 +1210,10 @@ defmodule OpenTelemetry.SemConv.Incubating.HealingAttributes do
   | `oldest` | `"oldest"` | oldest |
   """
   @spec healing_load_shedding_strategy_values() :: %{
-          random: :random,
-          priority: :priority,
-          oldest: :oldest
-        }
+    random: :random,
+    priority: :priority,
+    oldest: :oldest
+  }
   def healing_load_shedding_strategy_values do
     %{
       random: :random,
@@ -1226,6 +1238,7 @@ defmodule OpenTelemetry.SemConv.Incubating.HealingAttributes do
     @doc "oldest"
     @spec oldest() :: :oldest
     def oldest, do: :oldest
+
   end
 
   @doc """
@@ -1503,11 +1516,11 @@ defmodule OpenTelemetry.SemConv.Incubating.HealingAttributes do
   | `manual` | `"manual"` | manual |
   """
   @spec healing_quarantine_reason_values() :: %{
-          anomaly: :anomaly,
-          compliance: :compliance,
-          cascade_risk: :cascade_risk,
-          manual: :manual
-        }
+    anomaly: :anomaly,
+    compliance: :compliance,
+    cascade_risk: :cascade_risk,
+    manual: :manual
+  }
   def healing_quarantine_reason_values do
     %{
       anomaly: :anomaly,
@@ -1537,6 +1550,7 @@ defmodule OpenTelemetry.SemConv.Incubating.HealingAttributes do
     @doc "manual"
     @spec manual() :: :manual
     def manual, do: :manual
+
   end
 
   @doc """
@@ -1623,12 +1637,12 @@ defmodule OpenTelemetry.SemConv.Incubating.HealingAttributes do
   | `degrade` | `"degrade"` | Gracefully degrade to reduced functionality |
   """
   @spec healing_recovery_strategy_values() :: %{
-          restart: :restart,
-          rollback: :rollback,
-          circuit_break: :circuit_break,
-          isolate: :isolate,
-          degrade: :degrade
-        }
+    restart: :restart,
+    rollback: :rollback,
+    circuit_break: :circuit_break,
+    isolate: :isolate,
+    degrade: :degrade
+  }
   def healing_recovery_strategy_values do
     %{
       restart: :restart,
@@ -1663,6 +1677,7 @@ defmodule OpenTelemetry.SemConv.Incubating.HealingAttributes do
     @doc "Gracefully degrade to reduced functionality"
     @spec degrade() :: :degrade
     def degrade, do: :degrade
+
   end
 
   @doc """
@@ -1700,11 +1715,11 @@ defmodule OpenTelemetry.SemConv.Incubating.HealingAttributes do
   | `rebalance` | `"rebalance"` | rebalance |
   """
   @spec healing_repair_strategy_values() :: %{
-          restart: :restart,
-          rollback: :rollback,
-          failover: :failover,
-          rebalance: :rebalance
-        }
+    restart: :restart,
+    rollback: :rollback,
+    failover: :failover,
+    rebalance: :rebalance
+  }
   def healing_repair_strategy_values do
     %{
       restart: :restart,
@@ -1734,6 +1749,7 @@ defmodule OpenTelemetry.SemConv.Incubating.HealingAttributes do
     @doc "rebalance"
     @spec rebalance() :: :rebalance
     def rebalance, do: :rebalance
+
   end
 
   @doc """
@@ -1782,10 +1798,10 @@ defmodule OpenTelemetry.SemConv.Incubating.HealingAttributes do
   | `incremental` | `"incremental"` | incremental |
   """
   @spec healing_rollback_strategy_values() :: %{
-          checkpoint: :checkpoint,
-          snapshot: :snapshot,
-          incremental: :incremental
-        }
+    checkpoint: :checkpoint,
+    snapshot: :snapshot,
+    incremental: :incremental
+  }
   def healing_rollback_strategy_values do
     %{
       checkpoint: :checkpoint,
@@ -1810,6 +1826,7 @@ defmodule OpenTelemetry.SemConv.Incubating.HealingAttributes do
     @doc "incremental"
     @spec incremental() :: :incremental
     def incremental, do: :incremental
+
   end
 
   @doc """
@@ -1954,10 +1971,10 @@ defmodule OpenTelemetry.SemConv.Incubating.HealingAttributes do
   | `throttle` | `"throttle"` | throttle |
   """
   @spec healing_surge_mitigation_strategy_values() :: %{
-          shed: :shed,
-          queue: :queue,
-          throttle: :throttle
-        }
+    shed: :shed,
+    queue: :queue,
+    throttle: :throttle
+  }
   def healing_surge_mitigation_strategy_values do
     %{
       shed: :shed,
@@ -1982,6 +1999,7 @@ defmodule OpenTelemetry.SemConv.Incubating.HealingAttributes do
     @doc "throttle"
     @spec throttle() :: :throttle
     def throttle, do: :throttle
+
   end
 
   @doc """
@@ -2066,10 +2084,10 @@ defmodule OpenTelemetry.SemConv.Incubating.HealingAttributes do
   | `inconclusive` | `"inconclusive"` | inconclusive |
   """
   @spec healing_verification_status_values() :: %{
-          pass: :pass,
-          fail: :fail,
-          inconclusive: :inconclusive
-        }
+    pass: :pass,
+    fail: :fail,
+    inconclusive: :inconclusive
+  }
   def healing_verification_status_values do
     %{
       pass: :pass,
@@ -2094,6 +2112,7 @@ defmodule OpenTelemetry.SemConv.Incubating.HealingAttributes do
     @doc "inconclusive"
     @spec inconclusive() :: :inconclusive
     def inconclusive, do: :inconclusive
+
   end
 
   @doc """
@@ -2142,10 +2161,10 @@ defmodule OpenTelemetry.SemConv.Incubating.HealingAttributes do
   | `unavailable` | `"unavailable"` | unavailable |
   """
   @spec healing_warm_standby_readiness_values() :: %{
-          ready: :ready,
-          warming: :warming,
-          unavailable: :unavailable
-        }
+    ready: :ready,
+    warming: :warming,
+    unavailable: :unavailable
+  }
   def healing_warm_standby_readiness_values do
     %{
       ready: :ready,
@@ -2170,6 +2189,7 @@ defmodule OpenTelemetry.SemConv.Incubating.HealingAttributes do
     @doc "unavailable"
     @spec unavailable() :: :unavailable
     def unavailable, do: :unavailable
+
   end
 
   @doc """
@@ -2183,4 +2203,5 @@ defmodule OpenTelemetry.SemConv.Incubating.HealingAttributes do
   """
   @spec healing_warm_standby_replica_count() :: :"healing.warm_standby.replica_count"
   def healing_warm_standby_replica_count, do: :"healing.warm_standby.replica_count"
+
 end

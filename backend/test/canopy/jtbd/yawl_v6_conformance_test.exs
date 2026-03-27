@@ -4,11 +4,11 @@ defmodule Canopy.Jtbd.YawlV6ConformanceTest do
   alias Canopy.JTBD.YAWLv6Simulation
 
   describe "conformance event structure" do
-    test "emit_conformance_event/3 does not crash when PubSub not running" do
+    test "check_and_emit_conformance/3 fails fast when YAWL is unavailable (PubSub not running)" do
       # Private functions are exercised via the public check_and_emit_conformance/3.
-      # With no YAWL server running and no PubSub, this must return :ok (graceful degradation).
+      # With no YAWL server running, this must return {:error, :yawl_unavailable} (fail fast).
       result = YAWLv6Simulation.check_and_emit_conformance("WCP-1", "<spec/>", %{})
-      assert result == :ok
+      assert result == {:error, :yawl_unavailable}
     end
 
     test "yawl_conformance event has required fields" do
@@ -25,15 +25,16 @@ defmodule Canopy.Jtbd.YawlV6ConformanceTest do
       assert fitness >= 0.0 and fitness <= 1.0
     end
 
-    test "check_and_emit_conformance/3 returns :ok when YAWL is unavailable" do
-      # No YAWL engine running in test environment — must degrade gracefully
+    test "check_and_emit_conformance/3 returns error tuple when YAWL is unavailable" do
+      # No YAWL engine running in test environment — must fail fast
       result = YAWLv6Simulation.check_and_emit_conformance("WCP-2", "<spec/>")
-      assert result == :ok
+      assert {:error, :yawl_unavailable} = result
     end
 
-    test "check_and_emit_conformance/3 accepts default empty event log" do
+    test "check_and_emit_conformance/3 accepts default empty event log and returns error" do
+      # With no YAWL server, all conformance checks fail fast
       result = YAWLv6Simulation.check_and_emit_conformance("WCP-3", "<spec/>")
-      assert result == :ok
+      assert {:error, :yawl_unavailable} = result
     end
   end
 end

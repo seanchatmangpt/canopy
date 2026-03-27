@@ -19,6 +19,8 @@ defmodule Canopy.Ontology.Service do
 
   alias Canopy.Ontology.Client
 
+  @call_timeout 5_000
+
   # Public API
 
   @doc """
@@ -268,21 +270,21 @@ defmodule Canopy.Ontology.Service do
     %{hits: integer, misses: integer, hit_rate: float}
   """
   def cache_stats do
-    GenServer.call(__MODULE__, :cache_stats)
+    GenServer.call(__MODULE__, :cache_stats, @call_timeout)
   end
 
   @doc """
   Clear all cached data.
   """
   def clear_all_cache do
-    GenServer.call(__MODULE__, :clear_cache)
+    GenServer.call(__MODULE__, :clear_cache, @call_timeout)
   end
 
   @doc """
   Clear cache for a specific ontology.
   """
   def clear_ontology_cache(ontology_id) do
-    GenServer.call(__MODULE__, {:clear_ontology, ontology_id})
+    GenServer.call(__MODULE__, {:clear_ontology, ontology_id}, @call_timeout)
   end
 
   # GenServer Callbacks

@@ -33,4 +33,5 @@ defmodule OpenTelemetry.SemConv.Incubating.HostAttributes do
   """
   @spec host_name() :: :"host.name"
   def host_name, do: :"host.name"
+
 end

@@ -1,6 +1,3 @@
-ExUnit.start(exclude: [:weaver_e2e])
+ExUnit.start(exclude: [:weaver_e2e, :integration, :external_binary, :external_service])
 
-# Only set up Ecto sandbox if the repo is started
-if Process.whereis(Canopy.Repo) do
-  Ecto.Adapters.SQL.Sandbox.mode(Canopy.Repo, :manual)
-end
+Ecto.Adapters.SQL.Sandbox.mode(Canopy.Repo, :manual)

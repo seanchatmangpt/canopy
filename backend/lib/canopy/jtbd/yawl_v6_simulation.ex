@@ -344,12 +344,6 @@ defmodule Canopy.JTBD.YAWLv6Simulation do
       {:error, _reason} ->
         {:error, :yawl_unavailable}
     end
-  rescue
-    # Finch pool registry not running (e.g. --no-start test mode) or other HTTP infra errors
-    _ -> {:error, :yawl_unavailable}
-  catch
-    :exit, {:timeout, _} -> {:error, :timeout}
-    :exit, _ -> {:error, :yawl_unavailable}
   end
 
   @doc false
@@ -369,17 +363,19 @@ defmodule Canopy.JTBD.YAWLv6Simulation do
   Run conformance check for a named YAWL pattern against the process mining REST API,
   then emit a Phoenix.PubSub event if PubSub is running.
 
-  Returns `:ok` on success or when YAWL is unavailable (graceful degradation).
+  Returns `{:ok, conformance_result}` on success or `{:error, reason}` on failure.
+  Fails fast if YAWL is unavailable (does not degrade gracefully).
   """
-  @spec check_and_emit_conformance(String.t(), String.t(), map()) :: :ok
+  @spec check_and_emit_conformance(String.t(), String.t(), map()) ::
+          {:ok, map()} | {:error, atom()}
   def check_and_emit_conformance(pattern_name, spec_xml, event_log \\ %{}) do
     case call_yawl_conformance(spec_xml, event_log) do
-      {:ok, %{fitness: fitness, violations: violations}} ->
+      {:ok, %{fitness: fitness, violations: violations} = result} ->
         emit_conformance_event(pattern_name, fitness, violations)
+        {:ok, result}
 
-      {:error, _reason} ->
-        # Graceful degradation — YAWL unavailable does not block simulation
-        :ok
+      {:error, reason} ->
+        {:error, reason}
     end
   end
 end

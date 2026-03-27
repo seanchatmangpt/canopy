@@ -117,11 +117,11 @@ defmodule OpenTelemetry.SemConv.Incubating.SignalAttributes do
   | `plain` | `"plain"` | plain |
   """
   @spec signal_encoding_values() :: %{
-          json: :json,
-          protobuf: :protobuf,
-          msgpack: :msgpack,
-          plain: :plain
-        }
+    json: :json,
+    protobuf: :protobuf,
+    msgpack: :msgpack,
+    plain: :plain
+  }
   def signal_encoding_values do
     %{
       json: :json,
@@ -151,6 +151,7 @@ defmodule OpenTelemetry.SemConv.Incubating.SignalAttributes do
     @doc "plain"
     @spec plain() :: :plain
     def plain, do: :plain
+
   end
 
   @doc """
@@ -180,15 +181,15 @@ defmodule OpenTelemetry.SemConv.Incubating.SignalAttributes do
   | `diagram` | `"diagram"` | Visual diagram description |
   """
   @spec signal_format_values() :: %{
-          markdown: :markdown,
-          code: :code,
-          json: :json,
-          yaml: :yaml,
-          html: :html,
-          text: :text,
-          table: :table,
-          diagram: :diagram
-        }
+    markdown: :markdown,
+    code: :code,
+    json: :json,
+    yaml: :yaml,
+    html: :html,
+    text: :text,
+    table: :table,
+    diagram: :diagram
+  }
   def signal_format_values do
     %{
       markdown: :markdown,
@@ -238,6 +239,7 @@ defmodule OpenTelemetry.SemConv.Incubating.SignalAttributes do
     @doc "Visual diagram description"
     @spec diagram() :: :diagram
     def diagram, do: :diagram
+
   end
 
   @doc """
@@ -269,17 +271,17 @@ defmodule OpenTelemetry.SemConv.Incubating.SignalAttributes do
   | `analysis` | `"analysis"` | Deep-dive analysis or investigation |
   """
   @spec signal_genre_values() :: %{
-          spec: :spec,
-          brief: :brief,
-          report: :report,
-          plan: :plan,
-          adr: :adr,
-          email: :email,
-          code_review: :code_review,
-          pitch: :pitch,
-          decision: :decision,
-          analysis: :analysis
-        }
+    spec: :spec,
+    brief: :brief,
+    report: :report,
+    plan: :plan,
+    adr: :adr,
+    email: :email,
+    code_review: :code_review,
+    pitch: :pitch,
+    decision: :decision,
+    analysis: :analysis
+  }
   def signal_genre_values do
     %{
       spec: :spec,
@@ -339,6 +341,7 @@ defmodule OpenTelemetry.SemConv.Incubating.SignalAttributes do
     @doc "Deep-dive analysis or investigation"
     @spec analysis() :: :analysis
     def analysis, do: :analysis
+
   end
 
   @doc """
@@ -392,15 +395,15 @@ defmodule OpenTelemetry.SemConv.Incubating.SignalAttributes do
   | `reactive` | `"reactive"` | Response to stimulus |
   """
   @spec signal_mode_values() :: %{
-          linguistic: :linguistic,
-          visual: :visual,
-          code: :code,
-          data: :data,
-          mixed: :mixed,
-          cognitive: :cognitive,
-          operational: :operational,
-          reactive: :reactive
-        }
+    linguistic: :linguistic,
+    visual: :visual,
+    code: :code,
+    data: :data,
+    mixed: :mixed,
+    cognitive: :cognitive,
+    operational: :operational,
+    reactive: :reactive
+  }
   def signal_mode_values do
     %{
       linguistic: :linguistic,
@@ -450,6 +453,7 @@ defmodule OpenTelemetry.SemConv.Incubating.SignalAttributes do
     @doc "Response to stimulus"
     @spec reactive() :: :reactive
     def reactive, do: :reactive
+
   end
 
   @doc """
@@ -487,11 +491,11 @@ defmodule OpenTelemetry.SemConv.Incubating.SignalAttributes do
   | `low` | `"low"` | low |
   """
   @spec signal_priority_values() :: %{
-          critical: :critical,
-          high: :high,
-          normal: :normal,
-          low: :low
-        }
+    critical: :critical,
+    high: :high,
+    normal: :normal,
+    low: :low
+  }
   def signal_priority_values do
     %{
       critical: :critical,
@@ -521,6 +525,7 @@ defmodule OpenTelemetry.SemConv.Incubating.SignalAttributes do
     @doc "low"
     @spec low() :: :low
     def low, do: :low
+
   end
 
   @doc """
@@ -631,12 +636,12 @@ defmodule OpenTelemetry.SemConv.Incubating.SignalAttributes do
   | `express` | `"express"` | Expressive or emotive content |
   """
   @spec signal_type_values() :: %{
-          direct: :direct,
-          inform: :inform,
-          commit: :commit,
-          decide: :decide,
-          express: :express
-        }
+    direct: :direct,
+    inform: :inform,
+    commit: :commit,
+    decide: :decide,
+    express: :express
+  }
   def signal_type_values do
     %{
       direct: :direct,
@@ -671,6 +676,7 @@ defmodule OpenTelemetry.SemConv.Incubating.SignalAttributes do
     @doc "Expressive or emotive content"
     @spec express() :: :express
     def express, do: :express
+
   end
 
   @doc """
@@ -684,4 +690,5 @@ defmodule OpenTelemetry.SemConv.Incubating.SignalAttributes do
   """
   @spec signal_weight() :: :"signal.weight"
   def signal_weight, do: :"signal.weight"
+
 end

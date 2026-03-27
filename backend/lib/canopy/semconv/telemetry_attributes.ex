@@ -45,4 +45,5 @@ defmodule OpenTelemetry.SemConv.Incubating.TelemetryAttributes do
   """
   @spec telemetry_sdk_version() :: :"telemetry.sdk.version"
   def telemetry_sdk_version, do: :"telemetry.sdk.version"
+
 end

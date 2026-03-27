@@ -127,10 +127,8 @@ defmodule OpenTelemetry.SemConv.Incubating.ConsensusAttributes do
   Requirement: `recommended`
   Examples: `5`, `10`, `21`
   """
-  @spec consensus_epoch_finalization_signature_count() ::
-          :"consensus.epoch.finalization.signature_count"
-  def consensus_epoch_finalization_signature_count,
-    do: :"consensus.epoch.finalization.signature_count"
+  @spec consensus_epoch_finalization_signature_count() :: :"consensus.epoch.finalization.signature_count"
+  def consensus_epoch_finalization_signature_count, do: :"consensus.epoch.finalization.signature_count"
 
   @doc """
   Monotonically increasing epoch identifier for the consensus protocol.
@@ -190,10 +188,10 @@ defmodule OpenTelemetry.SemConv.Incubating.ConsensusAttributes do
   | `membership_change` | `"membership_change"` | membership_change |
   """
   @spec consensus_epoch_key_rotation_reason_values() :: %{
-          scheduled: :scheduled,
-          compromise: :compromise,
-          membership_change: :membership_change
-        }
+    scheduled: :scheduled,
+    compromise: :compromise,
+    membership_change: :membership_change
+  }
   def consensus_epoch_key_rotation_reason_values do
     %{
       scheduled: :scheduled,
@@ -218,6 +216,7 @@ defmodule OpenTelemetry.SemConv.Incubating.ConsensusAttributes do
     @doc "membership_change"
     @spec membership_change() :: :membership_change
     def membership_change, do: :membership_change
+
   end
 
   @doc """
@@ -326,10 +325,10 @@ defmodule OpenTelemetry.SemConv.Incubating.ConsensusAttributes do
   | `key_rotation` | `"key_rotation"` | key_rotation |
   """
   @spec consensus_epoch_transition_trigger_values() :: %{
-          timeout: :timeout,
-          quorum_change: :quorum_change,
-          key_rotation: :key_rotation
-        }
+    timeout: :timeout,
+    quorum_change: :quorum_change,
+    key_rotation: :key_rotation
+  }
   def consensus_epoch_transition_trigger_values do
     %{
       timeout: :timeout,
@@ -354,6 +353,7 @@ defmodule OpenTelemetry.SemConv.Incubating.ConsensusAttributes do
     @doc "key_rotation"
     @spec key_rotation() :: :key_rotation
     def key_rotation, do: :key_rotation
+
   end
 
   @doc """
@@ -413,10 +413,10 @@ defmodule OpenTelemetry.SemConv.Incubating.ConsensusAttributes do
   | `epoch_based` | `"epoch_based"` | epoch_based |
   """
   @spec consensus_fork_resolution_strategy_values() :: %{
-          longest_chain: :longest_chain,
-          highest_vote: :highest_vote,
-          epoch_based: :epoch_based
-        }
+    longest_chain: :longest_chain,
+    highest_vote: :highest_vote,
+    epoch_based: :epoch_based
+  }
   def consensus_fork_resolution_strategy_values do
     %{
       longest_chain: :longest_chain,
@@ -441,6 +441,7 @@ defmodule OpenTelemetry.SemConv.Incubating.ConsensusAttributes do
     @doc "epoch_based"
     @spec epoch_based() :: :epoch_based
     def epoch_based, do: :epoch_based
+
   end
 
   @doc """
@@ -596,8 +597,7 @@ defmodule OpenTelemetry.SemConv.Incubating.ConsensusAttributes do
   Requirement: `recommended`
   Examples: `1`, `2`, `5`
   """
-  @spec consensus_network_recovery_nodes_rejoined() ::
-          :"consensus.network.recovery.nodes_rejoined"
+  @spec consensus_network_recovery_nodes_rejoined() :: :"consensus.network.recovery.nodes_rejoined"
   def consensus_network_recovery_nodes_rejoined, do: :"consensus.network.recovery.nodes_rejoined"
 
   @doc """
@@ -634,10 +634,10 @@ defmodule OpenTelemetry.SemConv.Incubating.ConsensusAttributes do
   | `bootstrap` | `"bootstrap"` | bootstrap |
   """
   @spec consensus_network_recovery_strategy_values() :: %{
-          reconnect: :reconnect,
-          rejoin: :rejoin,
-          bootstrap: :bootstrap
-        }
+    reconnect: :reconnect,
+    rejoin: :rejoin,
+    bootstrap: :bootstrap
+  }
   def consensus_network_recovery_strategy_values do
     %{
       reconnect: :reconnect,
@@ -662,6 +662,7 @@ defmodule OpenTelemetry.SemConv.Incubating.ConsensusAttributes do
     @doc "bootstrap"
     @spec bootstrap() :: :bootstrap
     def bootstrap, do: :bootstrap
+
   end
 
   @doc """
@@ -699,11 +700,11 @@ defmodule OpenTelemetry.SemConv.Incubating.ConsensusAttributes do
   | `bus` | `"bus"` | bus |
   """
   @spec consensus_network_topology_type_values() :: %{
-          ring: :ring,
-          mesh: :mesh,
-          star: :star,
-          bus: :bus
-        }
+    ring: :ring,
+    mesh: :mesh,
+    star: :star,
+    bus: :bus
+  }
   def consensus_network_topology_type_values do
     %{
       ring: :ring,
@@ -733,6 +734,7 @@ defmodule OpenTelemetry.SemConv.Incubating.ConsensusAttributes do
     @doc "bus"
     @spec bus() :: :bus
     def bus, do: :bus
+
   end
 
   @doc """
@@ -794,11 +796,11 @@ defmodule OpenTelemetry.SemConv.Incubating.ConsensusAttributes do
   | `rollback` | `"rollback"` | rollback |
   """
   @spec consensus_partition_heal_strategy_values() :: %{
-          majority_wins: :majority_wins,
-          epoch_fence: :epoch_fence,
-          leader_arbitration: :leader_arbitration,
-          rollback: :rollback
-        }
+    majority_wins: :majority_wins,
+    epoch_fence: :epoch_fence,
+    leader_arbitration: :leader_arbitration,
+    rollback: :rollback
+  }
   def consensus_partition_heal_strategy_values do
     %{
       majority_wins: :majority_wins,
@@ -828,6 +830,7 @@ defmodule OpenTelemetry.SemConv.Incubating.ConsensusAttributes do
     @doc "rollback"
     @spec rollback() :: :rollback
     def rollback, do: :rollback
+
   end
 
   @doc """
@@ -888,10 +891,10 @@ defmodule OpenTelemetry.SemConv.Incubating.ConsensusAttributes do
   | `manual` | `"manual"` | manual |
   """
   @spec consensus_partition_strategy_values() :: %{
-          majority_wins: :majority_wins,
-          epoch_based: :epoch_based,
-          manual: :manual
-        }
+    majority_wins: :majority_wins,
+    epoch_based: :epoch_based,
+    manual: :manual
+  }
   def consensus_partition_strategy_values do
     %{
       majority_wins: :majority_wins,
@@ -916,6 +919,7 @@ defmodule OpenTelemetry.SemConv.Incubating.ConsensusAttributes do
     @doc "manual"
     @spec manual() :: :manual
     def manual, do: :manual
+
   end
 
   @doc """
@@ -942,12 +946,12 @@ defmodule OpenTelemetry.SemConv.Incubating.ConsensusAttributes do
   | `view_change` | `"view_change"` | View change triggered by leader timeout |
   """
   @spec consensus_phase_values() :: %{
-          prepare: :prepare,
-          pre_commit: :pre_commit,
-          commit: :commit,
-          decide: :decide,
-          view_change: :view_change
-        }
+    prepare: :prepare,
+    pre_commit: :pre_commit,
+    commit: :commit,
+    decide: :decide,
+    view_change: :view_change
+  }
   def consensus_phase_values do
     %{
       prepare: :prepare,
@@ -982,6 +986,7 @@ defmodule OpenTelemetry.SemConv.Incubating.ConsensusAttributes do
     @doc "View change triggered by leader timeout"
     @spec view_change() :: :view_change
     def view_change, do: :view_change
+
   end
 
   @doc """
@@ -1042,10 +1047,10 @@ defmodule OpenTelemetry.SemConv.Incubating.ConsensusAttributes do
   | `critical` | `"critical"` | critical |
   """
   @spec consensus_quorum_health_values() :: %{
-          healthy: :healthy,
-          degraded: :degraded,
-          critical: :critical
-        }
+    healthy: :healthy,
+    degraded: :degraded,
+    critical: :critical
+  }
   def consensus_quorum_health_values do
     %{
       healthy: :healthy,
@@ -1070,6 +1075,7 @@ defmodule OpenTelemetry.SemConv.Incubating.ConsensusAttributes do
     @doc "critical"
     @spec critical() :: :critical
     def critical, do: :critical
+
   end
 
   @doc """
@@ -1107,11 +1113,11 @@ defmodule OpenTelemetry.SemConv.Incubating.ConsensusAttributes do
   | `decommission` | `"decommission"` | decommission |
   """
   @spec consensus_quorum_shrink_reason_values() :: %{
-          node_failure: :node_failure,
-          config_change: :config_change,
-          rebalance: :rebalance,
-          decommission: :decommission
-        }
+    node_failure: :node_failure,
+    config_change: :config_change,
+    rebalance: :rebalance,
+    decommission: :decommission
+  }
   def consensus_quorum_shrink_reason_values do
     %{
       node_failure: :node_failure,
@@ -1141,6 +1147,7 @@ defmodule OpenTelemetry.SemConv.Incubating.ConsensusAttributes do
     @doc "decommission"
     @spec decommission() :: :decommission
     def decommission, do: :decommission
+
   end
 
   @doc """
@@ -1250,11 +1257,11 @@ defmodule OpenTelemetry.SemConv.Incubating.ConsensusAttributes do
   | `learn` | `"learn"` | BFT learn phase |
   """
   @spec consensus_round_type_values() :: %{
-          prepare: :prepare,
-          promise: :promise,
-          accept: :accept,
-          learn: :learn
-        }
+    prepare: :prepare,
+    promise: :promise,
+    accept: :accept,
+    learn: :learn
+  }
   def consensus_round_type_values do
     %{
       prepare: :prepare,
@@ -1284,6 +1291,7 @@ defmodule OpenTelemetry.SemConv.Incubating.ConsensusAttributes do
     @doc "BFT learn phase"
     @spec learn() :: :learn
     def learn, do: :learn
+
   end
 
   @doc """
@@ -1356,10 +1364,10 @@ defmodule OpenTelemetry.SemConv.Incubating.ConsensusAttributes do
   | `fatal` | `"fatal"` | Unrecoverable safety violation, consensus must restart |
   """
   @spec consensus_safety_violation_severity_values() :: %{
-          warning: :warning,
-          critical: :critical,
-          fatal: :fatal
-        }
+    warning: :warning,
+    critical: :critical,
+    fatal: :fatal
+  }
   def consensus_safety_violation_severity_values do
     %{
       warning: :warning,
@@ -1384,6 +1392,7 @@ defmodule OpenTelemetry.SemConv.Incubating.ConsensusAttributes do
     @doc "Unrecoverable safety violation, consensus must restart"
     @spec fatal() :: :fatal
     def fatal, do: :fatal
+
   end
 
   @doc """
@@ -1408,10 +1417,10 @@ defmodule OpenTelemetry.SemConv.Incubating.ConsensusAttributes do
   | `quorum_breach` | `"quorum_breach"` | Decision made without sufficient quorum majority |
   """
   @spec consensus_safety_violation_type_values() :: %{
-          double_vote: :double_vote,
-          equivocation: :equivocation,
-          quorum_breach: :quorum_breach
-        }
+    double_vote: :double_vote,
+    equivocation: :equivocation,
+    quorum_breach: :quorum_breach
+  }
   def consensus_safety_violation_type_values do
     %{
       double_vote: :double_vote,
@@ -1436,6 +1445,7 @@ defmodule OpenTelemetry.SemConv.Incubating.ConsensusAttributes do
     @doc "Decision made without sufficient quorum majority"
     @spec quorum_breach() :: :quorum_breach
     def quorum_breach, do: :quorum_breach
+
   end
 
   @doc """
@@ -1495,10 +1505,8 @@ defmodule OpenTelemetry.SemConv.Incubating.ConsensusAttributes do
   Requirement: `recommended`
   Examples: `0.33`, `0.25`
   """
-  @spec consensus_threshold_fault_tolerance_target() ::
-          :"consensus.threshold.fault_tolerance_target"
-  def consensus_threshold_fault_tolerance_target,
-    do: :"consensus.threshold.fault_tolerance_target"
+  @spec consensus_threshold_fault_tolerance_target() :: :"consensus.threshold.fault_tolerance_target"
+  def consensus_threshold_fault_tolerance_target, do: :"consensus.threshold.fault_tolerance_target"
 
   @doc """
   Number of negative votes cast.
@@ -1534,10 +1542,10 @@ defmodule OpenTelemetry.SemConv.Incubating.ConsensusAttributes do
   | `unanimous` | `"unanimous"` | unanimous |
   """
   @spec consensus_threshold_vote_type_values() :: %{
-          supermajority: :supermajority,
-          simple: :simple,
-          unanimous: :unanimous
-        }
+    supermajority: :supermajority,
+    simple: :simple,
+    unanimous: :unanimous
+  }
   def consensus_threshold_vote_type_values do
     %{
       supermajority: :supermajority,
@@ -1562,6 +1570,7 @@ defmodule OpenTelemetry.SemConv.Incubating.ConsensusAttributes do
     @doc "unanimous"
     @spec unanimous() :: :unanimous
     def unanimous, do: :unanimous
+
   end
 
   @doc """
@@ -1671,12 +1680,12 @@ defmodule OpenTelemetry.SemConv.Incubating.ConsensusAttributes do
   | `equivocation` | `"equivocation"` | equivocation |
   """
   @spec consensus_view_change_reason_values() :: %{
-          timeout: :timeout,
-          leader_failure: :leader_failure,
-          network_partition: :network_partition,
-          manual: :manual,
-          equivocation: :equivocation
-        }
+    timeout: :timeout,
+    leader_failure: :leader_failure,
+    network_partition: :network_partition,
+    manual: :manual,
+    equivocation: :equivocation
+  }
   def consensus_view_change_reason_values do
     %{
       timeout: :timeout,
@@ -1711,6 +1720,7 @@ defmodule OpenTelemetry.SemConv.Incubating.ConsensusAttributes do
     @doc "equivocation"
     @spec equivocation() :: :equivocation
     def equivocation, do: :equivocation
+
   end
 
   @doc """
@@ -1748,4 +1758,5 @@ defmodule OpenTelemetry.SemConv.Incubating.ConsensusAttributes do
   """
   @spec consensus_vote_count() :: :"consensus.vote_count"
   def consensus_vote_count, do: :"consensus.vote_count"
+
 end

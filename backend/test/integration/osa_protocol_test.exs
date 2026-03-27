@@ -52,39 +52,20 @@ defmodule Integration.OSAProtocolTest do
     end
   end
 
-  setup context do
-    # Skip if test is tagged with skip_if_osa_unavailable and OSA is unavailable
-    if context[:skip_if_osa_unavailable] do
-      case health_check_osa() do
-        :ok ->
-          # Create test workspace
-          case create_test_workspace("osa-protocol-#{System.unique_integer([:positive])}") do
-            {:ok, ws} ->
-              {:ok, workspace: ws}
+  setup _context do
+    case create_test_workspace("osa-protocol-#{System.unique_integer([:positive])}") do
+      {:ok, ws} ->
+        {:ok, workspace: ws}
 
-            {:error, _reason} ->
-              {:ok, workspace: nil}
-          end
-
-        {:error, _reason} ->
-          {:skip, "OSA service not available"}
-      end
-    else
-      # For tests that don't need OSA, just create workspace
-      case create_test_workspace("osa-protocol-#{System.unique_integer([:positive])}") do
-        {:ok, ws} ->
-          {:ok, workspace: ws}
-
-        {:error, _reason} ->
-          {:ok, workspace: nil}
-      end
+      {:error, _reason} ->
+        {:ok, workspace: nil}
     end
   end
 
   # ── Message Type Tests (1-10) ──────────────────────────────────────────────────
 
   describe "message type 1: spawn (agent lifecycle)" do
-    @tag :skip_if_osa_unavailable
+    @tag :integration
     test "canopy sends agent spawn → OSA creates agent → returns agent_id", %{workspace: ws} do
       start_time = System.monotonic_time(:millisecond)
 
@@ -119,7 +100,7 @@ defmodule Integration.OSAProtocolTest do
       )
     end
 
-    @tag :skip_if_osa_unavailable
+    @tag :integration
     test "spawn with invalid config returns error" do
       spawn_payload = %{
         "type" => "spawn",
@@ -135,7 +116,7 @@ defmodule Integration.OSAProtocolTest do
   end
 
   describe "message type 2: call (tool dispatch)" do
-    @tag :skip_if_osa_unavailable
+    @tag :integration
     test "canopy sends tool call → OSA dispatches tool → returns result" do
       start_time = System.monotonic_time(:millisecond)
 
@@ -161,7 +142,7 @@ defmodule Integration.OSAProtocolTest do
       Logger.info("[OSAProtocol] call: tool=echo, latency=#{elapsed_ms}ms")
     end
 
-    @tag :skip_if_osa_unavailable
+    @tag :integration
     test "call with missing tool argument returns validation error" do
       call_payload = %{
         "type" => "call",
@@ -176,7 +157,7 @@ defmodule Integration.OSAProtocolTest do
   end
 
   describe "message type 3: state (memory query)" do
-    @tag :skip_if_osa_unavailable
+    @tag :integration
     test "canopy sends state query → OSA returns memory state" do
       start_time = System.monotonic_time(:millisecond)
 
@@ -204,7 +185,7 @@ defmodule Integration.OSAProtocolTest do
   end
 
   describe "message type 4: stop (agent termination)" do
-    @tag :skip_if_osa_unavailable
+    @tag :integration
     test "canopy sends agent stop → OSA terminates cleanly" do
       # First spawn an agent
       spawn_payload = %{
@@ -246,7 +227,7 @@ defmodule Integration.OSAProtocolTest do
   end
 
   describe "message type 5: list (enumeration)" do
-    @tag :skip_if_osa_unavailable
+    @tag :integration
     test "canopy sends list request → OSA returns agent enumeration" do
       start_time = System.monotonic_time(:millisecond)
 
@@ -271,7 +252,7 @@ defmodule Integration.OSAProtocolTest do
   end
 
   describe "message type 6: health (liveness check)" do
-    @tag :skip_if_osa_unavailable
+    @tag :integration
     test "canopy sends health check → OSA returns status" do
       start_time = System.monotonic_time(:millisecond)
 
@@ -291,7 +272,7 @@ defmodule Integration.OSAProtocolTest do
   end
 
   describe "message type 7: signal (temporal workflow control)" do
-    @tag :skip_if_osa_unavailable
+    @tag :integration
     test "canopy sends workflow signal (pause/skip/abort)" do
       workflow_id = generate_id("workflow")
 
@@ -323,7 +304,7 @@ defmodule Integration.OSAProtocolTest do
   end
 
   describe "message type 8: signal/query (temporal status)" do
-    @tag :skip_if_osa_unavailable
+    @tag :integration
     test "canopy sends workflow query → OSA returns status" do
       workflow_id = generate_id("workflow")
 
@@ -343,7 +324,7 @@ defmodule Integration.OSAProtocolTest do
   end
 
   describe "message type 9: delegate (inter-agent task passing)" do
-    @tag :skip_if_osa_unavailable
+    @tag :integration
     test "canopy sends delegation → OSA routes task to delegate agent" do
       start_time = System.monotonic_time(:millisecond)
 
@@ -375,7 +356,7 @@ defmodule Integration.OSAProtocolTest do
   end
 
   describe "message type 10: heartbeat (scheduled execution)" do
-    @tag :skip_if_osa_unavailable
+    @tag :integration
     test "canopy sends heartbeat → OSA executes scheduled checks" do
       start_time = System.monotonic_time(:millisecond)
 
@@ -401,7 +382,6 @@ defmodule Integration.OSAProtocolTest do
 
   describe "concurrent load: 50 agents (10 workspaces × 5)" do
     @tag :integration
-    @tag :skip_if_osa_unavailable
     test "concurrent agent lifecycle operations" do
       Logger.info(
         "[OSAProtocol] Starting concurrent load test: #{@concurrent_workspaces} workspaces × #{@agents_per_workspace} agents"
@@ -484,7 +464,6 @@ defmodule Integration.OSAProtocolTest do
     end
 
     @tag :integration
-    @tag :skip_if_osa_unavailable
     test "concurrent message types on same agent" do
       # Spawn a single agent
       agent_id = generate_id("agent")
@@ -533,7 +512,6 @@ defmodule Integration.OSAProtocolTest do
     end
 
     @tag :integration
-    @tag :skip_if_osa_unavailable
     test "concurrent spawn operations scale linearly" do
       batch_sizes = [5, 10, 20]
 
@@ -574,7 +552,7 @@ defmodule Integration.OSAProtocolTest do
   # ── Protocol State Machine Tests ───────────────────────────────────────────────
 
   describe "protocol state machine" do
-    @tag :skip_if_osa_unavailable
+    @tag :integration
     test "spawn → call → state → stop follows correct sequence" do
       # 1. SPAWN
       spawn_payload = %{
@@ -633,7 +611,7 @@ defmodule Integration.OSAProtocolTest do
       assert status in [400, 404, 405, 503]
     end
 
-    @tag :skip_if_osa_unavailable
+    @tag :integration
     test "timeout handling: long-running operation respects timeout" do
       # Send a heartbeat (potentially long-running) and verify timeout respected
       heartbeat_payload = %{
@@ -657,7 +635,7 @@ defmodule Integration.OSAProtocolTest do
   # ── Error Handling Tests ───────────────────────────────────────────────────────
 
   describe "error handling and edge cases" do
-    @tag :skip_if_osa_unavailable
+    @tag :integration
     test "nonexistent agent returns 404" do
       payload = %{
         "type" => "state",
@@ -668,13 +646,13 @@ defmodule Integration.OSAProtocolTest do
       assert status == 404
     end
 
-    @tag :skip_if_osa_unavailable
+    @tag :integration
     test "malformed JSON returns 400" do
       {:error, {status, _body}} = call_osa_raw("/api/v1/agents/state", "{invalid json}")
       assert status == 400
     end
 
-    @tag :skip_if_osa_unavailable
+    @tag :integration
     test "missing required field returns validation error" do
       payload = %{
         "type" => "spawn"
@@ -685,7 +663,7 @@ defmodule Integration.OSAProtocolTest do
       assert status in [400, 422]
     end
 
-    @tag :skip_if_osa_unavailable
+    @tag :integration
     test "concurrent stop on same agent is idempotent" do
       # Spawn agent
       spawn_payload = %{

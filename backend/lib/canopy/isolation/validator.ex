@@ -71,7 +71,7 @@ defmodule Canopy.Isolation.Validator do
 
   @doc "Get concurrent agent count in workspace"
   def get_agent_count(workspace_id) do
-    GenServer.call(__MODULE__, {:get_agent_count, workspace_id})
+    GenServer.call(__MODULE__, {:get_agent_count, workspace_id}, 5_000)
   end
 
   @doc "Verify tool is accessible from workspace"

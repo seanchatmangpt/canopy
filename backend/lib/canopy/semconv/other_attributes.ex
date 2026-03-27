@@ -68,10 +68,10 @@ defmodule OpenTelemetry.SemConv.Incubating.OtherAttributes do
   | `failed` | `"failed"` | failed |
   """
   @spec fix_result_values() :: %{
-          success: :success,
-          partial: :partial,
-          failed: :failed
-        }
+    success: :success,
+    partial: :partial,
+    failed: :failed
+  }
   def fix_result_values do
     %{
       success: :success,
@@ -96,6 +96,7 @@ defmodule OpenTelemetry.SemConv.Incubating.OtherAttributes do
     @doc "failed"
     @spec failed() :: :failed
     def failed, do: :failed
+
   end
 
   @doc """
@@ -179,9 +180,9 @@ defmodule OpenTelemetry.SemConv.Incubating.OtherAttributes do
   | `fail` | `"fail"` | fail |
   """
   @spec verification_status_values() :: %{
-          pass: :pass,
-          fail: :fail
-        }
+    pass: :pass,
+    fail: :fail
+  }
   def verification_status_values do
     %{
       pass: :pass,
@@ -201,6 +202,7 @@ defmodule OpenTelemetry.SemConv.Incubating.OtherAttributes do
     @doc "fail"
     @spec fail() :: :fail
     def fail, do: :fail
+
   end
 
   @doc """
@@ -214,4 +216,5 @@ defmodule OpenTelemetry.SemConv.Incubating.OtherAttributes do
   """
   @spec version() :: :version
   def version, do: :version
+
 end

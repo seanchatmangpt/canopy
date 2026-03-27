@@ -45,11 +45,11 @@ defmodule OpenTelemetry.SemConv.Incubating.AgentAttributes do
   | `low` | `"low"` | low |
   """
   @spec agent_budget_tier_values() :: %{
-          critical: :critical,
-          high: :high,
-          normal: :normal,
-          low: :low
-        }
+    critical: :critical,
+    high: :high,
+    normal: :normal,
+    low: :low
+  }
   def agent_budget_tier_values do
     %{
       critical: :critical,
@@ -79,6 +79,7 @@ defmodule OpenTelemetry.SemConv.Incubating.AgentAttributes do
     @doc "low"
     @spec low() :: :low
     def low, do: :low
+
   end
 
   @doc """
@@ -139,10 +140,10 @@ defmodule OpenTelemetry.SemConv.Incubating.AgentAttributes do
   | `federated` | `"federated"` | federated |
   """
   @spec agent_capability_scope_values() :: %{
-          local: :local,
-          cluster: :cluster,
-          federated: :federated
-        }
+    local: :local,
+    cluster: :cluster,
+    federated: :federated
+  }
   def agent_capability_scope_values do
     %{
       local: :local,
@@ -167,6 +168,7 @@ defmodule OpenTelemetry.SemConv.Incubating.AgentAttributes do
     @doc "federated"
     @spec federated() :: :federated
     def federated, do: :federated
+
   end
 
   @doc """
@@ -217,12 +219,12 @@ defmodule OpenTelemetry.SemConv.Incubating.AgentAttributes do
   | `reject` | `"reject"` | reject |
   """
   @spec agent_decision_type_values() :: %{
-          action: :action,
-          delegation: :delegation,
-          escalation: :escalation,
-          defer: :defer,
-          reject: :reject
-        }
+    action: :action,
+    delegation: :delegation,
+    escalation: :escalation,
+    defer: :defer,
+    reject: :reject
+  }
   def agent_decision_type_values do
     %{
       action: :action,
@@ -257,6 +259,7 @@ defmodule OpenTelemetry.SemConv.Incubating.AgentAttributes do
     @doc "reject"
     @spec reject() :: :reject
     def reject, do: :reject
+
   end
 
   @doc """
@@ -330,11 +333,11 @@ defmodule OpenTelemetry.SemConv.Incubating.AgentAttributes do
   | `priority` | `"priority"` | priority |
   """
   @spec agent_handoff_reason_values() :: %{
-          capability: :capability,
-          load: :load,
-          timeout: :timeout,
-          priority: :priority
-        }
+    capability: :capability,
+    load: :load,
+    timeout: :timeout,
+    priority: :priority
+  }
   def agent_handoff_reason_values do
     %{
       capability: :capability,
@@ -364,6 +367,7 @@ defmodule OpenTelemetry.SemConv.Incubating.AgentAttributes do
     @doc "priority"
     @spec priority() :: :priority
     def priority, do: :priority
+
   end
 
   @doc """
@@ -509,11 +513,11 @@ defmodule OpenTelemetry.SemConv.Incubating.AgentAttributes do
   | `semantic` | `"semantic"` | semantic |
   """
   @spec agent_memory_type_values() :: %{
-          short_term: :short_term,
-          long_term: :long_term,
-          episodic: :episodic,
-          semantic: :semantic
-        }
+    short_term: :short_term,
+    long_term: :long_term,
+    episodic: :episodic,
+    semantic: :semantic
+  }
   def agent_memory_type_values do
     %{
       short_term: :short_term,
@@ -543,6 +547,7 @@ defmodule OpenTelemetry.SemConv.Incubating.AgentAttributes do
     @doc "semantic"
     @spec semantic() :: :semantic
     def semantic, do: :semantic
+
   end
 
   @doc """
@@ -603,10 +608,10 @@ defmodule OpenTelemetry.SemConv.Incubating.AgentAttributes do
   | `escalated` | `"escalated"` | escalated |
   """
   @spec agent_outcome_values() :: %{
-          success: :success,
-          failure: :failure,
-          escalated: :escalated
-        }
+    success: :success,
+    failure: :failure,
+    escalated: :escalated
+  }
   def agent_outcome_values do
     %{
       success: :success,
@@ -631,6 +636,7 @@ defmodule OpenTelemetry.SemConv.Incubating.AgentAttributes do
     @doc "escalated"
     @spec escalated() :: :escalated
     def escalated, do: :escalated
+
   end
 
   @doc """
@@ -667,11 +673,11 @@ defmodule OpenTelemetry.SemConv.Incubating.AgentAttributes do
   | `circuit_breaker` | `"circuit_breaker"` | circuit_breaker |
   """
   @spec agent_pipeline_retry_policy_values() :: %{
-          none: :none,
-          fixed_delay: :fixed_delay,
-          exponential_backoff: :exponential_backoff,
-          circuit_breaker: :circuit_breaker
-        }
+    none: :none,
+    fixed_delay: :fixed_delay,
+    exponential_backoff: :exponential_backoff,
+    circuit_breaker: :circuit_breaker
+  }
   def agent_pipeline_retry_policy_values do
     %{
       none: :none,
@@ -701,6 +707,7 @@ defmodule OpenTelemetry.SemConv.Incubating.AgentAttributes do
     @doc "circuit_breaker"
     @spec circuit_breaker() :: :circuit_breaker
     def circuit_breaker, do: :circuit_breaker
+
   end
 
   @doc """
@@ -833,10 +840,10 @@ defmodule OpenTelemetry.SemConv.Incubating.AgentAttributes do
   | `pooled` | `"pooled"` | pooled |
   """
   @spec agent_spawn_strategy_values() :: %{
-          on_demand: :on_demand,
-          pre_warmed: :pre_warmed,
-          pooled: :pooled
-        }
+    on_demand: :on_demand,
+    pre_warmed: :pre_warmed,
+    pooled: :pooled
+  }
   def agent_spawn_strategy_values do
     %{
       on_demand: :on_demand,
@@ -861,6 +868,7 @@ defmodule OpenTelemetry.SemConv.Incubating.AgentAttributes do
     @doc "pooled"
     @spec pooled() :: :pooled
     def pooled, do: :pooled
+
   end
 
   @doc """
@@ -887,12 +895,12 @@ defmodule OpenTelemetry.SemConv.Incubating.AgentAttributes do
   | `cancelled` | `"cancelled"` | cancelled |
   """
   @spec agent_task_status_values() :: %{
-          pending: :pending,
-          running: :running,
-          completed: :completed,
-          failed: :failed,
-          cancelled: :cancelled
-        }
+    pending: :pending,
+    running: :running,
+    completed: :completed,
+    failed: :failed,
+    cancelled: :cancelled
+  }
   def agent_task_status_values do
     %{
       pending: :pending,
@@ -927,6 +935,7 @@ defmodule OpenTelemetry.SemConv.Incubating.AgentAttributes do
     @doc "cancelled"
     @spec cancelled() :: :cancelled
     def cancelled, do: :cancelled
+
   end
 
   @doc """
@@ -977,12 +986,12 @@ defmodule OpenTelemetry.SemConv.Incubating.AgentAttributes do
   | `star` | `"star"` | star |
   """
   @spec agent_topology_type_values() :: %{
-          pipeline: :pipeline,
-          fan_out: :fan_out,
-          hierarchical: :hierarchical,
-          mesh: :mesh,
-          star: :star
-        }
+    pipeline: :pipeline,
+    fan_out: :fan_out,
+    hierarchical: :hierarchical,
+    mesh: :mesh,
+    star: :star
+  }
   def agent_topology_type_values do
     %{
       pipeline: :pipeline,
@@ -1017,6 +1026,7 @@ defmodule OpenTelemetry.SemConv.Incubating.AgentAttributes do
     @doc "star"
     @spec star() :: :star
     def star, do: :star
+
   end
 
   @doc """
@@ -1066,4 +1076,5 @@ defmodule OpenTelemetry.SemConv.Incubating.AgentAttributes do
   """
   @spec agent_workflow_resume_count() :: :"agent.workflow.resume_count"
   def agent_workflow_resume_count, do: :"agent.workflow.resume_count"
+
 end

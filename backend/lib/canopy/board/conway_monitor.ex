@@ -60,7 +60,8 @@ defmodule Canopy.Board.ConwayMonitor do
   This is the primary interface used by heartbeat/dispatcher integration.
   Returns the ConwayChecker result map.
   """
-  @spec check_routing(String.t(), non_neg_integer(), non_neg_integer()) :: map()
+  @spec check_routing(String.t(), non_neg_integer(), non_neg_integer()) ::
+          map() | {:error, :timeout}
   def check_routing(process_id, boundary_time_ms, cycle_time_ms) do
     GenServer.call(
       __MODULE__,
@@ -70,7 +71,7 @@ defmodule Canopy.Board.ConwayMonitor do
   catch
     :exit, {:timeout, _} ->
       Logger.error("[ConwayMonitor] check_routing timeout for #{process_id}")
-      %{is_violation: false, conway_score: 0.0, boundary_time_ms: 0, cycle_time_ms: 0}
+      {:error, :timeout}
   end
 
   @doc "Publish a routing event for Conway analysis (async broadcast)."

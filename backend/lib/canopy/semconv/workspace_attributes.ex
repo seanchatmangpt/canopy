@@ -59,14 +59,14 @@ defmodule OpenTelemetry.SemConv.Incubating.WorkspaceAttributes do
   | `memory_update` | `"memory_update"` | memory_update |
   """
   @spec workspace_activity_type_values() :: %{
-          code_edit: :code_edit,
-          file_read: :file_read,
-          terminal_exec: :terminal_exec,
-          web_search: :web_search,
-          agent_spawn: :agent_spawn,
-          tool_call: :tool_call,
-          memory_update: :memory_update
-        }
+    code_edit: :code_edit,
+    file_read: :file_read,
+    terminal_exec: :terminal_exec,
+    web_search: :web_search,
+    agent_spawn: :agent_spawn,
+    tool_call: :tool_call,
+    memory_update: :memory_update
+  }
   def workspace_activity_type_values do
     %{
       code_edit: :code_edit,
@@ -111,6 +111,7 @@ defmodule OpenTelemetry.SemConv.Incubating.WorkspaceAttributes do
     @doc "memory_update"
     @spec memory_update() :: :memory_update
     def memory_update, do: :memory_update
+
   end
 
   @doc """
@@ -149,12 +150,12 @@ defmodule OpenTelemetry.SemConv.Incubating.WorkspaceAttributes do
   | `researcher` | `"researcher"` | researcher |
   """
   @spec workspace_agent_role_values() :: %{
-          planner: :planner,
-          executor: :executor,
-          reviewer: :reviewer,
-          coordinator: :coordinator,
-          researcher: :researcher
-        }
+    planner: :planner,
+    executor: :executor,
+    reviewer: :reviewer,
+    coordinator: :coordinator,
+    researcher: :researcher
+  }
   def workspace_agent_role_values do
     %{
       planner: :planner,
@@ -189,6 +190,7 @@ defmodule OpenTelemetry.SemConv.Incubating.WorkspaceAttributes do
     @doc "researcher"
     @spec researcher() :: :researcher
     def researcher, do: :researcher
+
   end
 
   @doc """
@@ -359,12 +361,12 @@ defmodule OpenTelemetry.SemConv.Incubating.WorkspaceAttributes do
   | `event_driven` | `"event_driven"` | event_driven |
   """
   @spec workspace_orchestration_pattern_values() :: %{
-          sequential: :sequential,
-          parallel: :parallel,
-          reactive: :reactive,
-          proactive: :proactive,
-          event_driven: :event_driven
-        }
+    sequential: :sequential,
+    parallel: :parallel,
+    reactive: :reactive,
+    proactive: :proactive,
+    event_driven: :event_driven
+  }
   def workspace_orchestration_pattern_values do
     %{
       sequential: :sequential,
@@ -399,6 +401,7 @@ defmodule OpenTelemetry.SemConv.Incubating.WorkspaceAttributes do
     @doc "event_driven"
     @spec event_driven() :: :event_driven
     def event_driven, do: :event_driven
+
   end
 
   @doc """
@@ -424,11 +427,11 @@ defmodule OpenTelemetry.SemConv.Incubating.WorkspaceAttributes do
   | `shutdown` | `"shutdown"` | shutdown |
   """
   @spec workspace_phase_values() :: %{
-          startup: :startup,
-          active: :active,
-          idle: :idle,
-          shutdown: :shutdown
-        }
+    startup: :startup,
+    active: :active,
+    idle: :idle,
+    shutdown: :shutdown
+  }
   def workspace_phase_values do
     %{
       startup: :startup,
@@ -458,6 +461,7 @@ defmodule OpenTelemetry.SemConv.Incubating.WorkspaceAttributes do
     @doc "shutdown"
     @spec shutdown() :: :shutdown
     def shutdown, do: :shutdown
+
   end
 
   @doc """
@@ -555,11 +559,11 @@ defmodule OpenTelemetry.SemConv.Incubating.WorkspaceAttributes do
   | `public` | `"public"` | public |
   """
   @spec workspace_sharing_scope_values() :: %{
-          private: :private,
-          team: :team,
-          org: :org,
-          public: :public
-        }
+    private: :private,
+    team: :team,
+    org: :org,
+    public: :public
+  }
   def workspace_sharing_scope_values do
     %{
       private: :private,
@@ -589,6 +593,7 @@ defmodule OpenTelemetry.SemConv.Incubating.WorkspaceAttributes do
     @doc "public"
     @spec public() :: :public
     def public, do: :public
+
   end
 
   @doc """
@@ -628,13 +633,13 @@ defmodule OpenTelemetry.SemConv.Incubating.WorkspaceAttributes do
   | `transform` | `"transform"` | transform |
   """
   @spec workspace_tool_category_values() :: %{
-          read: :read,
-          write: :write,
-          search: :search,
-          compute: :compute,
-          communicate: :communicate,
-          transform: :transform
-        }
+    read: :read,
+    write: :write,
+    search: :search,
+    compute: :compute,
+    communicate: :communicate,
+    transform: :transform
+  }
   def workspace_tool_category_values do
     %{
       read: :read,
@@ -674,6 +679,7 @@ defmodule OpenTelemetry.SemConv.Incubating.WorkspaceAttributes do
     @doc "transform"
     @spec transform() :: :transform
     def transform, do: :transform
+
   end
 
   @doc """
@@ -711,4 +717,5 @@ defmodule OpenTelemetry.SemConv.Incubating.WorkspaceAttributes do
   """
   @spec workspace_tool_provider() :: :"workspace.tool.provider"
   def workspace_tool_provider, do: :"workspace.tool.provider"
+
 end

@@ -57,11 +57,11 @@ defmodule OpenTelemetry.SemConv.Incubating.ConversationAttributes do
   | `tool` | `"tool"` | tool |
   """
   @spec conversation_message_role_values() :: %{
-          user: :user,
-          assistant: :assistant,
-          system: :system,
-          tool: :tool
-        }
+    user: :user,
+    assistant: :assistant,
+    system: :system,
+    tool: :tool
+  }
   def conversation_message_role_values do
     %{
       user: :user,
@@ -91,6 +91,7 @@ defmodule OpenTelemetry.SemConv.Incubating.ConversationAttributes do
     @doc "tool"
     @spec tool() :: :tool
     def tool, do: :tool
+
   end
 
   @doc """
@@ -129,12 +130,12 @@ defmodule OpenTelemetry.SemConv.Incubating.ConversationAttributes do
   | `error` | `"error"` | error |
   """
   @spec conversation_phase_values() :: %{
-          init: :init,
-          active: :active,
-          waiting: :waiting,
-          complete: :complete,
-          error: :error
-        }
+    init: :init,
+    active: :active,
+    waiting: :waiting,
+    complete: :complete,
+    error: :error
+  }
   def conversation_phase_values do
     %{
       init: :init,
@@ -169,6 +170,7 @@ defmodule OpenTelemetry.SemConv.Incubating.ConversationAttributes do
     @doc "error"
     @spec error() :: :error
     def error, do: :error
+
   end
 
   @doc """
@@ -218,4 +220,5 @@ defmodule OpenTelemetry.SemConv.Incubating.ConversationAttributes do
   """
   @spec conversation_user_id() :: :"conversation.user_id"
   def conversation_user_id, do: :"conversation.user_id"
+
 end

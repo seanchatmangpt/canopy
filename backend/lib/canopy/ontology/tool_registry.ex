@@ -335,8 +335,6 @@ defmodule Canopy.Ontology.ToolRegistry do
       [] ->
         false
     end
-  rescue
-    _ -> false
   end
 
   defp get_cached(cache_key) do
@@ -353,19 +351,11 @@ defmodule Canopy.Ontology.ToolRegistry do
   end
 
   defp record_cache_hit do
-    try do
-      :ets.update_counter(:tool_registry_stats, :cache_hits, {2, 1})
-    rescue
-      _ -> :ok
-    end
+    :ets.update_counter(:tool_registry_stats, :cache_hits, {2, 1})
   end
 
   defp record_cache_miss do
-    try do
-      :ets.update_counter(:tool_registry_stats, :cache_misses, {2, 1})
-    rescue
-      _ -> :ok
-    end
+    :ets.update_counter(:tool_registry_stats, :cache_misses, {2, 1})
   end
 
   # Tool Discovery Logic

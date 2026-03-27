@@ -104,10 +104,10 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
   | `exactly_once` | `"exactly_once"` | exactly_once |
   """
   @spec a2a_batch_delivery_policy_values() :: %{
-          at_most_once: :at_most_once,
-          at_least_once: :at_least_once,
-          exactly_once: :exactly_once
-        }
+    at_most_once: :at_most_once,
+    at_least_once: :at_least_once,
+    exactly_once: :exactly_once
+  }
   def a2a_batch_delivery_policy_values do
     %{
       at_most_once: :at_most_once,
@@ -132,6 +132,7 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
     @doc "exactly_once"
     @spec exactly_once() :: :exactly_once
     def exactly_once, do: :exactly_once
+
   end
 
   @doc """
@@ -193,11 +194,11 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
   | `balanced` | `"balanced"` | balanced |
   """
   @spec a2a_bid_strategy_values() :: %{
-          lowest_cost: :lowest_cost,
-          highest_trust: :highest_trust,
-          fastest_response: :fastest_response,
-          balanced: :balanced
-        }
+    lowest_cost: :lowest_cost,
+    highest_trust: :highest_trust,
+    fastest_response: :fastest_response,
+    balanced: :balanced
+  }
   def a2a_bid_strategy_values do
     %{
       lowest_cost: :lowest_cost,
@@ -227,6 +228,7 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
     @doc "balanced"
     @spec balanced() :: :balanced
     def balanced, do: :balanced
+
   end
 
   @doc """
@@ -299,11 +301,11 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
   | `partial` | `"partial"` | partial |
   """
   @spec a2a_capability_negotiation_outcome_values() :: %{
-          accepted: :accepted,
-          rejected: :rejected,
-          deferred: :deferred,
-          partial: :partial
-        }
+    accepted: :accepted,
+    rejected: :rejected,
+    deferred: :deferred,
+    partial: :partial
+  }
   def a2a_capability_negotiation_outcome_values do
     %{
       accepted: :accepted,
@@ -333,6 +335,7 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
     @doc "partial"
     @spec partial() :: :partial
     def partial, do: :partial
+
   end
 
   @doc """
@@ -418,11 +421,11 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
   | `quality_revision` | `"quality_revision"` | quality_revision |
   """
   @spec a2a_contract_amendment_reason_values() :: %{
-          scope_change: :scope_change,
-          price_adjustment: :price_adjustment,
-          timeline_extension: :timeline_extension,
-          quality_revision: :quality_revision
-        }
+    scope_change: :scope_change,
+    price_adjustment: :price_adjustment,
+    timeline_extension: :timeline_extension,
+    quality_revision: :quality_revision
+  }
   def a2a_contract_amendment_reason_values do
     %{
       scope_change: :scope_change,
@@ -452,6 +455,7 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
     @doc "quality_revision"
     @spec quality_revision() :: :quality_revision
     def quality_revision, do: :quality_revision
+
   end
 
   @doc """
@@ -500,10 +504,10 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
   | `force_majeure` | `"force_majeure"` | force_majeure |
   """
   @spec a2a_contract_dispute_reason_values() :: %{
-          breach: :breach,
-          ambiguity: :ambiguity,
-          force_majeure: :force_majeure
-        }
+    breach: :breach,
+    ambiguity: :ambiguity,
+    force_majeure: :force_majeure
+  }
   def a2a_contract_dispute_reason_values do
     %{
       breach: :breach,
@@ -528,6 +532,7 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
     @doc "force_majeure"
     @spec force_majeure() :: :force_majeure
     def force_majeure, do: :force_majeure
+
   end
 
   @doc """
@@ -552,10 +557,10 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
   | `resolved` | `"resolved"` | resolved |
   """
   @spec a2a_contract_dispute_status_values() :: %{
-          open: :open,
-          arbitrating: :arbitrating,
-          resolved: :resolved
-        }
+    open: :open,
+    arbitrating: :arbitrating,
+    resolved: :resolved
+  }
   def a2a_contract_dispute_status_values do
     %{
       open: :open,
@@ -580,6 +585,7 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
     @doc "resolved"
     @spec resolved() :: :resolved
     def resolved, do: :resolved
+
   end
 
   @doc """
@@ -617,11 +623,11 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
   | `disputed` | `"disputed"` | disputed |
   """
   @spec a2a_contract_execution_status_values() :: %{
-          running: :running,
-          completed: :completed,
-          failed: :failed,
-          disputed: :disputed
-        }
+    running: :running,
+    completed: :completed,
+    failed: :failed,
+    disputed: :disputed
+  }
   def a2a_contract_execution_status_values do
     %{
       running: :running,
@@ -651,6 +657,7 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
     @doc "disputed"
     @spec disputed() :: :disputed
     def disputed, do: :disputed
+
   end
 
   @doc """
@@ -761,12 +768,12 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
   | `disputed` | `"disputed"` | disputed |
   """
   @spec a2a_deal_status_values() :: %{
-          pending: :pending,
-          active: :active,
-          completed: :completed,
-          cancelled: :cancelled,
-          disputed: :disputed
-        }
+    pending: :pending,
+    active: :active,
+    completed: :completed,
+    cancelled: :cancelled,
+    disputed: :disputed
+  }
   def a2a_deal_status_values do
     %{
       pending: :pending,
@@ -801,6 +808,7 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
     @doc "disputed"
     @spec disputed() :: :disputed
     def disputed, do: :disputed
+
   end
 
   @doc """
@@ -863,12 +871,12 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
   | `technical` | `"technical"` | technical |
   """
   @spec a2a_dispute_reason_values() :: %{
-          quality: :quality,
-          sla_breach: :sla_breach,
-          payment: :payment,
-          fraud: :fraud,
-          technical: :technical
-        }
+    quality: :quality,
+    sla_breach: :sla_breach,
+    payment: :payment,
+    fraud: :fraud,
+    technical: :technical
+  }
   def a2a_dispute_reason_values do
     %{
       quality: :quality,
@@ -903,6 +911,7 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
     @doc "technical"
     @spec technical() :: :technical
     def technical, do: :technical
+
   end
 
   @doc """
@@ -939,10 +948,10 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
   | `escalated` | `"escalated"` | escalated |
   """
   @spec a2a_dispute_resolution_status_values() :: %{
-          pending: :pending,
-          resolved: :resolved,
-          escalated: :escalated
-        }
+    pending: :pending,
+    resolved: :resolved,
+    escalated: :escalated
+  }
   def a2a_dispute_resolution_status_values do
     %{
       pending: :pending,
@@ -967,6 +976,7 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
     @doc "escalated"
     @spec escalated() :: :escalated
     def escalated, do: :escalated
+
   end
 
   @doc """
@@ -1016,11 +1026,11 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
   | `dispute` | `"dispute"` | dispute |
   """
   @spec a2a_escrow_release_condition_values() :: %{
-          completion: :completion,
-          timeout: :timeout,
-          manual: :manual,
-          dispute: :dispute
-        }
+    completion: :completion,
+    timeout: :timeout,
+    manual: :manual,
+    dispute: :dispute
+  }
   def a2a_escrow_release_condition_values do
     %{
       completion: :completion,
@@ -1050,6 +1060,7 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
     @doc "dispute"
     @spec dispute() :: :dispute
     def dispute, do: :dispute
+
   end
 
   @doc """
@@ -1087,11 +1098,11 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
   | `manual` | `"manual"` | manual |
   """
   @spec a2a_escrow_release_reason_values() :: %{
-          completion: :completion,
-          timeout: :timeout,
-          dispute: :dispute,
-          manual: :manual
-        }
+    completion: :completion,
+    timeout: :timeout,
+    dispute: :dispute,
+    manual: :manual
+  }
   def a2a_escrow_release_reason_values do
     %{
       completion: :completion,
@@ -1121,6 +1132,7 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
     @doc "manual"
     @spec manual() :: :manual
     def manual, do: :manual
+
   end
 
   @doc """
@@ -1158,11 +1170,11 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
   | `disputed` | `"disputed"` | disputed |
   """
   @spec a2a_escrow_status_values() :: %{
-          pending: :pending,
-          held: :held,
-          released: :released,
-          disputed: :disputed
-        }
+    pending: :pending,
+    held: :held,
+    released: :released,
+    disputed: :disputed
+  }
   def a2a_escrow_status_values do
     %{
       pending: :pending,
@@ -1192,6 +1204,7 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
     @doc "disputed"
     @spec disputed() :: :disputed
     def disputed, do: :disputed
+
   end
 
   @doc """
@@ -1252,10 +1265,10 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
   | `protobuf` | `"protobuf"` | protobuf |
   """
   @spec a2a_message_encoding_values() :: %{
-          json: :json,
-          msgpack: :msgpack,
-          protobuf: :protobuf
-        }
+    json: :json,
+    msgpack: :msgpack,
+    protobuf: :protobuf
+  }
   def a2a_message_encoding_values do
     %{
       json: :json,
@@ -1280,6 +1293,7 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
     @doc "protobuf"
     @spec protobuf() :: :protobuf
     def protobuf, do: :protobuf
+
   end
 
   @doc """
@@ -1317,11 +1331,11 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
   | `low` | `"low"` | low |
   """
   @spec a2a_message_priority_values() :: %{
-          critical: :critical,
-          high: :high,
-          normal: :normal,
-          low: :low
-        }
+    critical: :critical,
+    high: :high,
+    normal: :normal,
+    low: :low
+  }
   def a2a_message_priority_values do
     %{
       critical: :critical,
@@ -1351,6 +1365,7 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
     @doc "low"
     @spec low() :: :low
     def low, do: :low
+
   end
 
   @doc """
@@ -1413,12 +1428,12 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
   | `expired` | `"expired"` | expired |
   """
   @spec a2a_negotiation_state_values() :: %{
-          proposed: :proposed,
-          counter: :counter,
-          accepted: :accepted,
-          rejected: :rejected,
-          expired: :expired
-        }
+    proposed: :proposed,
+    counter: :counter,
+    accepted: :accepted,
+    rejected: :rejected,
+    expired: :expired
+  }
   def a2a_negotiation_state_values do
     %{
       proposed: :proposed,
@@ -1453,6 +1468,7 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
     @doc "expired"
     @spec expired() :: :expired
     def expired, do: :expired
+
   end
 
   @doc """
@@ -1481,14 +1497,14 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
   | `timeout` | `"timeout"` | timeout |
   """
   @spec a2a_negotiation_status_values() :: %{
-          pending: :pending,
-          in_progress: :in_progress,
-          accepted: :accepted,
-          rejected: :rejected,
-          counter_offer: :counter_offer,
-          expired: :expired,
-          timeout: :timeout
-        }
+    pending: :pending,
+    in_progress: :in_progress,
+    accepted: :accepted,
+    rejected: :rejected,
+    counter_offer: :counter_offer,
+    expired: :expired,
+    timeout: :timeout
+  }
   def a2a_negotiation_status_values do
     %{
       pending: :pending,
@@ -1533,6 +1549,7 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
     @doc "timeout"
     @spec timeout() :: :timeout
     def timeout, do: :timeout
+
   end
 
   @doc """
@@ -1606,11 +1623,11 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
   | `fraud` | `"fraud"` | fraud |
   """
   @spec a2a_penalty_reason_values() :: %{
-          sla_violation: :sla_violation,
-          quality_failure: :quality_failure,
-          timeout: :timeout,
-          fraud: :fraud
-        }
+    sla_violation: :sla_violation,
+    quality_failure: :quality_failure,
+    timeout: :timeout,
+    fraud: :fraud
+  }
   def a2a_penalty_reason_values do
     %{
       sla_violation: :sla_violation,
@@ -1640,6 +1657,7 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
     @doc "fraud"
     @spec fraud() :: :fraud
     def fraud, do: :fraud
+
   end
 
   @doc """
@@ -1724,11 +1742,11 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
   | `banned` | `"banned"` | banned |
   """
   @spec a2a_reputation_category_values() :: %{
-          trusted: :trusted,
-          neutral: :neutral,
-          probation: :probation,
-          banned: :banned
-        }
+    trusted: :trusted,
+    neutral: :neutral,
+    probation: :probation,
+    banned: :banned
+  }
   def a2a_reputation_category_values do
     %{
       trusted: :trusted,
@@ -1758,6 +1776,7 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
     @doc "banned"
     @spec banned() :: :banned
     def banned, do: :banned
+
   end
 
   @doc """
@@ -1806,10 +1825,10 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
   | `violation` | `"violation"` | violation |
   """
   @spec a2a_reputation_decay_trigger_values() :: %{
-          time: :time,
-          interaction: :interaction,
-          violation: :violation
-        }
+    time: :time,
+    interaction: :interaction,
+    violation: :violation
+  }
   def a2a_reputation_decay_trigger_values do
     %{
       time: :time,
@@ -1834,6 +1853,7 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
     @doc "violation"
     @spec violation() :: :violation
     def violation, do: :violation
+
   end
 
   @doc """
@@ -1931,11 +1951,11 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
   | `priority_queue` | `"priority_queue"` | priority_queue |
   """
   @spec a2a_routing_strategy_values() :: %{
-          best_match: :best_match,
-          round_robin: :round_robin,
-          load_balanced: :load_balanced,
-          priority_queue: :priority_queue
-        }
+    best_match: :best_match,
+    round_robin: :round_robin,
+    load_balanced: :load_balanced,
+    priority_queue: :priority_queue
+  }
   def a2a_routing_strategy_values do
     %{
       best_match: :best_match,
@@ -1965,6 +1985,7 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
     @doc "priority_queue"
     @spec priority_queue() :: :priority_queue
     def priority_queue, do: :priority_queue
+
   end
 
   @doc """
@@ -2110,11 +2131,11 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
   | `low` | `"low"` | low |
   """
   @spec a2a_task_priority_values() :: %{
-          critical: :critical,
-          high: :high,
-          normal: :normal,
-          low: :low
-        }
+    critical: :critical,
+    high: :high,
+    normal: :normal,
+    low: :low
+  }
   def a2a_task_priority_values do
     %{
       critical: :critical,
@@ -2144,6 +2165,7 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
     @doc "low"
     @spec low() :: :low
     def low, do: :low
+
   end
 
   @doc """
@@ -2229,4 +2251,5 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
   """
   @spec a2a_trust_updated_at_ms() :: :"a2a.trust.updated_at_ms"
   def a2a_trust_updated_at_ms, do: :"a2a.trust.updated_at_ms"
+
 end

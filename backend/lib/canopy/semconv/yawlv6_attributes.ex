@@ -45,4 +45,5 @@ defmodule OpenTelemetry.SemConv.Incubating.Yawlv6Attributes do
   """
   @spec yawlv6_tests_passed() :: :"yawlv6.tests_passed"
   def yawlv6_tests_passed, do: :"yawlv6.tests_passed"
+
 end

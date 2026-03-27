@@ -68,10 +68,10 @@ defmodule OpenTelemetry.SemConv.Incubating.ChatmangptAttributes do
   | `production` | `"production"` | production |
   """
   @spec chatmangpt_deployment_values() :: %{
-          development: :development,
-          staging: :staging,
-          production: :production
-        }
+    development: :development,
+    staging: :staging,
+    production: :production
+  }
   def chatmangpt_deployment_values do
     %{
       development: :development,
@@ -96,6 +96,7 @@ defmodule OpenTelemetry.SemConv.Incubating.ChatmangptAttributes do
     @doc "production"
     @spec production() :: :production
     def production, do: :production
+
   end
 
   @doc """
@@ -134,11 +135,11 @@ defmodule OpenTelemetry.SemConv.Incubating.ChatmangptAttributes do
   | `low` | `"low"` | Low priority tier — lowest resource budget |
   """
   @spec chatmangpt_service_tier_values() :: %{
-          critical: :critical,
-          high: :high,
-          normal: :normal,
-          low: :low
-        }
+    critical: :critical,
+    high: :high,
+    normal: :normal,
+    low: :low
+  }
   def chatmangpt_service_tier_values do
     %{
       critical: :critical,
@@ -168,6 +169,7 @@ defmodule OpenTelemetry.SemConv.Incubating.ChatmangptAttributes do
     @doc "Low priority tier — lowest resource budget"
     @spec low() :: :low
     def low, do: :low
+
   end
 
   @doc """
@@ -241,4 +243,5 @@ defmodule OpenTelemetry.SemConv.Incubating.ChatmangptAttributes do
   """
   @spec chatmangpt_wave() :: :"chatmangpt.wave"
   def chatmangpt_wave, do: :"chatmangpt.wave"
+
 end

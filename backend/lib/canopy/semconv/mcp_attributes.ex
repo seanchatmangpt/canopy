@@ -92,10 +92,10 @@ defmodule OpenTelemetry.SemConv.Incubating.McpAttributes do
   | `sse` | `"sse"` | sse |
   """
   @spec mcp_connection_transport_values() :: %{
-          stdio: :stdio,
-          http: :http,
-          sse: :sse
-        }
+    stdio: :stdio,
+    http: :http,
+    sse: :sse
+  }
   def mcp_connection_transport_values do
     %{
       stdio: :stdio,
@@ -120,6 +120,7 @@ defmodule OpenTelemetry.SemConv.Incubating.McpAttributes do
     @doc "sse"
     @spec sse() :: :sse
     def sse, do: :sse
+
   end
 
   @doc """
@@ -144,10 +145,10 @@ defmodule OpenTelemetry.SemConv.Incubating.McpAttributes do
   | `sse` | `"sse"` | sse |
   """
   @spec mcp_protocol_values() :: %{
-          stdio: :stdio,
-          http: :http,
-          sse: :sse
-        }
+    stdio: :stdio,
+    http: :http,
+    sse: :sse
+  }
   def mcp_protocol_values do
     %{
       stdio: :stdio,
@@ -172,6 +173,7 @@ defmodule OpenTelemetry.SemConv.Incubating.McpAttributes do
     @doc "sse"
     @spec sse() :: :sse
     def sse, do: :sse
+
   end
 
   @doc """
@@ -281,11 +283,11 @@ defmodule OpenTelemetry.SemConv.Incubating.McpAttributes do
   | `unknown` | `"unknown"` | unknown |
   """
   @spec mcp_server_health_status_values() :: %{
-          healthy: :healthy,
-          degraded: :degraded,
-          unhealthy: :unhealthy,
-          unknown: :unknown
-        }
+    healthy: :healthy,
+    degraded: :degraded,
+    unhealthy: :unhealthy,
+    unknown: :unknown
+  }
   def mcp_server_health_status_values do
     %{
       healthy: :healthy,
@@ -315,6 +317,7 @@ defmodule OpenTelemetry.SemConv.Incubating.McpAttributes do
     @doc "unknown"
     @spec unknown() :: :unknown
     def unknown, do: :unknown
+
   end
 
   @doc """
@@ -520,11 +523,11 @@ defmodule OpenTelemetry.SemConv.Incubating.McpAttributes do
   | `pipeline` | `"pipeline"` | pipeline |
   """
   @spec mcp_tool_composition_strategy_values() :: %{
-          sequential: :sequential,
-          parallel: :parallel,
-          fallback: :fallback,
-          pipeline: :pipeline
-        }
+    sequential: :sequential,
+    parallel: :parallel,
+    fallback: :fallback,
+    pipeline: :pipeline
+  }
   def mcp_tool_composition_strategy_values do
     %{
       sequential: :sequential,
@@ -554,6 +557,7 @@ defmodule OpenTelemetry.SemConv.Incubating.McpAttributes do
     @doc "pipeline"
     @spec pipeline() :: :pipeline
     def pipeline, do: :pipeline
+
   end
 
   @doc """
@@ -625,10 +629,10 @@ defmodule OpenTelemetry.SemConv.Incubating.McpAttributes do
   | `warn_only` | `"warn_only"` | warn_only |
   """
   @spec mcp_tool_deprecation_policy_values() :: %{
-          immediate: :immediate,
-          grace_period: :grace_period,
-          warn_only: :warn_only
-        }
+    immediate: :immediate,
+    grace_period: :grace_period,
+    warn_only: :warn_only
+  }
   def mcp_tool_deprecation_policy_values do
     %{
       immediate: :immediate,
@@ -653,6 +657,7 @@ defmodule OpenTelemetry.SemConv.Incubating.McpAttributes do
     @doc "warn_only"
     @spec warn_only() :: :warn_only
     def warn_only, do: :warn_only
+
   end
 
   @doc """
@@ -846,11 +851,11 @@ defmodule OpenTelemetry.SemConv.Incubating.McpAttributes do
   | `websocket` | `"websocket"` | websocket |
   """
   @spec mcp_transport_type_values() :: %{
-          stdio: :stdio,
-          http: :http,
-          sse: :sse,
-          websocket: :websocket
-        }
+    stdio: :stdio,
+    http: :http,
+    sse: :sse,
+    websocket: :websocket
+  }
   def mcp_transport_type_values do
     %{
       stdio: :stdio,
@@ -880,5 +885,7 @@ defmodule OpenTelemetry.SemConv.Incubating.McpAttributes do
     @doc "websocket"
     @spec websocket() :: :websocket
     def websocket, do: :websocket
+
   end
+
 end

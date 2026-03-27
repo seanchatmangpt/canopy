@@ -28,6 +28,7 @@ defmodule Canopy.Yawl.Client do
   @default_engine_url "http://localhost:8080"
   @failure_threshold 3
   @circuit_reset_ms 30_000
+  @call_timeout 15_000
 
   # ── Child spec ───────────────────────────────────────────────────────────────
 
@@ -39,27 +40,27 @@ defmodule Canopy.Yawl.Client do
 
   @doc "Upload a YAWL specification XML string. Returns `{:ok, spec_id}` on success."
   def upload_spec(xml_string) do
-    GenServer.call(__MODULE__, {:upload_spec, xml_string})
+    GenServer.call(__MODULE__, {:upload_spec, xml_string}, @call_timeout)
   end
 
   @doc "Launch a case for the given spec_id. Returns `{:ok, case_id}` on success."
   def launch_case(spec_id) do
-    GenServer.call(__MODULE__, {:launch_case, spec_id})
+    GenServer.call(__MODULE__, {:launch_case, spec_id}, @call_timeout)
   end
 
   @doc "Cancel a running case by case_id. Returns `:ok` on success."
   def cancel_case(case_id) do
-    GenServer.call(__MODULE__, {:cancel_case, case_id})
+    GenServer.call(__MODULE__, {:cancel_case, case_id}, @call_timeout)
   end
 
   @doc "Get the current state XML for a running case."
   def get_case_state(case_id) do
-    GenServer.call(__MODULE__, {:get_case_state, case_id})
+    GenServer.call(__MODULE__, {:get_case_state, case_id}, @call_timeout)
   end
 
   @doc "Check whether the YAWL engine is reachable."
   def health_check do
-    GenServer.call(__MODULE__, :health_check)
+    GenServer.call(__MODULE__, :health_check, @call_timeout)
   end
 
   # ── Server callbacks ──────────────────────────────────────────────────────────
@@ -179,8 +180,6 @@ defmodule Canopy.Yawl.Client do
       {:ok, response} -> {:ok, response}
       {:error, reason} -> {:error, reason}
     end
-  rescue
-    exception -> {:error, Exception.message(exception)}
   end
 
   defp get_request(base_url, path, params) do
@@ -190,8 +189,6 @@ defmodule Canopy.Yawl.Client do
       {:ok, response} -> {:ok, response}
       {:error, reason} -> {:error, reason}
     end
-  rescue
-    exception -> {:error, Exception.message(exception)}
   end
 
   # ── Response parsing ──────────────────────────────────────────────────────────

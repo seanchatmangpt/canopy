@@ -62,9 +62,6 @@ defmodule CanopyWeb.Plugs.Audit do
       {:error, reason} ->
         Logger.warning("[Audit] Failed to log event: #{inspect(reason)}")
     end
-  rescue
-    e ->
-      Logger.warning("[Audit] Error logging audit event: #{Exception.message(e)}")
   end
 
   defp extract_entity(conn) do
