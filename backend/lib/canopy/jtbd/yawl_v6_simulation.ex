@@ -320,4 +320,66 @@ defmodule Canopy.JTBD.YAWLv6Simulation do
     empty = 10 - filled
     "[" <> String.duplicate("█", filled) <> String.duplicate("░", empty) <> "]"
   end
+
+  @doc false
+  defp call_yawl_conformance(spec_xml, event_log_json) do
+    url = Application.get_env(:canopy, :yawl_url, "http://localhost:8080")
+    body = %{spec: spec_xml, event_log: event_log_json}
+
+    case Req.post("#{url}/api/process-mining/conformance",
+           json: body,
+           receive_timeout: 10_000
+         ) do
+      {:ok, %{status: 200, body: response_body}} ->
+        {:ok,
+         %{
+           fitness: Map.get(response_body, "fitness", 0.0),
+           violations: Map.get(response_body, "violations", []),
+           is_sound: Map.get(response_body, "is_sound", false)
+         }}
+
+      {:ok, %{status: status}} ->
+        {:error, {:http_error, status}}
+
+      {:error, _reason} ->
+        {:error, :yawl_unavailable}
+    end
+  rescue
+    # Finch pool registry not running (e.g. --no-start test mode) or other HTTP infra errors
+    _ -> {:error, :yawl_unavailable}
+  catch
+    :exit, {:timeout, _} -> {:error, :timeout}
+    :exit, _ -> {:error, :yawl_unavailable}
+  end
+
+  @doc false
+  defp emit_conformance_event(pattern, fitness, violations) do
+    if Process.whereis(Canopy.PubSub) != nil do
+      Phoenix.PubSub.broadcast(
+        Canopy.PubSub,
+        "yawl:conformance",
+        {:yawl_conformance, %{pattern: pattern, fitness: fitness, violations: violations}}
+      )
+    end
+
+    :ok
+  end
+
+  @doc """
+  Run conformance check for a named YAWL pattern against the process mining REST API,
+  then emit a Phoenix.PubSub event if PubSub is running.
+
+  Returns `:ok` on success or when YAWL is unavailable (graceful degradation).
+  """
+  @spec check_and_emit_conformance(String.t(), String.t(), map()) :: :ok
+  def check_and_emit_conformance(pattern_name, spec_xml, event_log \\ %{}) do
+    case call_yawl_conformance(spec_xml, event_log) do
+      {:ok, %{fitness: fitness, violations: violations}} ->
+        emit_conformance_event(pattern_name, fitness, violations)
+
+      {:error, _reason} ->
+        # Graceful degradation — YAWL unavailable does not block simulation
+        :ok
+    end
+  end
 end

@@ -502,12 +502,15 @@ tier: L0
 
 ### @canopy-yawl-coordinator
 
-**Purpose**: YAWL pattern application to agent workflows
+**Purpose**: YAWL pattern application to agent workflows — backed by a live YAWL engine
+
+**Status**: IMPLEMENTED (`Canopy.Yawl.Client` + `Canopy.Yawl.WorkflowCoordinator`)
 
 **Signal Encoding**: `S=(linguistic, spec, commit, markdown, yawl-pattern)`
 
 **Use When**:
 - Mapping YAWL patterns to agent coordination
+- Submitting workflow specs to a running YAWL engine
 - Workflow soundness verification
 - Pattern selection for workflows
 - Multi-agent synchronization
@@ -517,6 +520,46 @@ tier: L0
 - **Soundness verification**: Compile-time guarantees
 - **Pattern categories**: Control flow, branching, structural, etc.
 - **Agent mapping**: Patterns to agent dispatch
+
+**Implementation Modules**:
+
+#### `Canopy.Yawl.Client` (GenServer)
+Real HTTP client with circuit breaker for the YAWL engine. Wraps Interface A and Interface B.
+
+- Maintains a supervised connection to `YAWL_ENGINE_URL` (default: `http://localhost:8080`)
+- Circuit breaker: opens after 3 consecutive failures, half-open probe after 30 s
+- All requests go through the GenServer mailbox for back-pressure and observability
+
+```elixir
+# Start (supervised automatically in Canopy.Application)
+{:ok, _pid} = Canopy.Yawl.Client.start_link(url: "http://localhost:8080")
+
+# Upload a spec and launch a case
+{:ok, spec_id} = Canopy.Yawl.Client.upload_spec(spec_xml)
+{:ok, case_id} = Canopy.Yawl.Client.launch_case(spec_id, %{})
+```
+
+#### `Canopy.Yawl.WorkflowCoordinator`
+High-level coordinator that wraps the Client with workflow lifecycle management.
+
+- `coordinate_workflow/1` — Accepts a workflow map (`%{spec_xml: ..., data: ...}`), uploads the spec, launches a case, polls until completion, returns `{:ok, %{case_id: ..., result: ...}}`
+- `coordinate_workflow_from_file/1` — Same as above but accepts a file path to a `.yawl` spec; reads the file then delegates to `coordinate_workflow/1`
+
+```elixir
+# From inline spec XML
+{:ok, result} = Canopy.Yawl.WorkflowCoordinator.coordinate_workflow(%{
+  spec_xml: File.read!("my_workflow.yawl"),
+  data: %{customer_id: "C42"}
+})
+
+# From file path
+{:ok, result} = Canopy.Yawl.WorkflowCoordinator.coordinate_workflow_from_file(
+  "/path/to/my_workflow.yawl"
+)
+```
+
+**Config**:
+- `YAWL_ENGINE_URL` — YAWL engine base URL (default: `http://localhost:8080`)
 
 **Common Patterns**:
 ```
@@ -567,7 +610,7 @@ Arbitrary Cycles   → Retry loop with escalation
 "L0", "L1", "L2", "tier", "progressive disclosure"
   → @canopy-progressive-disclosure
 
-"YAWL", "pattern", "workflow coordination"
+"YAWL", "pattern", "workflow coordination", "coordinate_workflow", "Canopy.Yawl"
   → @canopy-yawl-coordinator
 
 "LiveView", "Phoenix", "channel"
@@ -651,7 +694,11 @@ SEQUENTIAL: @canopy-workflow-designer
 ║ SPECIALIZED:                                                             ║
 ║   @canopy-signal-theory     → Signal Theory implementation                ║
 ║   @canopy-progressive-disclosure → L0/L1/L2 tiered loading               ║
-║   @canopy-yawl-coordinator   → YAWL pattern application                  ║
+║   @canopy-yawl-coordinator   → YAWL engine integration (IMPLEMENTED)     ║
+║     Canopy.Yawl.Client          GenServer + circuit breaker               ║
+║     coordinate_workflow/1       submit spec → case_id                     ║
+║     coordinate_workflow_from_file/1  load .yawl + coordinate              ║
+║     YAWL_ENGINE_URL             default http://localhost:8080              ║
 ║                                                                          ║
 ╚══════════════════════════════════════════════════════════════════════════╝
 ```
