@@ -19,6 +19,12 @@ defmodule CanopyWeb.Router do
     plug CanopyWeb.Plugs.CORS
   end
 
+  # A2A well-known agent card — no auth, standard discovery endpoint
+  scope "/.well-known", CanopyWeb do
+    pipe_through :api
+    get "/agent.json", WellKnownController, :agent_card
+  end
+
   # Health check — no auth
   scope "/api/v1", CanopyWeb do
     pipe_through :api
@@ -42,6 +48,9 @@ defmodule CanopyWeb.Router do
       get "/agents", WorkspaceController, :agents, as: :agents
       get "/skills", WorkspaceController, :skills, as: :skills
       get "/config", WorkspaceController, :config, as: :config
+      get "/members", WorkspaceMemberController, :index, as: :members
+      post "/members", WorkspaceMemberController, :add_member, as: :add_member
+      delete "/members/:user_id", WorkspaceMemberController, :remove_member, as: :remove_member
     end
 
     # Agents
