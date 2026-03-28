@@ -34,7 +34,7 @@ defmodule Canopy.Adapters.BusinessOS do
   def supports_concurrent?, do: true
 
   @impl true
-  def capabilities, do: [:process_mining, :model_analysis, :conformance_checking]
+  def capabilities, do: [:process_mining, :model_analysis, :conformance_checking, :workflow_simulation]
 
   # ── Public API ──────────────────────────────────────────────────────
 
@@ -130,6 +130,19 @@ defmodule Canopy.Adapters.BusinessOS do
             "event_type" => status,
             "data" => data,
             "tokens" => 200
+          }
+
+        {:yawl_simulate, payload} ->
+          {status, data} =
+            case simulate_workflows(payload, payload) do
+              {:ok, result} -> {"simulation_complete", result}
+              {:error, reason} -> {"simulation_failed", %{"error" => inspect(reason)}}
+            end
+
+          %{
+            "event_type" => status,
+            "data" => data,
+            "tokens" => 300
           }
 
         {:error, reason} ->
@@ -415,16 +428,8 @@ defmodule Canopy.Adapters.BusinessOS do
 
   defp parse_message(msg) when is_binary(msg) do
     case Jason.decode(msg) do
-      {:ok, data} ->
-        case data do
-          %{"type" => "process_mining", "payload" => payload} -> {:process_mining, payload}
-          %{"type" => "conformance", "payload" => payload} -> {:conformance, payload}
-          %{"type" => "compliance", "payload" => payload} -> {:compliance, payload}
-          _ -> {:error, "Unknown message type"}
-        end
-
-      {:error, _} ->
-        {:error, "Invalid JSON"}
+      {:ok, data} -> parse_message(data)
+      {:error, _} -> {:error, "Invalid JSON"}
     end
   end
 
@@ -433,11 +438,70 @@ defmodule Canopy.Adapters.BusinessOS do
       %{"type" => "process_mining", "payload" => payload} -> {:process_mining, payload}
       %{"type" => "conformance", "payload" => payload} -> {:conformance, payload}
       %{"type" => "compliance", "payload" => payload} -> {:compliance, payload}
+      %{"type" => "yawl_simulate", "payload" => payload} -> {:yawl_simulate, payload}
       _ -> {:error, "Unknown message type"}
     end
   end
 
   defp parse_message(_), do: {:error, "Invalid message format"}
+
+  # ── YAWL Workflow Simulation API ────────────────────────────────────
+
+  @doc """
+  Run concurrent YAWL user simulations via BusinessOS → OSA pipeline.
+
+  BusinessOS proxies the request to OSA's POST /api/v1/yawl/simulate, which
+  runs the `OptimalSystemAgent.Yawl.Simulator` with N concurrent Tasks.
+
+  ## Options (all optional, as map keys)
+
+  | Key              | Default      | Description                                    |
+  |------------------|--------------|------------------------------------------------|
+  | `"spec_set"`     | `"basic_wcp"` | `"basic_wcp"`, `"wcp_patterns"`, `"real_data"`, `"all"` |
+  | `"user_count"`   | `3`          | Number of concurrent simulated users           |
+  | `"timeout_ms"`   | `30000`      | Per-user budget in milliseconds                |
+  | `"max_steps"`    | `50`         | Drain-loop iteration limit per user            |
+  | `"max_concurrency"` | `10`     | OSA Task.async_stream cap                      |
+
+  Returns `{:ok, result_map}` or `{:error, reason}`.
+
+  ## Example
+
+      {:ok, result} = BusinessOS.simulate_workflows(%{"spec_set" => "basic_wcp", "user_count" => 5})
+      result["completed_count"]  # => 5
+      result["summary"]          # => "spec_set=basic_wcp users=5 completed=5 ..."
+  """
+  @spec simulate_workflows(map(), map()) :: {:ok, map()} | {:error, term()}
+  def simulate_workflows(payload \\ %{}, params \\ %{}) do
+    url = params["url"] || @default_url
+    timeout = (payload["timeout_ms"] || 30_000) * 2 + 10_000
+
+    body = %{
+      "spec_set" => payload["spec_set"] || "basic_wcp",
+      "user_count" => payload["user_count"] || 3,
+      "timeout_ms" => payload["timeout_ms"] || 30_000,
+      "max_steps" => payload["max_steps"] || 50,
+      "max_concurrency" => payload["max_concurrency"] || 10
+    }
+
+    case make_request("POST", "#{url}/api/yawl/simulate", body, params, timeout) do
+      {:ok, %{status: 200, body: resp_body}} ->
+        Logger.info(
+          "[BusinessOS] YAWL simulation complete: #{resp_body["summary"]}"
+        )
+        {:ok, resp_body}
+
+      {:ok, %{status: 502, body: resp_body}} ->
+        {:error, {:osa_unavailable, resp_body["error"]}}
+
+      {:ok, %{status: status, body: resp_body}} ->
+        {:error, {:simulation_failed, status, resp_body}}
+
+      {:error, reason} ->
+        Logger.error("[BusinessOS] YAWL simulate request failed: #{inspect(reason)}")
+        {:error, {:connection_failed, reason}}
+    end
+  end
 
   # ── LinkedIn RevOps API ──────────────────────────────────────────────
 

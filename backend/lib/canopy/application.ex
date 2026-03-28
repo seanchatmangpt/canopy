@@ -32,8 +32,14 @@ defmodule Canopy.Application do
       Canopy.Ontology.ToolRegistry,
       Canopy.JTBD.SelfPlayLoop,
       Canopy.Yawl.Client,
-      Canopy.Bridges.YawlValidatorSupervisor
+      Canopy.Bridges.YawlValidatorSupervisor,
+      %{
+        id: :canopy_consent_agent,
+        start: {Agent, :start_link, [fn -> %{} end, [name: :canopy_consent_agent]]}
+      }
     ]
+
+    Application.put_env(:canopy, :consent_agent, :canopy_consent_agent)
 
     # Add Finch to children only if not already started
     children = if finch_child, do: children ++ [finch_child], else: children
@@ -54,6 +60,8 @@ defmodule Canopy.Application do
 
     # YAWLv6 build tracker: store latest simulation/real build state
     Canopy.JTBD.YAWLv6BuildTracker.init()
+
+    OpentelemetryPhoenix.setup()
 
     opts = [strategy: :one_for_one, name: Canopy.Supervisor]
     result = Supervisor.start_link(children, opts)

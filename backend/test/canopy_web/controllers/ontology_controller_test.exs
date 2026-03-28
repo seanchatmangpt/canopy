@@ -1,5 +1,6 @@
 defmodule CanopyWeb.OntologyControllerTest do
   use CanopyWeb.ConnCase
+  @moduletag :external_service
 
   alias Canopy.Ontology.Service
 

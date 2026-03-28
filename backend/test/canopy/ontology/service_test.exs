@@ -1,5 +1,6 @@
 defmodule Canopy.Ontology.ServiceTest do
   use ExUnit.Case
+  @moduletag :external_service
 
   alias Canopy.Ontology.Service
 

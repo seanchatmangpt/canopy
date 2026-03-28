@@ -22,6 +22,7 @@ defmodule Integration.OSAProtocolTest do
   """
 
   use CanopyWeb.ConnCase
+  @moduletag :integration
 
   require Logger
 

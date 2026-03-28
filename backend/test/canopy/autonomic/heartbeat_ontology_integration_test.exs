@@ -14,6 +14,7 @@ defmodule Canopy.Autonomic.HeartbeatOntologyIntegrationTest do
   """
 
   use ExUnit.Case, async: false
+  @moduletag :integration
 
   alias Canopy.Autonomic.HeartbeatOntologyService
   alias Canopy.Ontology.Service

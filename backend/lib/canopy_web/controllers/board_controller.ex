@@ -36,6 +36,7 @@ defmodule CanopyWeb.BoardController do
   """
   def briefing(conn, _params) do
     case Req.get("#{osa_url()}/api/v1/board/briefing",
+           headers: osa_headers(conn),
            receive_timeout: @briefing_timeout_ms
          ) do
       {:ok, %{status: 200, body: body}} when is_map(body) ->
@@ -125,6 +126,7 @@ defmodule CanopyWeb.BoardController do
 
         case Req.post("#{osa_url()}/api/v1/board/decision",
                json: body,
+               headers: osa_headers(conn),
                receive_timeout: @decision_timeout_ms
              ) do
           {:ok, %{status: 200, body: resp_body}} ->
@@ -172,6 +174,7 @@ defmodule CanopyWeb.BoardController do
   """
   def list_decisions(conn, _params) do
     case Req.get("#{osa_url()}/api/v1/board/decisions",
+           headers: osa_headers(conn),
            receive_timeout: @decisions_timeout_ms
          ) do
       {:ok, %{status: 200, body: decisions}} when is_list(decisions) ->
@@ -221,4 +224,26 @@ defmodule CanopyWeb.BoardController do
   # ── Private Helpers ──────────────────────────────────────────────────────────
 
   defp osa_url, do: Application.get_env(:canopy, :osa_url, "http://127.0.0.1:8089")
+
+  defp osa_headers(conn) do
+    base = [
+      {"Content-Type", "application/json"},
+      {"X-Correlation-ID", get_correlation_id(conn)}
+    ]
+
+    inject_traceparent(base)
+  end
+
+  defp get_correlation_id(conn) do
+    case Plug.Conn.get_req_header(conn, "x-correlation-id") do
+      [id | _] -> id
+      [] -> :crypto.strong_rand_bytes(16) |> Base.encode16(case: :lower)
+    end
+  end
+
+  defp inject_traceparent(headers) do
+    :otel_propagator_text_map.inject(headers, fn c, k, v -> [{k, v} | c] end)
+  rescue
+    _ -> headers
+  end
 end

@@ -65,7 +65,7 @@ defmodule Canopy.Healthcare.PolicyEngine do
          patient_id: patient_id,
          user_id: user_id,
          data_type: data_type,
-         granted: consent.granted && !consent_expired?(consent),
+         granted: consent.status == "active" && !consent_expired?(consent),
          expiration: consent.expires_at,
          reason: if(consent_expired?(consent), do: "expired", else: "valid")
        }}
@@ -149,7 +149,7 @@ defmodule Canopy.Healthcare.PolicyEngine do
         {:error, :consent_not_found}
 
       consent ->
-        revoked_consent = %{consent | status: "revoked", revoked_at: DateTime.utc_now()}
+        revoked_consent = consent |> Map.put(:status, "revoked") |> Map.put(:revoked_at, DateTime.utc_now())
         store_consent(revoked_consent)
 
         Logger.info("[Healthcare] Consent revoked: #{consent_id}, reason: #{reason}")

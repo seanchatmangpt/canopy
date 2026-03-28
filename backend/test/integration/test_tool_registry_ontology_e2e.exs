@@ -16,6 +16,7 @@ defmodule Canopy.Integration.ToolRegistryOntologyE2ETest do
   """
 
   use ExUnit.Case, async: false
+  @moduletag :integration
 
   alias Canopy.Ontology.Service
   alias Canopy.Ontology.ToolRegistry

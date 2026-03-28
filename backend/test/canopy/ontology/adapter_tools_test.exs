@@ -1,5 +1,6 @@
 defmodule Canopy.Ontology.AdapterToolsTest do
   use ExUnit.Case
+  @moduletag :external_service
 
   alias Canopy.Ontology.AdapterTools
   alias Canopy.Ontology.ToolRegistry

@@ -19,6 +19,11 @@ defmodule CanopyWeb.HealthcareControllerTest do
   # ── Setup ───────────────────────────────────────────────────────
 
   setup do
+    # Reset consent Agent state for test isolation (Chicago TDD: independent tests)
+    if agent = Application.get_env(:canopy, :consent_agent) do
+      Agent.update(agent, fn _ -> %{} end)
+    end
+
     healthcare_provider =
       insert_user(%{
         email: "provider@hospital.com",

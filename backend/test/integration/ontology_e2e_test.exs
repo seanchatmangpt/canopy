@@ -16,12 +16,7 @@ defmodule Canopy.Integration.OntologyE2ETest do
 
   setup_all do
     oxigraph_available = check_oxigraph_http()
-
-    if not oxigraph_available do
-      {:skip, "Oxigraph not available at #{@oxigraph_url}"}
-    else
-      {:ok, %{oxigraph_available: oxigraph_available}}
-    end
+    {:ok, %{oxigraph_available: oxigraph_available}}
   end
 
   defp check_oxigraph_http do

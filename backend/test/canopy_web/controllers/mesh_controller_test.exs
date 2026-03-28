@@ -3,6 +3,7 @@ defmodule CanopyWeb.MeshControllerTest do
   Tests for data mesh operations controller.
 
   Tests the 80/20 critical paths:
+  Run with: mix test --include external_service
   - Domain registration with validation
   - Entity discovery with pagination
   - Data lineage computation
@@ -11,6 +12,7 @@ defmodule CanopyWeb.MeshControllerTest do
   - Error handling and timeouts
   """
   use CanopyWeb.ConnCase
+  @moduletag :external_service
 
   setup do
     {:ok, conn: build_conn()}

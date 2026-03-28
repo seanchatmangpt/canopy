@@ -330,7 +330,7 @@ defmodule Canopy.JTBD.YAWLv6Simulation do
            json: body,
            receive_timeout: 10_000
          ) do
-      {:ok, %{status: 200, body: response_body}} ->
+      {:ok, %{status: 200, body: response_body}} when is_map(response_body) ->
         {:ok,
          %{
            fitness: Map.get(response_body, "fitness", 0.0),
@@ -338,8 +338,8 @@ defmodule Canopy.JTBD.YAWLv6Simulation do
            is_sound: Map.get(response_body, "is_sound", false)
          }}
 
-      {:ok, %{status: status}} ->
-        {:error, {:http_error, status}}
+      {:ok, _response} ->
+        {:error, :yawl_unavailable}
 
       {:error, _reason} ->
         {:error, :yawl_unavailable}

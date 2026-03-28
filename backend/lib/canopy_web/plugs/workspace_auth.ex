@@ -20,11 +20,12 @@ defmodule CanopyWeb.Plugs.WorkspaceAuth do
 
   alias Canopy.Repo
   alias Canopy.Schemas.Workspace
+  alias Canopy.WorkspaceIsolation
 
   def init(opts), do: opts
 
   def call(conn, _opts) do
-    workspace_id = conn.params["workspace_id"]
+    workspace_id = conn.path_params["workspace_id"]
     user = conn.assigns[:current_user]
 
     cond do
@@ -35,25 +36,19 @@ defmodule CanopyWeb.Plugs.WorkspaceAuth do
 
         assign(conn, :user_workspace_ids, user_workspace_ids)
 
-      # Validate ownership when workspace_id is present
+      # Validate membership (owner or workspace_users entry) when workspace_id is present
       true ->
-        case Repo.get(Workspace, workspace_id) do
-          %Workspace{owner_id: owner_id} = workspace when owner_id == user.id ->
-            conn
-            |> assign(:workspace, workspace)
-            |> assign(:user_workspace_ids, [workspace_id])
-
-          %Workspace{} ->
+        case WorkspaceIsolation.get_user_workspace(user.id, workspace_id) do
+          nil ->
             conn
             |> put_status(403)
             |> json(%{error: "forbidden", message: "You do not have access to this workspace"})
             |> halt()
 
-          nil ->
+          workspace ->
             conn
-            |> put_status(404)
-            |> json(%{error: "not_found", message: "Workspace not found"})
-            |> halt()
+            |> assign(:workspace, workspace)
+            |> assign(:user_workspace_ids, [workspace_id])
         end
     end
   end
