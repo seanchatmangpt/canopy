@@ -1,0 +1,77 @@
+# A2A Integration Ontology for Canopy
+# A = μ(O) — Canopy A2A integration artifacts are projections of this ontology
+# Uses ggen a2a ontology prefix for compatibility with ggen sync pipeline
+
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix a2a:    <https://ggen.dev/ontology/a2a#> .
+@prefix canopy: <http://chatmangpt.com/canopy/> .
+
+# ── Canopy A2A Agent ─────────────────────────────────────────────────────────
+
+canopy:CanopyA2AAgent
+  a a2a:Agent ;
+  a2a:name "canopy" ;
+  a2a:description "Workspace orchestration protocol and command center" ;
+  a2a:version "0.1.0" ;
+  a2a:defaultInputMode "text" ;
+  a2a:defaultOutputMode "text" ;
+  a2a:hasSkill canopy:WorkspaceCoordinationSkill ;
+  a2a:hasSkill canopy:HeartbeatDispatchSkill ;
+  a2a:hasSkill canopy:ProcessMiningSkill ;
+  a2a:hasSkill canopy:AgentOrchestrationSkill ;
+  a2a:hasTransport canopy:CanopyTransport .
+
+canopy:CanopyTransport
+  a2a:url "http://localhost:9089/api/v1/a2a" ;
+  a2a:transportType "http" .
+
+# ── Skills ───────────────────────────────────────────────────────────────────
+
+canopy:WorkspaceCoordinationSkill
+  a a2a:Skill ;
+  a2a:name "workspace_coordination" ;
+  a2a:description "Coordinate multi-agent workspaces and agent hiring" ;
+  a2a:inputType "text" ;
+  a2a:outputType "text" .
+
+canopy:HeartbeatDispatchSkill
+  a a2a:Skill ;
+  a2a:name "heartbeat_dispatch" ;
+  a2a:description "Agent heartbeat scheduling and task dispatch" ;
+  a2a:inputType "text" ;
+  a2a:outputType "text" .
+
+canopy:ProcessMiningSkill
+  a a2a:Skill ;
+  a2a:name "process_mining" ;
+  a2a:description "Process mining via BusinessOS integration" ;
+  a2a:inputType "text" ;
+  a2a:outputType "text" .
+
+canopy:AgentOrchestrationSkill
+  a a2a:Skill ;
+  a2a:name "agent_orchestration" ;
+  a2a:description "Orchestrate 160+ agents via heartbeat protocol" ;
+  a2a:inputType "text" ;
+  a2a:outputType "text" .
+
+# ── A2A Adapter (Canopy.Adapter behaviour) ───────────────────────────────────
+
+canopy:A2AAdapter
+  a canopy:Adapter ;
+  canopy:adapterType "a2a" ;
+  canopy:adapterName "A2A Protocol" ;
+  canopy:supportsSession "false"^^xsd:boolean ;
+  canopy:supportsConcurrent "true"^^xsd:boolean ;
+  canopy:capability "chat" , "task_delegation" , "agent_discovery" .
+
+# ── Telemetry Handler ────────────────────────────────────────────────────────
+
+canopy:A2ATelemetryHandler
+  a canopy:TelemetryHandler ;
+  canopy:monitorsEvent "a2a.message" ;
+  canopy:monitorsEvent "a2a.cancel" ;
+  canopy:monitorsEvent "a2a.task" .

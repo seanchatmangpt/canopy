@@ -1242,3 +1242,72 @@ export interface DocumentRevision {
   change_summary: string | null;
   created_at: string;
 }
+
+// ── Process Mining (BusinessOS integration) ───────────────────────────────────
+
+export interface ProcessMiningKPIs {
+  businessos_available: boolean;
+  avg_cycle_time_hours: number | null;
+  conformance_score: number | null;
+  active_cases: number | null;
+  bottleneck_activity: string | null;
+  error?: string;
+}
+
+export interface ProcessDiscoveryParams {
+  log_path: string;
+  algorithm?: "alpha" | "heuristics" | "inductive";
+  workspace_id?: string;
+}
+
+export interface ProcessDiscoveryResult {
+  businessos_available: boolean;
+  model_id: string;
+  algorithm: string;
+  places: number;
+  transitions: number;
+  arcs: number;
+  latency_ms: number;
+  error?: string;
+}
+
+export interface ProcessMiningStatus {
+  businessos_available: boolean;
+  status: "healthy" | "degraded" | "unavailable";
+  database_ready?: boolean;
+  requests_total?: number;
+  average_latency_ms?: number;
+  error?: string;
+}
+
+// ── Compliance Dashboard (BusinessOS integration) ─────────────────────────────
+
+export interface ComplianceFrameworkStatus {
+  framework: "SOC2" | "HIPAA" | "GDPR" | "SOX" | "CUSTOM";
+  score: number;
+  passed: number;
+  failed: number;
+  total: number;
+  status: "compliant" | "non_compliant" | "partial";
+}
+
+export interface ComplianceDashboardStatus {
+  businessos_available: boolean;
+  overall_score: number;
+  status: "compliant" | "non_compliant" | "partial" | "unavailable";
+  frameworks: ComplianceFrameworkStatus[];
+  last_checked_at: string | null;
+  error?: string;
+}
+
+// ── Board Briefing ────────────────────────────────────────────────────────────
+
+export interface BoardBriefing {
+  osa_available: boolean;
+  text: string;
+  generated_at: string | null;
+  l3_freshness: "fresh" | "stale" | "unknown";
+  structural_issue_count: number;
+  has_structural_issues: boolean;
+  error?: string;
+}

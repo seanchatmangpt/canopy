@@ -303,6 +303,76 @@ defmodule Canopy.Adapters.BusinessOS do
 
   # ── Health Check ────────────────────────────────────────────────────
 
+  # ── SyncWorker Polling API ───────────────────────────────────────────
+
+  @doc """
+  Poll BusinessOS BOS operational status.
+
+  WvdA: 10 s receive timeout — deadlock freedom.
+  Returns `{:ok, map()}` or `{:error, term()}`.
+  """
+  @spec get_status(map()) :: {:ok, map()} | {:error, term()}
+  def get_status(params \\ %{}) do
+    url = bos_base_url()
+
+    case Req.get("#{url}/api/bos/status",
+           headers: build_headers(params, %{}),
+           receive_timeout: 10_000
+         ) do
+      {:ok, %{status: 200, body: body}} -> {:ok, body}
+      {:ok, %{status: status}} -> {:error, {:http_error, status}}
+      {:error, reason} -> {:error, {:connection_failed, reason}}
+    end
+  rescue
+    _ -> {:error, :bos_unavailable}
+  end
+
+  @doc """
+  Poll BusinessOS compliance status.
+
+  WvdA: 15 s receive timeout — deadlock freedom.
+  Returns `{:ok, map()}` or `{:error, term()}`.
+  """
+  @spec get_compliance_status(map()) :: {:ok, map()} | {:error, term()}
+  def get_compliance_status(params \\ %{}) do
+    url = bos_base_url()
+
+    case Req.get("#{url}/api/compliance/status",
+           headers: build_headers(params, %{}),
+           receive_timeout: 15_000
+         ) do
+      {:ok, %{status: 200, body: body}} -> {:ok, body}
+      {:ok, %{status: status}} -> {:error, {:http_error, status}}
+      {:error, reason} -> {:error, {:connection_failed, reason}}
+    end
+  rescue
+    _ -> {:error, :bos_unavailable}
+  end
+
+  @doc """
+  Fetch dashboard KPIs from pm4py-rust via BusinessOS.
+
+  NOTE: BusinessOS route is POST /api/pm4py/dashboard-kpi (not GET).
+  WvdA: 20 s receive timeout — deadlock freedom.
+  Returns `{:ok, map()}` or `{:error, term()}`.
+  """
+  @spec get_kpis(map()) :: {:ok, map()} | {:error, term()}
+  def get_kpis(params \\ %{}) do
+    url = bos_base_url()
+
+    case Req.post("#{url}/api/pm4py/dashboard-kpi",
+           json: %{},
+           headers: build_headers(params, %{}),
+           receive_timeout: 20_000
+         ) do
+      {:ok, %{status: 200, body: body}} -> {:ok, body}
+      {:ok, %{status: status}} -> {:error, {:http_error, status}}
+      {:error, reason} -> {:error, {:connection_failed, reason}}
+    end
+  rescue
+    _ -> {:error, :bos_unavailable}
+  end
+
   @doc """
   Check health status of BusinessOS server.
   """
@@ -442,6 +512,10 @@ defmodule Canopy.Adapters.BusinessOS do
   end
 
   defp parse_message(_), do: {:error, "Invalid message format"}
+
+  defp bos_base_url do
+    Application.get_env(:canopy, :bos_url, "http://127.0.0.1:8001")
+  end
 
   # ── YAWL Workflow Simulation API ────────────────────────────────────
 

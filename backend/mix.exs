@@ -5,7 +5,7 @@ defmodule Canopy.MixProject do
     [
       app: :canopy,
       version: "0.1.0",
-      elixir: "~> 1.15",
+      elixir: "~> 1.17",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
@@ -52,6 +52,7 @@ defmodule Canopy.MixProject do
       {:bcrypt_elixir, "~> 3.0"},
       {:cors_plug, "~> 3.0"},
       {:req, "~> 0.5"},
+      {:a2a, "~> 0.2.0"},
       {:yaml_elixir, "~> 2.12"},
       {:quantum, "~> 3.5"},
       {:websocket_client, git: "https://github.com/sanmiguel/websocket_client.git"},

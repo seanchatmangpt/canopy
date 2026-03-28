@@ -73,10 +73,16 @@ defmodule CanopyWeb.Router do
       post "/message", SessionController, :message, as: :message
     end
 
+    # Process Mining (BusinessOS integration)
+    get "/process-mining/kpis", ProcessMiningController, :kpis
+    post "/process-mining/discover", ProcessMiningController, :discover
+    get "/process-mining/status", ProcessMiningController, :status
+
     # Schedules
     get "/schedules/queue", ScheduleController, :queue
     post "/schedules/wake-all", ScheduleController, :wake_all
     post "/schedules/pause-all", ScheduleController, :pause_all
+    post "/schedules/runs/:run_id/cancel", ScheduleController, :cancel_run
 
     resources "/schedules", ScheduleController, except: [:new, :edit] do
       post "/trigger", ScheduleController, :trigger, as: :trigger

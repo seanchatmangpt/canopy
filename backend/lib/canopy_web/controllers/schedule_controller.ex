@@ -253,6 +253,32 @@ defmodule CanopyWeb.ScheduleController do
     end
   end
 
+  def cancel_run(conn, %{"run_id" => run_id}) do
+    case Repo.get(Session, run_id) do
+      nil ->
+        conn
+        |> put_status(404)
+        |> json(%{error: "not_found", run_id: run_id})
+
+      session ->
+        session
+        |> Ecto.Changeset.change(status: "cancelled")
+        |> Repo.update()
+        |> case do
+          {:ok, _updated} ->
+            json(conn, %{status: "cancelled", run_id: run_id})
+
+          {:error, changeset} ->
+            conn
+            |> put_status(422)
+            |> json(%{
+              error: "cancel_failed",
+              details: inspect(changeset.errors)
+            })
+        end
+    end
+  end
+
   defp compute_next_run_at(_), do: nil
 
   # Persists next_run_at on an already-inserted schedule.  Silently skips on

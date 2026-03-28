@@ -14,7 +14,8 @@ defmodule Canopy.Autonomic.HealingAgent do
   require Logger
 
   alias Canopy.Repo
-  alias Canopy.Schemas.Session
+  alias Canopy.Schemas.{Session, Agent}
+  alias Canopy.Autonomic.AutoRecovery
   import Ecto.Query
 
   def run(opts \\ []) do
@@ -24,6 +25,27 @@ defmodule Canopy.Autonomic.HealingAgent do
     tier = opts[:tier] || :high
 
     start_time = System.monotonic_time(:millisecond)
+
+    # Auto-recovery: reset agents stuck in "error" status (Gap 6 — closed-loop autonomics)
+    try do
+      error_agents = Repo.all(from(a in Agent, where: a.status == "error", limit: 50))
+
+      Enum.each(error_agents, fn agent ->
+        case AutoRecovery.check_and_recover(agent) do
+          {:recovered, updated} ->
+            Logger.info("[HealingAgent] Auto-recovered agent #{updated.id}")
+
+          {:escalated, reason} ->
+            Logger.warning("[HealingAgent] Escalating agent #{agent.id}: #{inspect(reason)}")
+
+          :ok ->
+            :ok
+        end
+      end)
+    rescue
+      e ->
+        Logger.warning("[HealingAgent] Auto-recovery scan failed: #{Exception.message(e)}")
+    end
 
     # Find failed sessions/workflows
     failed_workflows = find_failed_workflows()

@@ -22,6 +22,9 @@ defmodule Canopy.Autonomic.HealthAgent do
   ]
 
   @latency_threshold_ms 1000
+  # WvdA: explicit timeouts for each external system poll (deadlock freedom)
+  @businessos_timeout_ms 5_000
+  @osa_timeout_ms 5_000
 
   def run(opts \\ []) do
     Logger.info("[HealthAgent] Polling systems for anomalies...")
@@ -67,6 +70,9 @@ defmodule Canopy.Autonomic.HealthAgent do
         timestamp: DateTime.utc_now()
       }
 
+      # Update ScheduleGovernor skip flags from health results (non-blocking)
+      Canopy.Autonomic.ScheduleGovernor.update_flags(result)
+
       # Emit telemetry event for observability
       :telemetry.execute(
         [:agent, :run],
@@ -92,7 +98,21 @@ defmodule Canopy.Autonomic.HealthAgent do
     url = system_url(system_name)
     start = System.monotonic_time(:millisecond)
 
-    case Req.get(url, receive_timeout: 5_000, retry: false) do
+    # BusinessOS polls go through the circuit breaker (Gap 6 — circuit protection)
+    timeout = if system_name == :businessos, do: @businessos_timeout_ms, else: @osa_timeout_ms
+
+    req_result =
+      if system_name == :businessos do
+        Canopy.Autonomic.CircuitBreaker.call(
+          :businessos,
+          fn -> Req.get(url, receive_timeout: @businessos_timeout_ms, retry: false) end,
+          @businessos_timeout_ms + 500
+        )
+      else
+        Req.get(url, receive_timeout: timeout, retry: false)
+      end
+
+    case req_result do
       {:ok, %{status: status_code}} ->
         latency = System.monotonic_time(:millisecond) - start
         healthy = status_code in 200..299

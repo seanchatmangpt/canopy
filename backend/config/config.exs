@@ -40,6 +40,9 @@ config :canopy, Canopy.Guardian,
   issuer: "canopy",
   secret_key: "dev-secret-key-change-in-production"
 
+# Base URL for this Canopy instance — used by A2AAgent.agent_card/0 and WellKnownController
+config :canopy, :base_url, "http://localhost:9089"
+
 # Quantum scheduler — jobs loaded from DB at runtime
 config :canopy, Canopy.Scheduler, name: Canopy.Scheduler
 

@@ -81,38 +81,67 @@ defmodule Canopy.Scheduler do
         Logger.debug("[Scheduler] Schedule #{schedule_id} is disabled — skipping")
 
       schedule ->
-        Logger.info(
-          "[Scheduler] Firing heartbeat for agent #{schedule.agent.name} (schedule: #{schedule.name})"
-        )
+        agent_adapter = schedule.agent && schedule.agent.adapter
 
-        # Update last_run_at
-        now = DateTime.utc_now() |> DateTime.truncate(:second)
+        # ScheduleGovernor skip check (Gap 6 — adaptive scheduling)
+        if Canopy.Autonomic.ScheduleGovernor.should_skip?(
+             schedule.agent_id,
+             schedule.id,
+             agent_adapter
+           ) do
+          Logger.info(
+            "[Scheduler] Skipping agent #{schedule.agent.name} — governor skip (adapter=#{agent_adapter})"
+          )
+        else
+          Logger.info(
+            "[Scheduler] Firing heartbeat for agent #{schedule.agent.name} (schedule: #{schedule.name})"
+          )
 
-        schedule
-        |> Ecto.Changeset.change(last_run_at: now, last_run_status: "running")
-        |> Repo.update!()
+          # Update last_run_at
+          now = DateTime.utc_now() |> DateTime.truncate(:second)
 
-        # Execute via HeartbeatRunner (async)
-        Task.Supervisor.start_child(Canopy.HeartbeatRunner, fn ->
-          case Canopy.Heartbeat.run(schedule.agent_id,
-                 schedule_id: schedule.id,
-                 context: schedule.context || "Scheduled heartbeat: #{schedule.name}"
-               ) do
-            {:ok, session_id} ->
-              schedule
-              |> Ecto.Changeset.change(last_run_status: "success")
-              |> Repo.update()
+          schedule
+          |> Ecto.Changeset.change(last_run_at: now, last_run_status: "running")
+          |> Repo.update!()
 
-              Logger.info("[Scheduler] Heartbeat completed: session #{session_id}")
+          start_ms = System.monotonic_time(:millisecond)
 
-            {:error, reason} ->
-              schedule
-              |> Ecto.Changeset.change(last_run_status: "failed")
-              |> Repo.update()
+          # Execute via HeartbeatRunner (async)
+          Task.Supervisor.start_child(Canopy.HeartbeatRunner, fn ->
+            case Canopy.Heartbeat.run(schedule.agent_id,
+                   schedule_id: schedule.id,
+                   context: schedule.context || "Scheduled heartbeat: #{schedule.name}"
+                 ) do
+              {:ok, session_id} ->
+                schedule
+                |> Ecto.Changeset.change(last_run_status: "success")
+                |> Repo.update()
 
-              Logger.error("[Scheduler] Heartbeat failed: #{inspect(reason)}")
-          end
-        end)
+                latency = System.monotonic_time(:millisecond) - start_ms
+
+                Canopy.Autonomic.ExecutionLog.record(schedule.agent_id, %{
+                  outcome: :success,
+                  latency_ms: latency
+                })
+
+                Logger.info("[Scheduler] Heartbeat completed: session #{session_id}")
+
+              {:error, reason} ->
+                schedule
+                |> Ecto.Changeset.change(last_run_status: "failed")
+                |> Repo.update()
+
+                latency = System.monotonic_time(:millisecond) - start_ms
+
+                Canopy.Autonomic.ExecutionLog.record(schedule.agent_id, %{
+                  outcome: :failure,
+                  latency_ms: latency
+                })
+
+                Logger.error("[Scheduler] Heartbeat failed: #{inspect(reason)}")
+            end
+          end)
+        end
     end
   end
 end

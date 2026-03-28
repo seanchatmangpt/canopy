@@ -158,6 +158,45 @@ defmodule Canopy.Mesh.Cache do
     :ok
   end
 
+  # ── BusinessOS Cache Keys ─────────────────────────────────────────────
+  # ETS singletons — no TTL expiry; SyncWorker refreshes every 5 min.
+
+  def put_bos_status(data) when is_map(data) do
+    :ets.insert(@table_name, {{:bos_status, :singleton}, data})
+    :ok
+  end
+
+  def get_bos_status do
+    case :ets.lookup(@table_name, {:bos_status, :singleton}) do
+      [{{:bos_status, :singleton}, data}] -> {:ok, data}
+      [] -> {:error, :not_found}
+    end
+  end
+
+  def put_compliance_status(data) when is_map(data) do
+    :ets.insert(@table_name, {{:compliance_status, :singleton}, data})
+    :ok
+  end
+
+  def get_compliance_status do
+    case :ets.lookup(@table_name, {:compliance_status, :singleton}) do
+      [{{:compliance_status, :singleton}, data}] -> {:ok, data}
+      [] -> {:error, :not_found}
+    end
+  end
+
+  def put_kpis(data) when is_map(data) do
+    :ets.insert(@table_name, {{:bos_kpis, :singleton}, data})
+    :ok
+  end
+
+  def get_kpis do
+    case :ets.lookup(@table_name, {:bos_kpis, :singleton}) do
+      [{{:bos_kpis, :singleton}, data}] -> {:ok, data}
+      [] -> {:error, :not_found}
+    end
+  end
+
   def cache_info do
     size = :ets.info(@table_name, :size)
     memory = :ets.info(@table_name, :memory)

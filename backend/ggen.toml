@@ -1,0 +1,55 @@
+# ggen.toml — Canopy A2A Integration
+# A = μ(O) — Elixir modules are projections of .specify/a2a_integration.ttl
+# ggen v6.0.1 · RDF-driven code generation
+
+[project]
+name = "canopy-a2a"
+version = "0.1.0"
+description = "A2A protocol integration for Canopy workspace agent"
+language = "elixir"
+
+[rdf]
+base_uri = "http://chatmangpt.com/canopy/"
+default_format = "turtle"
+ontologies = [".specify/a2a_integration.ttl"]
+
+[templates]
+source_dir = "templates"
+output_dir = "lib/canopy"
+
+# μ₁-μ₅ generation pipeline:
+#   μ₁ CONSTRUCT  — normalize a2a_integration.ttl
+#   μ₂ SELECT     — extract agent/skill/adapter bindings
+#   μ₃ Tera       — emit Elixir module skeletons
+#   μ₄ Canonicalize — mix format
+#   μ₅ Receipt    — hash verification
+
+[[generators.pipeline]]
+name = "a2a-agent"
+description = "Generate Canopy.A2AAgent skeleton from A2A ontology"
+inputs = [".specify/a2a_integration.ttl"]
+steps = [
+  { action = "parse", parser = "turtle" },
+  { action = "transform", query = "templates/queries/extract-canopy-agent.rq" },
+  { action = "template", template = "templates/a2a-agent.ex.tera" },
+  { action = "exec", command = "cd lib/canopy/agents && mix format a2a_agent.ex 2>/dev/null || true" }
+]
+
+[[generators.pipeline]]
+name = "a2a-adapter"
+description = "Generate Canopy.Adapters.A2A skeleton from A2A ontology"
+inputs = [".specify/a2a_integration.ttl"]
+steps = [
+  { action = "parse", parser = "turtle" },
+  { action = "transform", query = "templates/queries/extract-canopy-adapter.rq" },
+  { action = "template", template = "templates/canopy-adapter.ex.tera" }
+]
+
+[[generators.pipeline]]
+name = "a2a-telemetry"
+description = "Generate Canopy.Telemetry.A2AHandler skeleton from A2A ontology"
+inputs = [".specify/a2a_integration.ttl"]
+steps = [
+  { action = "parse", parser = "turtle" },
+  { action = "template", template = "templates/telemetry-handler.ex.tera" }
+]
