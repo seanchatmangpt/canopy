@@ -31,6 +31,9 @@ defmodule Canopy.Isolation.Validator do
   @violations_table :canopy_isolation_violations
   @tool_registry :canopy_tool_registry
   @memory_store :canopy_memory_store
+  @call_timeout_fast 10_000
+  @call_timeout_slow 30_000
+  @call_timeout_query 5_000
 
   # Client API
 
@@ -40,12 +43,12 @@ defmodule Canopy.Isolation.Validator do
 
   @doc "Validate isolation for a workspace. Returns {:ok, report} or {:error, violations}"
   def validate_workspace(workspace_id) do
-    GenServer.call(__MODULE__, {:validate_workspace, workspace_id}, 10_000)
+    GenServer.call(__MODULE__, {:validate_workspace, workspace_id}, @call_timeout_fast)
   end
 
   @doc "Validate all active workspaces. Returns map of workspace_id => result"
   def validate_all_workspaces do
-    GenServer.call(__MODULE__, :validate_all_workspaces, 30_000)
+    GenServer.call(__MODULE__, :validate_all_workspaces, @call_timeout_slow)
   end
 
   @doc "Check if workspace_id is properly isolated. Returns true/false"
@@ -71,7 +74,7 @@ defmodule Canopy.Isolation.Validator do
 
   @doc "Get concurrent agent count in workspace"
   def get_agent_count(workspace_id) do
-    GenServer.call(__MODULE__, {:get_agent_count, workspace_id}, 5_000)
+    GenServer.call(__MODULE__, {:get_agent_count, workspace_id}, @call_timeout_query)
   end
 
   @doc "Verify tool is accessible from workspace"
@@ -218,7 +221,7 @@ defmodule Canopy.Isolation.Validator do
 
   @impl true
   def handle_info(:validate_isolation, state) do
-    Task.start_link(fn ->
+    Task.start(fn ->
       validate_all_workspaces()
     end)
 

@@ -293,9 +293,19 @@ defmodule Canopy.Adapters.OSA do
         [{key, value} | carrier]
       end)
     rescue
-      _ -> headers
+      UndefinedFunctionError ->
+        # OTel SDK not loaded — expected in test/dev environments without OTel
+        headers
+
+      e ->
+        # Unexpected rescue — log for visibility per Armstrong "let-it-crash"
+        Logger.debug("OTel traceparent injection failed: #{Exception.message(e)}")
+        headers
     catch
-      _, _ -> headers
+      kind, reason ->
+        # Unexpected catch — log for visibility per Armstrong "let-it-crash"
+        Logger.debug("OTel traceparent injection caught #{kind}: #{inspect(reason)}")
+        headers
     end
   end
 
