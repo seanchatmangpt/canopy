@@ -31,9 +31,6 @@ defmodule Canopy.Adapter do
   def resolve("codex"), do: {:ok, Canopy.Adapters.Codex}
   def resolve("bash"), do: {:ok, Canopy.Adapters.Bash}
   def resolve("http"), do: {:ok, Canopy.Adapters.HTTP}
-  def resolve("openclaw"), do: {:ok, Canopy.Adapters.OpenClaw}
-  def resolve("cursor"), do: {:ok, Canopy.Adapters.Cursor}
-  def resolve("gemini"), do: {:ok, Canopy.Adapters.Gemini}
   def resolve("mcp"), do: {:ok, Canopy.Adapters.MCP}
   def resolve("pm4py-rust"), do: {:ok, Canopy.Adapters.PM4pyRust}
   def resolve("businessos"), do: {:ok, Canopy.Adapters.BusinessOS}
@@ -47,9 +44,6 @@ defmodule Canopy.Adapter do
       Canopy.Adapters.Codex,
       Canopy.Adapters.Bash,
       Canopy.Adapters.HTTP,
-      Canopy.Adapters.OpenClaw,
-      Canopy.Adapters.Cursor,
-      Canopy.Adapters.Gemini,
       Canopy.Adapters.MCP,
       Canopy.Adapters.PM4pyRust,
       Canopy.Adapters.BusinessOS

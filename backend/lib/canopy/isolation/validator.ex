@@ -221,9 +221,20 @@ defmodule Canopy.Isolation.Validator do
 
   @impl true
   def handle_info(:validate_isolation, state) do
-    Task.start(fn ->
-      validate_all_workspaces()
-    end)
+    Task.Supervisor.start_child(
+      Canopy.TaskSupervisor,
+      fn ->
+        case validate_all_workspaces() do
+          results when is_map(results) ->
+            Logger.debug("Isolation validation completed: #{map_size(results)} workspaces checked")
+            :ok
+
+          {:error, reason} ->
+            Logger.warning("Isolation validation failed: #{inspect(reason)}")
+            :error
+        end
+      end
+    )
 
     schedule_validation()
     {:noreply, state}

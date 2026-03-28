@@ -111,11 +111,18 @@ defmodule Canopy.JTBD.Scenarios.Scenario13 do
 
       _count ->
         # Exceeded limit, decrement and reject
-        :ets.update_counter(:mcp_tool_concurrency, :count, {2, -1})
+        try do
+          :ets.update_counter(:mcp_tool_concurrency, :count, {2, -1})
+        rescue
+          e ->
+            Logger.error("Failed to decrement concurrency counter: #{Exception.message(e)}")
+        end
         :error
     end
   catch
-    _ -> :ok
+    kind, reason ->
+      Logger.error("ETS concurrency slot acquisition failed (#{kind}): #{inspect(reason)}")
+      :error
   end
 
   # Private: Release concurrency slot
@@ -123,7 +130,8 @@ defmodule Canopy.JTBD.Scenarios.Scenario13 do
     try do
       :ets.update_counter(:mcp_tool_concurrency, :count, {2, -1})
     rescue
-      _ -> :ok
+      e ->
+        Logger.error("Failed to release concurrency slot: #{Exception.message(e)}")
     end
   end
 
@@ -135,7 +143,15 @@ defmodule Canopy.JTBD.Scenarios.Scenario13 do
           :ets.new(:mcp_tool_concurrency, [:named_table, :public])
           :ets.insert(:mcp_tool_concurrency, {:count, 0})
         rescue
-          _ -> :ok
+          e ->
+            # Table may have been created by concurrent process; verify and log
+            if :ets.whereis(:mcp_tool_concurrency) == :undefined do
+              Logger.error(
+                "Failed to create ETS concurrency table and concurrent creation also failed: #{Exception.message(e)}"
+              )
+            else
+              Logger.debug("ETS table created by concurrent process")
+            end
         end
 
       _ ->
@@ -196,8 +212,48 @@ defmodule Canopy.JTBD.Scenarios.Scenario13 do
     end
   end
 
-  # Private: Simulate tool execution (placeholder for MCP client call)
+  # Private: Execute tool via MCP server or fallback to simulation
   defp simulate_tool_execution(tool_name, resource_uri, parameters) do
+    # Try to route to MCP server if available
+    case route_to_mcp_server(tool_name, resource_uri, parameters) do
+      {:ok, result} ->
+        {:ok, result}
+
+      {:unavailable, _reason} ->
+        # MCP server not available; use simulation fallback
+        simulate_tool_execution_fallback(tool_name, resource_uri, parameters)
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  # Private: Route tool execution to MCP server
+  defp route_to_mcp_server(tool_name, _resource_uri, parameters) do
+    mcp_pid = Process.whereis(Canopy.Adapters.MCPServer)
+
+    if mcp_pid && Process.alive?(mcp_pid) do
+      try do
+        Canopy.Adapters.MCPServer.call_tool(mcp_pid, tool_name, parameters)
+      rescue
+        e ->
+          Logger.debug("MCP server unavailable: #{Exception.message(e)}")
+          {:unavailable, e}
+      catch
+        :exit, {:timeout, _} ->
+          {:error, :timeout}
+
+        kind, reason ->
+          Logger.error("MCP tool execution failed (#{kind}): #{inspect(reason)}")
+          {:error, reason}
+      end
+    else
+      {:unavailable, :mcp_server_not_running}
+    end
+  end
+
+  # Private: Fallback tool execution simulation when MCP not available
+  defp simulate_tool_execution_fallback(tool_name, resource_uri, parameters) do
     # Add minimal delay to ensure latency_ms > 0
     Process.sleep(1)
 
@@ -210,7 +266,8 @@ defmodule Canopy.JTBD.Scenarios.Scenario13 do
           "resource" => resource_uri,
           "code_length" => String.length(code),
           "review" => "completed",
-          "issues_found" => 0
+          "issues_found" => 0,
+          "backend" => "simulated"
         }
 
         {:ok, result}
@@ -222,7 +279,8 @@ defmodule Canopy.JTBD.Scenarios.Scenario13 do
           "analysis_type" =>
             Map.get(parameters, :type) ||
               Map.get(parameters, "type", "general"),
-          "status" => "analyzed"
+          "status" => "analyzed",
+          "backend" => "simulated"
         }
 
         {:ok, result}
@@ -230,23 +288,27 @@ defmodule Canopy.JTBD.Scenarios.Scenario13 do
       "slow-tool" ->
         # Simulate slow tool for timeout testing
         Process.sleep(5000)
-        {:ok, %{"result" => "completed slowly"}}
+        {:ok, %{"result" => "completed slowly", "backend" => "simulated"}}
 
       _ ->
         {:error, :unknown_tool}
     end
   end
 
-  # Private: Emit OTEL span (placeholder)
+  # Private: Emit OTEL span with tool execution metrics
   defp emit_otel_span(tool_name, resource_uri, status, latency_ms) do
-    Logger.debug("OTEL span emitted",
+    # Log span metadata for observability (actual OTEL instrumentation is
+    # handled by the Canopy telemetry layer at the adapter boundary)
+    Logger.debug("Tool execution metrics",
       span_name: "jtbd.scenario",
-      attributes: %{
-        tool_name: tool_name,
-        resource_uri: resource_uri,
-        execution_status: status,
-        latency_ms: latency_ms
-      }
+      tool_name: tool_name,
+      resource_uri: resource_uri,
+      execution_status: status,
+      latency_ms: latency_ms
     )
+  rescue
+    e ->
+      # Logging failure should not crash the function
+      Logger.debug("Failed to log tool execution metrics: #{Exception.message(e)}")
   end
 end
