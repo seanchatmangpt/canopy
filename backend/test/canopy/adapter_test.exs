@@ -36,6 +36,10 @@ defmodule Canopy.AdapterTest do
       assert {:ok, Canopy.Adapters.MCP} = Adapter.resolve("mcp")
     end
 
+    test "resolves 'a2a' to Canopy.Adapters.A2A" do
+      assert {:ok, Canopy.Adapters.A2A} = Adapter.resolve("a2a")
+    end
+
     test "returns error for unknown adapter type" do
       assert {:error, {:unknown_adapter, "nonexistent"}} = Adapter.resolve("nonexistent")
     end
@@ -53,7 +57,7 @@ defmodule Canopy.AdapterTest do
     test "returns a list of adapter metadata maps" do
       adapters = Adapter.all()
       assert is_list(adapters)
-      assert length(adapters) == 8
+      assert length(adapters) == 9
     end
 
     test "each adapter has required metadata fields" do

@@ -22,7 +22,7 @@ defmodule CanopyWeb.WellKnownController do
         "Workspace orchestration protocol and command center for AI agent systems " <>
           "with 160+ agents, heartbeat dispatch, and process mining integration.",
       version: version,
-      url: "http://localhost:9089/api/v1/a2a",
+      url: Application.get_env(:canopy, :base_url, "http://localhost:9089") <> "/api/v1/a2a",
       capabilities: ["streaming", "tools", "stateless"],
       skills: [
         %{

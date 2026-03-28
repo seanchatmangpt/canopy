@@ -28,8 +28,6 @@ defmodule Canopy.Mesh.SyncWorker do
   @osa_timeout_ms 30_000
 
   # WvdA: BOS endpoint timeouts (per plan Gap 1)
-  @bos_status_timeout_ms 10_000
-  @bos_compliance_timeout_ms 15_000
   @bos_kpi_timeout_ms 20_000
 
   # ── Public API ──────────────────────────────────────────────────────

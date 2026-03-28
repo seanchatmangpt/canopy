@@ -76,7 +76,7 @@ defmodule Canopy.Telemetry.A2AHandler do
       duration_ms = native_to_ms(Map.get(measurements, :duration, 0))
       :otel_span.set_attributes(ctx, %{A2aAttributes.a2a_duration_ms() => duration_ms})
       :otel_span.set_status(ctx, :ok)
-      :otel_tracer.end_span(ctx)
+      :otel_span.end_span(ctx)
       Process.delete({:a2a_span, :message})
     end
   end
@@ -84,9 +84,8 @@ defmodule Canopy.Telemetry.A2AHandler do
   def handle_event([:a2a, :message, :exception], _measurements, metadata, _config) do
     with ctx when not is_nil(ctx) <- Process.get({:a2a_span, :message}) do
       reason = Map.get(metadata, :reason, :unknown)
-      :otel_span.record_exception(ctx, reason, [])
       :otel_span.set_status(ctx, :error, "A2A message exception: #{inspect(reason)}")
-      :otel_tracer.end_span(ctx)
+      :otel_span.end_span(ctx)
       Process.delete({:a2a_span, :message})
     end
   end
@@ -106,7 +105,7 @@ defmodule Canopy.Telemetry.A2AHandler do
       duration_ms = native_to_ms(Map.get(measurements, :duration, 0))
       :otel_span.set_attributes(ctx, %{A2aAttributes.a2a_duration_ms() => duration_ms})
       :otel_span.set_status(ctx, :ok)
-      :otel_tracer.end_span(ctx)
+      :otel_span.end_span(ctx)
       Process.delete({:a2a_span, :cancel})
     end
   end
@@ -114,9 +113,8 @@ defmodule Canopy.Telemetry.A2AHandler do
   def handle_event([:a2a, :cancel, :exception], _measurements, metadata, _config) do
     with ctx when not is_nil(ctx) <- Process.get({:a2a_span, :cancel}) do
       reason = Map.get(metadata, :reason, :unknown)
-      :otel_span.record_exception(ctx, reason, [])
       :otel_span.set_status(ctx, :error, "A2A cancel exception: #{inspect(reason)}")
-      :otel_tracer.end_span(ctx)
+      :otel_span.end_span(ctx)
       Process.delete({:a2a_span, :cancel})
     end
   end
@@ -136,7 +134,7 @@ defmodule Canopy.Telemetry.A2AHandler do
       duration_ms = native_to_ms(Map.get(measurements, :duration, 0))
       :otel_span.set_attributes(ctx, %{A2aAttributes.a2a_duration_ms() => duration_ms})
       :otel_span.set_status(ctx, :ok)
-      :otel_tracer.end_span(ctx)
+      :otel_span.end_span(ctx)
       Process.delete({:a2a_span, :task})
     end
   end

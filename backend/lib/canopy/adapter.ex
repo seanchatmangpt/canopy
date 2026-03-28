@@ -34,6 +34,7 @@ defmodule Canopy.Adapter do
   def resolve("mcp"), do: {:ok, Canopy.Adapters.MCP}
   def resolve("pm4py-rust"), do: {:ok, Canopy.Adapters.PM4pyRust}
   def resolve("businessos"), do: {:ok, Canopy.Adapters.BusinessOS}
+  def resolve("a2a"), do: {:ok, Canopy.Adapters.A2A}
   def resolve(type), do: {:error, {:unknown_adapter, type}}
 
   @doc "List all registered adapters with metadata."
@@ -46,7 +47,8 @@ defmodule Canopy.Adapter do
       Canopy.Adapters.HTTP,
       Canopy.Adapters.MCP,
       Canopy.Adapters.PM4pyRust,
-      Canopy.Adapters.BusinessOS
+      Canopy.Adapters.BusinessOS,
+      Canopy.Adapters.A2A
     ]
     |> Enum.map(fn mod ->
       %{

@@ -23,6 +23,17 @@ defmodule CanopyWeb.Router do
   scope "/.well-known", CanopyWeb do
     pipe_through :api
     get "/agent.json", WellKnownController, :agent_card
+    get "/agent-card.json", WellKnownController, :agent_card
+  end
+
+  # A2A protocol endpoint — no auth, receives incoming agent calls via A2A.Plug
+  # (No module alias — A2A.Plug must not be prefixed with CanopyWeb)
+  scope "/api/v1" do
+    pipe_through :api
+    forward "/a2a", A2A.Plug,
+      agent: Canopy.A2AAgent,
+      base_url:
+        Application.compile_env(:canopy, :base_url, "http://localhost:9089") <> "/api/v1/a2a"
   end
 
   # Health check — no auth

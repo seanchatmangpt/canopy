@@ -35,6 +35,18 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
   def a2a_agent_name, do: :"a2a.agent.name"
 
   @doc """
+  Endpoint URL of the A2A agent receiving or initiating the call.
+
+  Attribute: `a2a.agent.url`
+  Type: `string`
+  Stability: `development`
+  Requirement: `recommended`
+  Examples: `http://localhost:9089/api/v1/a2a`, `https://agent.example.com/a2a`
+  """
+  @spec a2a_agent_url() :: :"a2a.agent.url"
+  def a2a_agent_url, do: :"a2a.agent.url"
+
+  @doc """
   Number of output artifacts produced by a completed A2A task.
 
   Attribute: `a2a.artifact.count`
@@ -1004,6 +1016,18 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
   end
 
   @doc """
+  Duration of the A2A operation in milliseconds.
+
+  Attribute: `a2a.duration_ms`
+  Type: `int`
+  Stability: `development`
+  Requirement: `recommended`
+  Examples: `42`, `250`, `1500`
+  """
+  @spec a2a_duration_ms() :: :"a2a.duration_ms"
+  def a2a_duration_ms, do: :"a2a.duration_ms"
+
+  @doc """
   Amount held in escrow for the A2A deal.
 
   Attribute: `a2a.escrow.amount`
@@ -1230,6 +1254,18 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aAttributes do
     def disputed, do: :disputed
 
   end
+
+  @doc """
+  The JSON-RPC 2.0 method name for an A2A protocol call.
+
+  Attribute: `a2a.jsonrpc.method`
+  Type: `string`
+  Stability: `development`
+  Requirement: `recommended`
+  Examples: `message/send`, `tasks/get`, `tasks/cancel`, `tasks/list`
+  """
+  @spec a2a_jsonrpc_method() :: :"a2a.jsonrpc.method"
+  def a2a_jsonrpc_method, do: :"a2a.jsonrpc.method"
 
   @doc """
   Unique identifier for knowledge transfer.

@@ -51,6 +51,17 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aSpanNames do
   def a2a_call, do: "a2a.call"
 
   @doc """
+  Canceling an A2A task via tasks/cancel JSON-RPC call. Emitted by Canopy.Telemetry.A2AHandler when a task cancel request is processed.
+
+
+  Span: `span.a2a.cancel`
+  Kind: `client`
+  Stability: `development`
+  """
+  @spec a2a_cancel() :: String.t()
+  def a2a_cancel, do: "a2a.cancel"
+
+  @doc """
   Matching a capability request to available agents — selecting best provider.
 
   Span: `span.a2a.capability.match`
@@ -179,6 +190,17 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aSpanNames do
   """
   @spec a2a_knowledge_transfer() :: String.t()
   def a2a_knowledge_transfer, do: "a2a.knowledge.transfer"
+
+  @doc """
+  Receiving an A2A message/send JSON-RPC call via A2A.Plug. Emitted by Canopy.Telemetry.A2AHandler when the server receives a message.
+
+
+  Span: `span.a2a.message`
+  Kind: `server`
+  Stability: `development`
+  """
+  @spec a2a_message() :: String.t()
+  def a2a_message, do: "a2a.message"
 
   @doc """
   Batched delivery of multiple A2A messages — aggregates messages for efficient transport.
@@ -370,6 +392,7 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aSpanNames do
       a2a_auction_run(),
       a2a_bid_evaluate(),
       a2a_call(),
+      a2a_cancel(),
       a2a_capability_match(),
       a2a_capability_negotiate(),
       a2a_capability_register(),
@@ -383,6 +406,7 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aSpanNames do
       a2a_escrow_create(),
       a2a_escrow_release(),
       a2a_knowledge_transfer(),
+      a2a_message(),
       a2a_message_batch(),
       a2a_message_receive(),
       a2a_message_route(),

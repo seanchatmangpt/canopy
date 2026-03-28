@@ -253,6 +253,8 @@ defmodule CanopyWeb.ScheduleController do
     end
   end
 
+  defp compute_next_run_at(_), do: nil
+
   def cancel_run(conn, %{"run_id" => run_id}) do
     case Repo.get(Session, run_id) do
       nil ->
@@ -278,8 +280,6 @@ defmodule CanopyWeb.ScheduleController do
         end
     end
   end
-
-  defp compute_next_run_at(_), do: nil
 
   # Persists next_run_at on an already-inserted schedule.  Silently skips on
   # parse failure so a bad cron expression does not block schedule creation.

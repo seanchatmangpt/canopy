@@ -37,7 +37,10 @@ defmodule Canopy.Application do
       %{
         id: :canopy_consent_agent,
         start: {Agent, :start_link, [fn -> %{} end, [name: :canopy_consent_agent]]}
-      }
+      },
+      {Canopy.A2AAgent,
+       task_supervisor: Canopy.TaskSupervisor,
+       task_store: {A2A.TaskStore.ETS, :canopy_a2a_tasks}}
     ]
 
     Application.put_env(:canopy, :consent_agent, :canopy_consent_agent)
@@ -56,6 +59,9 @@ defmodule Canopy.Application do
 
     # BOS intelligence cache: single-row overwrite, bounded memory.
     :ets.new(:canopy_bos_intelligence, [:named_table, :set, :public, read_concurrency: true])
+
+    # A2A task store: tracks in-flight A2A tasks for cancel support (bounded by task TTL)
+    :ets.new(:canopy_a2a_tasks, [:named_table, :set, :public, read_concurrency: true])
 
     # Wave 12 metrics table: bounded LRU cache for iteration metrics (WvdA soundness)
     :ets.new(:jtbd_wave12_metrics, [
@@ -76,6 +82,9 @@ defmodule Canopy.Application do
 
     case result do
       {:ok, _pid} ->
+        # Attach A2A telemetry handler after supervisor starts (Armstrong: supervised startup)
+        Canopy.Telemetry.A2AHandler.attach()
+
         # Load schedules asynchronously via supervised task (Armstrong: supervised startup)
         Task.Supervisor.start_child(
           Canopy.TaskSupervisor,
