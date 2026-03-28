@@ -108,7 +108,7 @@ defmodule Canopy.Adapters.MCPTest do
 
       # Will fail at GenServer.call since self() isn't a real MCPServer,
       # but we can test the parsing worked by checking it attempts the call
-      assert catch_error(MCP.send_message(session, message) |> Enum.to_list())
+      assert catch_exit(MCP.send_message(session, message) |> Enum.to_list())
     end
 
     test "accepts map message directly" do
@@ -116,7 +116,7 @@ defmodule Canopy.Adapters.MCPTest do
       message = %{"tool_name" => "read_file", "arguments" => %{"path" => "/tmp"}}
 
       # Parsing succeeds; GenServer.call fails since self() is not a real MCPServer
-      assert catch_error(MCP.send_message(session, message) |> Enum.to_list())
+      assert catch_exit(MCP.send_message(session, message) |> Enum.to_list())
     end
   end
 
@@ -125,21 +125,21 @@ defmodule Canopy.Adapters.MCPTest do
       session = %{pid: self(), tools: [%{"name" => "my_tool"}], transport: :stdio}
       message = Jason.encode!(%{"name" => "my_tool", "arguments" => %{}})
 
-      assert catch_error(MCP.send_message(session, message) |> Enum.to_list())
+      assert catch_exit(MCP.send_message(session, message) |> Enum.to_list())
     end
 
     test "supports 'tool' key for tool name" do
       session = %{pid: self(), tools: [%{"name" => "my_tool"}], transport: :stdio}
       message = Jason.encode!(%{"tool" => "my_tool", "args" => %{}})
 
-      assert catch_error(MCP.send_message(session, message) |> Enum.to_list())
+      assert catch_exit(MCP.send_message(session, message) |> Enum.to_list())
     end
 
     test "supports 'input' key for arguments" do
       session = %{pid: self(), tools: [%{"name" => "my_tool"}], transport: :stdio}
       message = Jason.encode!(%{"tool_name" => "my_tool", "input" => %{"key" => "val"}})
 
-      assert catch_error(MCP.send_message(session, message) |> Enum.to_list())
+      assert catch_exit(MCP.send_message(session, message) |> Enum.to_list())
     end
 
     test "returns error for missing tool name" do

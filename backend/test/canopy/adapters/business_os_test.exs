@@ -1,6 +1,9 @@
 defmodule Canopy.Adapters.BusinessOSTest do
   use ExUnit.Case, async: true
 
+  # Tests make HTTP calls to BusinessOS service on port 8001
+  @moduletag :external_service
+
   alias Canopy.Adapters.BusinessOS
 
   doctest BusinessOS

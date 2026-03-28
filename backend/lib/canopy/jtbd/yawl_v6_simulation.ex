@@ -344,6 +344,10 @@ defmodule Canopy.JTBD.YAWLv6Simulation do
       {:error, _reason} ->
         {:error, :yawl_unavailable}
     end
+  rescue
+    ArgumentError ->
+      # Req.Finch registry not started (--no-start mode)
+      {:error, :yawl_unavailable}
   end
 
   @doc false

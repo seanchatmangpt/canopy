@@ -26,6 +26,7 @@ defmodule Canopy.Application do
       Canopy.Ontology.ToolRegistry,
       Canopy.JTBD.SelfPlayLoop,
       Canopy.Yawl.Client,
+      Canopy.Bridges.YawlValidatorSupervisor,
       CanopyWeb.Endpoint
     ]
 
