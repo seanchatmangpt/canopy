@@ -1,6 +1,9 @@
 defmodule Canopy.Ontology.ServiceTest do
   use ExUnit.Case
 
+  # Requires Canopy.Ontology.Service GenServer to be running
+  @moduletag :requires_application
+
   alias Canopy.Ontology.Service
 
   setup do
