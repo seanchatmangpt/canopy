@@ -24,16 +24,12 @@ defmodule Canopy.AdapterTest do
       assert {:ok, Canopy.Adapters.HTTP} = Adapter.resolve("http")
     end
 
-    test "resolves 'openclaw' to Canopy.Adapters.OpenClaw" do
-      assert {:ok, Canopy.Adapters.OpenClaw} = Adapter.resolve("openclaw")
+    test "resolves 'pm4py-rust' to Canopy.Adapters.PM4pyRust" do
+      assert {:ok, Canopy.Adapters.PM4pyRust} = Adapter.resolve("pm4py-rust")
     end
 
-    test "resolves 'cursor' to Canopy.Adapters.Cursor" do
-      assert {:ok, Canopy.Adapters.Cursor} = Adapter.resolve("cursor")
-    end
-
-    test "resolves 'gemini' to Canopy.Adapters.Gemini" do
-      assert {:ok, Canopy.Adapters.Gemini} = Adapter.resolve("gemini")
+    test "resolves 'businessos' to Canopy.Adapters.BusinessOS" do
+      assert {:ok, Canopy.Adapters.BusinessOS} = Adapter.resolve("businessos")
     end
 
     test "resolves 'mcp' to Canopy.Adapters.MCP" do
@@ -57,7 +53,7 @@ defmodule Canopy.AdapterTest do
     test "returns a list of adapter metadata maps" do
       adapters = Adapter.all()
       assert is_list(adapters)
-      assert length(adapters) == 9
+      assert length(adapters) == 8
     end
 
     test "each adapter has required metadata fields" do

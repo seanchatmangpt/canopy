@@ -323,8 +323,18 @@ defmodule Canopy.Ontology.Service do
 
   @impl GenServer
   def handle_call(:cache_stats, _from, state) do
-    hits = get_ets_counter(:cache_hits)
-    misses = get_ets_counter(:cache_misses)
+    hits =
+      case :ets.whereis(:ontology_cache_stats) do
+        :undefined -> 0
+        _ -> get_ets_counter(:cache_hits)
+      end
+
+    misses =
+      case :ets.whereis(:ontology_cache_stats) do
+        :undefined -> 0
+        _ -> get_ets_counter(:cache_misses)
+      end
+
     total = hits + misses
     hit_rate = if total > 0, do: hits / total, else: 0.0
 
@@ -340,9 +350,17 @@ defmodule Canopy.Ontology.Service do
 
   @impl GenServer
   def handle_call(:clear_cache, _from, state) do
-    :ets.delete_all_objects(:ontology_cache)
-    :ets.delete_all_objects(:ontology_cache_stats)
-    :ets.insert(:ontology_cache_stats, cache_hits: 0, cache_misses: 0)
+    case :ets.whereis(:ontology_cache) do
+      :undefined -> :ok
+      _ -> :ets.delete_all_objects(:ontology_cache)
+    end
+
+    case :ets.whereis(:ontology_cache_stats) do
+      :undefined -> :ok
+      _ ->
+        :ets.delete_all_objects(:ontology_cache_stats)
+        :ets.insert(:ontology_cache_stats, cache_hits: 0, cache_misses: 0)
+    end
 
     Logger.info("Ontology cache cleared")
     {:reply, :ok, state}
@@ -351,7 +369,10 @@ defmodule Canopy.Ontology.Service do
   @impl GenServer
   def handle_call({:clear_ontology, ontology_id}, _from, state) do
     # Delete all cache entries related to this ontology
-    :ets.delete_all_objects(:ontology_cache)
+    case :ets.whereis(:ontology_cache) do
+      :undefined -> :ok
+      _ -> :ets.delete_all_objects(:ontology_cache)
+    end
 
     Logger.info("Cache cleared for ontology #{ontology_id}")
     {:reply, :ok, state}
@@ -360,36 +381,62 @@ defmodule Canopy.Ontology.Service do
   # Private Helpers
 
   defp cached?(key) do
-    case :ets.lookup(:ontology_cache, key) do
-      [{^key, _value, expires_at}] ->
-        DateTime.utc_now() |> DateTime.before?(expires_at)
-
-      [] ->
+    case :ets.whereis(:ontology_cache) do
+      :undefined ->
         false
+      _ ->
+        case :ets.lookup(:ontology_cache, key) do
+          [{^key, _value, expires_at}] ->
+            DateTime.utc_now() |> DateTime.before?(expires_at)
+
+          [] ->
+            false
+        end
     end
   end
 
   defp get_cached(key) do
-    case :ets.lookup(:ontology_cache, key) do
-      [{^key, value, _expires_at}] ->
-        value
-
-      [] ->
+    case :ets.whereis(:ontology_cache) do
+      :undefined ->
         nil
+      _ ->
+        case :ets.lookup(:ontology_cache, key) do
+          [{^key, value, _expires_at}] ->
+            value
+
+          [] ->
+            nil
+        end
     end
   end
 
   defp cache_result(key, value, ttl_seconds: ttl) do
     expires_at = DateTime.add(DateTime.utc_now(), ttl, :second)
-    :ets.insert(:ontology_cache, {key, value, expires_at})
+
+    case :ets.whereis(:ontology_cache) do
+      :undefined ->
+        :ok
+      _ ->
+        :ets.insert(:ontology_cache, {key, value, expires_at})
+    end
   end
 
   defp record_cache_hit do
-    :ets.update_counter(:ontology_cache_stats, :cache_hits, {2, 1})
+    case :ets.whereis(:ontology_cache_stats) do
+      :undefined ->
+        :ok
+      _ ->
+        :ets.update_counter(:ontology_cache_stats, :cache_hits, {2, 1})
+    end
   end
 
   defp record_cache_miss do
-    :ets.update_counter(:ontology_cache_stats, :cache_misses, {2, 1})
+    case :ets.whereis(:ontology_cache_stats) do
+      :undefined ->
+        :ok
+      _ ->
+        :ets.update_counter(:ontology_cache_stats, :cache_misses, {2, 1})
+    end
   end
 
   defp get_ets_counter(key) do

@@ -13,6 +13,7 @@ defmodule Canopy.Integration.ConsistencyTest do
   """
 
   use ExUnit.Case
+  @moduletag :requires_application
   alias Canopy.Adapters.OSA
   alias Canopy.IssueDispatcher
   require Logger

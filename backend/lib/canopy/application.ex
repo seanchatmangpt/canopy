@@ -27,6 +27,7 @@ defmodule Canopy.Application do
       Canopy.JTBD.SelfPlayLoop,
       Canopy.Yawl.Client,
       Canopy.Bridges.YawlValidatorSupervisor,
+      {Finch, name: Req.Finch, pools: %{:default => [size: 32]}},
       CanopyWeb.Endpoint
     ]
 

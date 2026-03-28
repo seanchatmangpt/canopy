@@ -9,6 +9,9 @@ defmodule Canopy.JTBD.LinkedInRevOpsSmokeTest do
   4. Fallback handling works when adapter returns errors
   """
 
+  use ExUnit.Case, async: true
+  @moduletag :requires_application
+
   use ExUnit.Case, async: false
 
   require Logger
