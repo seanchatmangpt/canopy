@@ -1,0 +1,2 @@
+database_pool_size: 10
+heartbeat_interval_ms: 30000

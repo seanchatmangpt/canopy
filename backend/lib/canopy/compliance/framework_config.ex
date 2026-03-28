@@ -267,18 +267,86 @@ defmodule Canopy.Compliance.FrameworkConfig do
     :ok
   end
 
+  @doc """
+  Returns a plain map with at least a `:name` key for the given framework atom.
+
+  Loads from `priv/compliance/frameworks/<framework>.yaml` if present,
+  otherwise falls back to the built-in defaults.
+
+  ## Examples
+
+      iex> FrameworkConfig.get_framework(:soc2)
+      %{name: "SOC2", ...}
+
+      iex> FrameworkConfig.get_framework(:hipaa)
+      %{name: "HIPAA", ...}
+  """
+  @spec get_framework(atom()) :: map()
+  def get_framework(framework_atom) when is_atom(framework_atom) do
+    framework_str = framework_atom |> Atom.to_string() |> String.upcase()
+    yaml_path = Application.app_dir(:canopy, "priv/compliance/frameworks/#{String.downcase(framework_str)}.yaml")
+
+    if File.exists?(yaml_path) do
+      case YamlElixir.read_from_file(yaml_path) do
+        {:ok, raw} ->
+          raw
+          |> Map.put("name", Map.get(raw, "name", framework_str))
+          |> atomize_keys()
+
+        {:error, _reason} ->
+          fallback_framework_map(framework_str)
+      end
+    else
+      fallback_framework_map(framework_str)
+    end
+  end
+
   # Private helpers
 
+  defp atomize_keys(map) when is_map(map) do
+    Map.new(map, fn {k, v} ->
+      key = if is_binary(k), do: String.to_atom(k), else: k
+      {key, v}
+    end)
+  end
+
+  defp fallback_framework_map(framework_str) do
+    case load_config(framework_str) do
+      {:ok, fw} ->
+        %{
+          name: fw.framework_name,
+          version: fw.version,
+          description: fw.description
+        }
+
+      {:error, _} ->
+        %{name: framework_str}
+    end
+  end
+
   defp load_framework_file(framework_name) do
-    # For now, return in-memory defaults
-    # In production, load from priv/compliance/frameworks/{framework}.yaml
-    case framework_name do
-      "SOC2" -> {:ok, soc2_defaults()}
-      "HIPAA" -> {:ok, hipaa_defaults()}
-      "GDPR" -> {:ok, gdpr_defaults()}
-      "ISO27001" -> {:ok, iso27001_defaults()}
-      "SOX" -> {:ok, sox_defaults()}
-      _ -> {:error, "Framework file not found: #{framework_name}"}
+    # Try YAML file first, fall back to in-memory defaults
+    yaml_path =
+      Application.app_dir(
+        :canopy,
+        "priv/compliance/frameworks/#{String.downcase(framework_name)}.yaml"
+      )
+
+    if File.exists?(yaml_path) do
+      case YamlElixir.read_from_file(yaml_path) do
+        {:ok, config_map} -> {:ok, config_map}
+        {:error, reason} -> {:error, "Failed to read #{framework_name} YAML: #{inspect(reason)}"}
+      end
+    else
+      # Fall back to in-memory defaults
+      case framework_name do
+        "SOC2" -> {:ok, soc2_defaults()}
+        "HIPAA" -> {:ok, hipaa_defaults()}
+        "GDPR" -> {:ok, gdpr_defaults()}
+        "ISO27001" -> {:ok, iso27001_defaults()}
+        "SOX" -> {:ok, sox_defaults()}
+        _ -> {:error, "Framework file not found: #{framework_name}"}
+      end
     end
   end
 

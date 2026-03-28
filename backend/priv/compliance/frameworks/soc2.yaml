@@ -1,0 +1,101 @@
+name: SOC2
+framework_name: SOC2
+version: "2.0"
+description: "Service Organization Control 2 - Trust Service Criteria"
+controls:
+  - id: cc6.1
+    title: Logical Access Control
+    description: Logical access restricted to authorized personnel
+    criticality: critical
+    tags:
+      - access_control
+      - authentication
+    evidence_required:
+      - access_policy
+      - audit_logs
+      - role_assignments
+  - id: cc6.2
+    title: User Provisioning
+    description: User provisioning requires verification
+    criticality: high
+    tags:
+      - access_control
+      - onboarding
+    evidence_required:
+      - onboarding_checklist
+      - manager_approval
+      - training_record
+  - id: a1.1
+    title: System Availability
+    description: System availability must exceed 99.9%
+    criticality: high
+    tags:
+      - availability
+      - monitoring
+    evidence_required:
+      - uptime_logs
+      - sla_metrics
+      - incident_reports
+  - id: c1.1
+    title: Data Encryption
+    description: Sensitive data encrypted at rest and in transit
+    criticality: critical
+    tags:
+      - encryption
+      - confidentiality
+    evidence_required:
+      - encryption_policy
+      - key_management_logs
+      - technical_review
+  - id: i1.1
+    title: Audit Trail Integrity
+    description: Audit trail entries have valid signatures
+    criticality: critical
+    tags:
+      - audit
+      - integrity
+    evidence_required:
+      - audit_logs
+      - signature_validation
+      - technical_review
+  - id: cc7.1
+    title: System Monitoring
+    description: System monitoring and alerting enabled
+    criticality: high
+    tags:
+      - monitoring
+      - incident_response
+    evidence_required:
+      - monitoring_config
+      - alert_logs
+      - incident_response_plan
+audit_requirements:
+  - id: annual_audit
+    description: Annual SOC2 Type II audit
+    frequency: annual
+    responsible_role: compliance_officer
+  - id: quarterly_review
+    description: Quarterly control assessment
+    frequency: quarterly
+    responsible_role: compliance_officer
+evidence_mapping:
+  cc6.1:
+    - policy
+    - logs
+    - roles
+  cc6.2:
+    - checklist
+    - approval
+    - training
+  a1.1:
+    - metrics
+    - reports
+  c1.1:
+    - policy
+    - keys
+  i1.1:
+    - logs
+    - signatures
+  cc7.1:
+    - config
+    - alerts

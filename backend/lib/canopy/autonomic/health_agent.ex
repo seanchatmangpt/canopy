@@ -22,7 +22,6 @@ defmodule Canopy.Autonomic.HealthAgent do
   ]
 
   @latency_threshold_ms 1000
-  @error_rate_threshold 0.05
 
   def run(opts \\ []) do
     Logger.info("[HealthAgent] Polling systems for anomalies...")
@@ -83,34 +82,55 @@ defmodule Canopy.Autonomic.HealthAgent do
     end
   end
 
-  defp poll_system(system_name) do
+  @doc """
+  Poll a named system and return its health data.
+
+  Returns `{system_name, %{latency_ms, error_rate, healthy, anomaly, status}}`.
+  `error_rate` is 0.0 when healthy, 1.0 when unreachable.
+  """
+  def poll_system(system_name) do
+    url = system_url(system_name)
     start = System.monotonic_time(:millisecond)
 
-    try do
-      # Simulate health check (would be real HTTP in production)
-      # Simulate network latency
-      :timer.sleep(10)
+    case Req.get(url, receive_timeout: 5_000, retry: false) do
+      {:ok, %{status: status_code}} ->
+        latency = System.monotonic_time(:millisecond) - start
+        healthy = status_code in 200..299
+        error_rate = if healthy, do: 0.0, else: 1.0
+        anomaly = latency > @latency_threshold_ms or not healthy
 
-      latency = System.monotonic_time(:millisecond) - start
-      error_rate = :rand.uniform()
+        {system_name,
+         %{
+           latency_ms: latency,
+           error_rate: error_rate,
+           healthy: healthy,
+           anomaly: anomaly,
+           status: if(healthy, do: "healthy", else: "degraded")
+         }}
 
-      anomaly =
-        latency > @latency_threshold_ms or error_rate > @error_rate_threshold
+      {:error, reason} ->
+        latency = System.monotonic_time(:millisecond) - start
 
-      {system_name,
-       %{
-         latency_ms: latency,
-         error_rate: error_rate,
-         anomaly: anomaly,
-         status: if(anomaly, do: "degraded", else: "healthy")
-       }}
-    rescue
-      e ->
-        Logger.error(
-          "[HealthAgent] Error polling #{inspect(system_name)}: #{Exception.message(e)}"
+        Logger.warning(
+          "[HealthAgent] Error polling #{inspect(system_name)}: #{inspect(reason)}"
         )
 
-        {system_name, %{status: "unreachable", error: Exception.message(e), anomaly: true}}
+        {system_name,
+         %{
+           latency_ms: latency,
+           error_rate: 1.0,
+           healthy: false,
+           anomaly: true,
+           status: "unreachable"
+         }}
+    end
+  end
+
+  # Map system atom to URL
+  defp system_url(system_name) do
+    case Enum.find(@systems, fn {name, _url} -> name == system_name end) do
+      {_name, url} -> url
+      nil -> "http://localhost:9999/healthz"
     end
   end
 end

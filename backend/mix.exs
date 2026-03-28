@@ -52,6 +52,7 @@ defmodule Canopy.MixProject do
       {:bcrypt_elixir, "~> 3.0"},
       {:cors_plug, "~> 3.0"},
       {:req, "~> 0.5"},
+      {:yaml_elixir, "~> 2.12"},
       {:quantum, "~> 3.5"},
       {:websocket_client, git: "https://github.com/sanmiguel/websocket_client.git"},
       {:opentelemetry_api, "~> 1.2"},
