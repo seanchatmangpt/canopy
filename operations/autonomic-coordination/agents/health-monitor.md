@@ -16,10 +16,10 @@ You monitor the health of all system components every 5 minutes.
 
 | System | Health Endpoint | Port |
 |--------|----------------|------|
-| OSA | GET /health | 9089 |
+| OSA | GET /api/v1/health | 8089 |
 | BusinessOS | GET /api/health | 8001 |
-| Canopy | GET /health | 5200 |
-| Groq API | Direct API ping | N/A |
+| Canopy | GET /healthz | 9089 |
+| Groq | Proxy through OSA | 8089 |
 
 ## Procedure
 

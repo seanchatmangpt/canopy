@@ -2,9 +2,6 @@ defmodule Canopy.Autonomic.HeartbeatTest do
   use ExUnit.Case, async: false
   doctest Canopy.Autonomic.Heartbeat
 
-  # Requires database and application processes
-  @moduletag :requires_application
-
   alias Canopy.Repo
   alias Canopy.Schemas.{Agent, Organization}
   alias Canopy.Autonomic.Heartbeat

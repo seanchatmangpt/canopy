@@ -165,8 +165,8 @@ defmodule Canopy.Ontology.Loader do
 
   @impl true
   def init(_opts) do
-    :ets.new(@cache_table, [:named_table, :set, :protected])
-    :ets.new(@stats_table, [:named_table, :set, :protected])
+    :ets.new(@cache_table, [:named_table, :set, :public])
+    :ets.new(@stats_table, [:named_table, :set, :public])
 
     # Start periodic refresh
     schedule_refresh()

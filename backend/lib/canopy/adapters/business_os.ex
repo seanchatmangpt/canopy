@@ -51,13 +51,20 @@ defmodule Canopy.Adapters.BusinessOS do
 
   @impl true
   def execute_heartbeat(params) do
+    # Create span for BusinessOS heartbeat operation
+    {:ok, span} = Canopy.Middleware.Tracing.create_span(nil, "businessos.heartbeat", %{
+      url: params["url"] || @default_url
+    })
+
     Stream.resource(
       fn ->
         params
       end,
       fn params ->
-        case parallel_health_check(params) do
+        case parallel_health_check(params, span) do
           {:ok, status} ->
+            Canopy.Middleware.Tracing.end_span(span, :ok)
+
             event = %{
               "event_type" => "health_check",
               "data" => status,
@@ -67,6 +74,8 @@ defmodule Canopy.Adapters.BusinessOS do
             {[event], params}
 
           {:error, reason} ->
+            Canopy.Middleware.Tracing.end_span(span, :error)
+
             event = %{
               "event_type" => "health_check_failed",
               "data" => %{"error" => reason, "timestamp" => DateTime.utc_now()},
@@ -155,6 +164,13 @@ defmodule Canopy.Adapters.BusinessOS do
     url = params["url"] || @default_url
     timeout = params["timeout"] || @default_timeout
 
+    # Create span for process discovery
+    {:ok, span} = Canopy.Middleware.Tracing.create_span(nil, "businessos.discover", %{
+      url: url,
+      include_variants: true,
+      include_statistics: true
+    })
+
     payload = %{
       "event_log" => event_log,
       "include_variants" => true,
@@ -163,16 +179,20 @@ defmodule Canopy.Adapters.BusinessOS do
 
     case make_request("POST", "#{url}/api/bos/discover", payload, params, timeout) do
       {:ok, %{status: status, body: resp_body}} when status in 200..201 ->
+        Canopy.Middleware.Tracing.end_span(span, :ok)
         Logger.info("[BusinessOS] Process discovery succeeded")
         {:ok, resp_body}
 
       {:ok, %{status: 400, body: resp_body}} ->
+        Canopy.Middleware.Tracing.end_span(span, :error)
         {:error, {:invalid_log, resp_body["error"]}}
 
       {:ok, %{status: 500, body: resp_body}} ->
+        Canopy.Middleware.Tracing.end_span(span, :error)
         {:error, {:discovery_failed, resp_body["error"]}}
 
       {:error, reason} ->
+        Canopy.Middleware.Tracing.end_span(span, :error)
         Logger.error("[BusinessOS] Process discovery failed: #{inspect(reason)}")
         {:error, {:connection_failed, reason}}
     end
@@ -189,6 +209,12 @@ defmodule Canopy.Adapters.BusinessOS do
     url = params["url"] || @default_url
     timeout = params["timeout"] || @default_timeout
 
+    # Create span for conformance checking
+    {:ok, span} = Canopy.Middleware.Tracing.create_span(nil, "businessos.conformance_check", %{
+      url: url,
+      method: params["method"] || "token_replay"
+    })
+
     payload = %{
       "model" => model,
       "event_log" => event_log,
@@ -199,16 +225,22 @@ defmodule Canopy.Adapters.BusinessOS do
       {:ok, %{status: status, body: resp_body}} when status in 200..201 ->
         fitness = resp_body["fitness"] || 0.0
         precision = resp_body["precision"] || 0.0
+        Canopy.Middleware.Tracing.record_operation(span, :fitness, fitness)
+        Canopy.Middleware.Tracing.record_operation(span, :precision, precision)
+        Canopy.Middleware.Tracing.end_span(span, :ok)
         Logger.info("[BusinessOS] Conformance check: fitness=#{fitness}, precision=#{precision}")
         {:ok, %{"fitness" => fitness, "precision" => precision}}
 
       {:ok, %{status: 400, body: resp_body}} ->
+        Canopy.Middleware.Tracing.end_span(span, :error)
         {:error, {:invalid_input, resp_body["error"]}}
 
       {:ok, %{status: 500, body: resp_body}} ->
+        Canopy.Middleware.Tracing.end_span(span, :error)
         {:error, {:conformance_failed, resp_body["error"]}}
 
       {:error, reason} ->
+        Canopy.Middleware.Tracing.end_span(span, :error)
         Logger.error("[BusinessOS] Conformance check failed: #{inspect(reason)}")
         {:error, {:connection_failed, reason}}
     end
@@ -225,6 +257,12 @@ defmodule Canopy.Adapters.BusinessOS do
     url = params["url"] || @default_url
     timeout = params["timeout"] || @default_timeout
 
+    # Create span for compliance verification
+    {:ok, span} = Canopy.Middleware.Tracing.create_span(nil, "businessos.verify_compliance", %{
+      url: url,
+      framework: framework
+    })
+
     payload = %{
       "framework" => framework,
       "include_gaps" => true,
@@ -233,16 +271,20 @@ defmodule Canopy.Adapters.BusinessOS do
 
     case make_request("POST", "#{url}/api/bos/compliance/verify", payload, params, timeout) do
       {:ok, %{status: status, body: resp_body}} when status in 200..201 ->
+        Canopy.Middleware.Tracing.end_span(span, :ok)
         Logger.info("[BusinessOS] Compliance verification succeeded for #{framework}")
         {:ok, resp_body}
 
       {:ok, %{status: 400, body: resp_body}} ->
+        Canopy.Middleware.Tracing.end_span(span, :error)
         {:error, {:invalid_framework, resp_body["error"]}}
 
       {:ok, %{status: 500, body: resp_body}} ->
+        Canopy.Middleware.Tracing.end_span(span, :error)
         {:error, {:verification_failed, resp_body["error"]}}
 
       {:error, reason} ->
+        Canopy.Middleware.Tracing.end_span(span, :error)
         Logger.error("[BusinessOS] Compliance verification failed: #{inspect(reason)}")
         {:error, {:connection_failed, reason}}
     end
@@ -253,11 +295,11 @@ defmodule Canopy.Adapters.BusinessOS do
   @doc """
   Check health status of BusinessOS server.
   """
-  def health_check(params \\ %{}) do
+  def health_check(params \\ %{}, trace_headers \\ %{}) do
     url = params["url"] || @default_url
     timeout = params["timeout"] || @default_timeout
 
-    case make_request("GET", "#{url}/api/health", nil, params, timeout) do
+    case make_request("GET", "#{url}/api/health", nil, params, timeout, trace_headers) do
       {:ok, %{status: 200, body: resp_body}} ->
         Logger.debug("[BusinessOS] Health check OK")
         {:ok, resp_body["status"] || "healthy"}
@@ -274,20 +316,29 @@ defmodule Canopy.Adapters.BusinessOS do
   Parallel health checks: status endpoint + discovery capability.
 
   Used by heartbeat to validate both availability and functionality.
+  Includes traceparent injection for distributed tracing.
   """
-  def parallel_health_check(params \\ %{}) do
+  def parallel_health_check(params \\ %{}, span \\ nil) do
     url = params["url"] || @default_url
     timeout = params["timeout"] || @default_timeout
+
+    # Inject traceparent into request headers
+    headers_with_trace = if span do
+      {:ok, headers} = Canopy.Middleware.Tracing.propagate_to_downstream(span, %{})
+      headers
+    else
+      %{}
+    end
 
     # Start two parallel checks: status and discover endpoint
     status_task =
       Task.async(fn ->
-        health_check(params)
+        health_check(params, headers_with_trace)
       end)
 
     discover_task =
       Task.async(fn ->
-        case make_request("GET", "#{url}/api/bos/status", nil, params, timeout) do
+        case make_request("GET", "#{url}/api/bos/status", nil, params, timeout, headers_with_trace) do
           {:ok, %{status: 200, body: resp_body}} ->
             {:ok, resp_body}
 
@@ -313,8 +364,8 @@ defmodule Canopy.Adapters.BusinessOS do
 
   # ── Private Helpers ─────────────────────────────────────────────────
 
-  defp make_request(method, url, body, params, timeout) do
-    headers = build_headers(params)
+  defp make_request(method, url, body, params, timeout, trace_headers \\ %{}) do
+    headers = build_headers(params, trace_headers)
 
     case method do
       "GET" ->
@@ -339,13 +390,27 @@ defmodule Canopy.Adapters.BusinessOS do
     end
   end
 
-  defp build_headers(params) do
+  defp build_headers(params, trace_headers) do
     token = params["token"] || System.get_env("BUSINESSOS_API_TOKEN") || ""
 
-    [
+    base = [
       {"authorization", "Bearer #{token}"},
       {"content-type", "application/json"}
     ]
+
+    # Add traceparent headers if provided
+    base =
+      if map_size(trace_headers) > 0 do
+        trace_list =
+          trace_headers
+          |> Enum.map(fn {k, v} -> {k, v} end)
+
+        trace_list ++ base
+      else
+        base
+      end
+
+    base
   end
 
   defp parse_message(msg) when is_binary(msg) do

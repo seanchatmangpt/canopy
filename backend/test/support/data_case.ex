@@ -24,8 +24,6 @@ defmodule Canopy.DataCase do
       import Ecto.Changeset
       import Ecto.Query
       import Canopy.DataCase
-
-      @moduletag :requires_application
     end
   end
 

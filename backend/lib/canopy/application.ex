@@ -4,6 +4,12 @@ defmodule Canopy.Application do
 
   @impl true
   def start(_type, _args) do
+    # Start Finch only if not already started (Req may start it automatically)
+    finch_child = case Process.whereis(Req.Finch) do
+      nil -> {Finch, name: Req.Finch, pools: %{:default => [size: 32]}}
+      _pid -> nil
+    end
+
     children = [
       CanopyWeb.Telemetry,
       Canopy.Repo,
@@ -26,10 +32,13 @@ defmodule Canopy.Application do
       Canopy.Ontology.ToolRegistry,
       Canopy.JTBD.SelfPlayLoop,
       Canopy.Yawl.Client,
-      Canopy.Bridges.YawlValidatorSupervisor,
-      {Finch, name: Req.Finch, pools: %{:default => [size: 32]}},
-      CanopyWeb.Endpoint
+      Canopy.Bridges.YawlValidatorSupervisor
     ]
+
+    # Add Finch to children only if not already started
+    children = if finch_child, do: children ++ [finch_child], else: children
+
+    children = children ++ [CanopyWeb.Endpoint]
 
     # Create ETS tables for caches and metrics before endpoint starts (avoids TOCTOU race)
     :ets.new(:canopy_idempotency_cache, [:named_table, :set, :public, read_concurrency: true])

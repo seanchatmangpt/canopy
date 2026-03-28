@@ -28,8 +28,6 @@ defmodule CanopyWeb.ConnCase do
       import Plug.Conn
       import Phoenix.ConnTest
       import CanopyWeb.ConnCase
-
-      @moduletag :requires_application
     end
   end
 

@@ -9,7 +9,7 @@ defmodule Canopy.Adapters.OSA do
 
   require Logger
 
-  @default_url "http://127.0.0.1:9089"
+  @default_url "http://127.0.0.1:8089"
   @default_provider "groq"
   @default_model "llama-3.3-70b-versatile"
 

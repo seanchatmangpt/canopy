@@ -21,7 +21,6 @@ defmodule Canopy.ArmstrongAGILiveValidationTest do
   """
 
   use ExUnit.Case, async: false
-  @moduletag :requires_application
 
   # ---------------------------------------------------------------------------
   # SECTION 1: Supervision restart (Armstrong principle 2)

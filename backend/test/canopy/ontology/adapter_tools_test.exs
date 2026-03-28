@@ -1,6 +1,5 @@
 defmodule Canopy.Ontology.AdapterToolsTest do
   use ExUnit.Case
-  @moduletag :requires_application
 
   alias Canopy.Ontology.AdapterTools
   alias Canopy.Ontology.ToolRegistry
