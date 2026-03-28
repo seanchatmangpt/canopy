@@ -153,17 +153,15 @@ defmodule Canopy.Adapters.BusinessOS do
           }
       end
 
-    Stream.concat([event])
+    [event]
   end
 
   def send_message(_session, _message) do
-    event = %{
+    [%{
       "event_type" => "parse_error",
       "data" => %{"error" => "Invalid message format"},
       "tokens" => 100
-    }
-
-    Stream.concat([event])
+    }]
   end
 
   # ── Process Mining API ───────────────────────────────────────────────
