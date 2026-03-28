@@ -15,10 +15,10 @@ defmodule Canopy.Autonomic.HealthAgent do
   require OpenTelemetry.Tracer
 
   @systems [
-    {:pm4py_rust, "http://localhost:8090/healthz"},
-    {:businessos, "http://localhost:8001/healthz"},
-    {:canopy, "http://localhost:9089/healthz"},
-    {:osa, "http://localhost:8089/healthz"}
+    {:pm4py_rust, "http://localhost:8090/api/health"},
+    {:businessos, "http://localhost:8001/health"},
+    {:canopy, "http://localhost:9089/health"},
+    {:osa, "http://localhost:8089/health"}
   ]
 
   @latency_threshold_ms 1000

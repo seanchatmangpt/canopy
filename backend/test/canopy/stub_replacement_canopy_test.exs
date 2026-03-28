@@ -146,6 +146,18 @@ defmodule Canopy.StubReplacementTest do
   end
 
   # ─────────────────────────────────────────────────────────────────
+  # CAN-C3b: HealingAgent OSA wiring
+  # ─────────────────────────────────────────────────────────────────
+
+  describe "CAN-C3b: HealingAgent execute_healing/2 OSA wiring" do
+    test "execute_healing returns error when OSA not running" do
+      session = %Canopy.Schemas.Session{id: "test-123"}
+      result = HealingAgent.execute_healing(session, :retry)
+      assert match?({:error, {:osa_unreachable, _}}, result)
+    end
+  end
+
+  # ─────────────────────────────────────────────────────────────────
   # CAN-C3: HealingAgent strategies
   # ─────────────────────────────────────────────────────────────────
 

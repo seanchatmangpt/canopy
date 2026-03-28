@@ -136,12 +136,39 @@ defmodule Canopy.Autonomic.HealingAgent do
   def determine_healing_strategy(%{error_type: :partial}), do: :compensate
   def determine_healing_strategy(_), do: :retry
 
-  defp execute_healing(%Session{id: session_id}, strategy) do
+  @doc """
+  Execute healing strategy for a session.
+
+  For `:retry` strategy, posts a deviation event to OSA at
+  `OSA_API_URL/api/v1/board/deviation`. Returns `{:error, {:osa_unreachable, reason}}`
+  if OSA is not reachable.
+
+  Armstrong rule: no silent swallowing — caller sees the real error.
+  """
+  def execute_healing(%Session{id: session_id} = _session, strategy) do
     case strategy do
       :retry ->
-        # Attempt retry with exponential backoff (50ms, 100ms, 200ms)
-        Logger.info("[HealingAgent] Retrying session #{session_id} with backoff")
-        :ok
+        payload = %{
+          "process_id" => to_string(session_id),
+          "fitness" => fitness_for_strategy(strategy),
+          "deviation_type" => to_string(strategy)
+        }
+
+        case Req.post(osa_url("/api/v1/board/deviation"),
+               json: payload,
+               receive_timeout: 10_000,
+               retry: false
+             ) do
+          {:ok, %{status: 202}} ->
+            Logger.info("[HealingAgent] OSA acknowledged retry for session #{session_id}")
+            :ok
+
+          {:ok, %{status: s, body: b}} ->
+            {:error, {:osa_rejected, s, b}}
+
+          {:error, reason} ->
+            {:error, {:osa_unreachable, reason}}
+        end
 
       :rollback ->
         # Rollback to last known-good state in a transaction
@@ -168,4 +195,14 @@ defmodule Canopy.Autonomic.HealingAgent do
         {:error, "unknown_strategy"}
     end
   end
+
+  defp osa_url(path) do
+    base = System.get_env("OSA_API_URL", "http://localhost:8089")
+    base <> path
+  end
+
+  defp fitness_for_strategy(:retry), do: 0.5
+  defp fitness_for_strategy(:rollback), do: 0.2
+  defp fitness_for_strategy(:compensate), do: 0.3
+  defp fitness_for_strategy(_), do: 0.1
 end
