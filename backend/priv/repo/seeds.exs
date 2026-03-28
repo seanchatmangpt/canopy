@@ -181,7 +181,7 @@ autonomic_agents = [
     name: "Health Monitor",
     role: "health_monitor",
     adapter: "osa",
-    model: "llama-3.3-70b-versatile",
+    model: "openai/gpt-oss-20b",
     status: "idle",
     avatar_emoji: "💓",
     config: %{
@@ -209,7 +209,7 @@ autonomic_agents = [
     name: "CRM Automation",
     role: "crm_automation",
     adapter: "osa",
-    model: "llama-3.3-70b-versatile",
+    model: "openai/gpt-oss-20b",
     status: "idle",
     avatar_emoji: "📊",
     config: %{
@@ -233,7 +233,7 @@ autonomic_agents = [
     name: "Project Coordinator",
     role: "project_coordinator",
     adapter: "osa",
-    model: "llama-3.3-70b-versatile",
+    model: "openai/gpt-oss-20b",
     status: "idle",
     avatar_emoji: "📋",
     config: %{
@@ -257,7 +257,7 @@ autonomic_agents = [
     name: "App Generator",
     role: "app_generator",
     adapter: "osa",
-    model: "llama-3.3-70b-versatile",
+    model: "openai/gpt-oss-20b",
     status: "sleeping",
     avatar_emoji: "🚀",
     config: %{
@@ -281,7 +281,7 @@ autonomic_agents = [
     name: "Process Healer",
     role: "process_healer",
     adapter: "osa",
-    model: "llama-3.3-70b-versatile",
+    model: "openai/gpt-oss-20b",
     status: "sleeping",
     avatar_emoji: "🔧",
     config: %{
@@ -305,7 +305,7 @@ autonomic_agents = [
     name: "Compliance Monitor",
     role: "compliance_monitor",
     adapter: "osa",
-    model: "llama-3.3-70b-versatile",
+    model: "openai/gpt-oss-20b",
     status: "idle",
     avatar_emoji: "✅",
     config: %{

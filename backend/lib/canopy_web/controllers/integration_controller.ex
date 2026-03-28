@@ -114,6 +114,35 @@ defmodule CanopyWeb.IntegrationController do
     end
   end
 
+  def relay_osa_provider_key(conn, %{"provider" => slug, "api_key" => api_key})
+      when is_binary(slug) and is_binary(api_key) and byte_size(api_key) > 0 do
+    osa_url = Application.get_env(:canopy, :osa_url, "http://127.0.0.1:8089")
+    shared_secret = System.get_env("OSA_SHARED_SECRET", "")
+
+    headers = [
+      {"Content-Type", "application/json"},
+      {"X-Shared-Secret", shared_secret}
+    ]
+
+    case Req.post("#{osa_url}/api/v1/providers/#{slug}/connect",
+           json: %{"api_key" => api_key},
+           headers: headers,
+           receive_timeout: 5_000) do
+      {:ok, %{status: status}} when status in 200..299 ->
+        json(conn, %{"status" => "ok", "provider" => slug})
+
+      {:ok, %{status: status, body: body}} ->
+        conn |> put_status(status) |> json(%{"error" => inspect(body)})
+
+      {:error, reason} ->
+        conn |> put_status(503) |> json(%{"error" => "OSA unreachable: #{inspect(reason)}"})
+    end
+  end
+
+  def relay_osa_provider_key(conn, _params) do
+    conn |> put_status(400) |> json(%{"error" => "provider and api_key required"})
+  end
+
   def pull_all(conn, params) do
     workspace_id = params["workspace_id"]
 

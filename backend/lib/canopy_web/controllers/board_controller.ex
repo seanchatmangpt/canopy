@@ -22,7 +22,6 @@ defmodule CanopyWeb.BoardController do
 
   require Logger
 
-  @osa_url Application.compile_env(:canopy, :osa_url, "http://localhost:8089")
   @briefing_timeout_ms 10_000
   @decision_timeout_ms 10_000
   @decisions_timeout_ms 5_000
@@ -36,7 +35,7 @@ defmodule CanopyWeb.BoardController do
   If OSA is unavailable, returns a degraded response with `osa_available: false`.
   """
   def briefing(conn, _params) do
-    case Req.get("#{@osa_url}/api/v1/board/briefing",
+    case Req.get("#{osa_url()}/api/v1/board/briefing",
            receive_timeout: @briefing_timeout_ms
          ) do
       {:ok, %{status: 200, body: body}} when is_map(body) ->
@@ -83,7 +82,7 @@ defmodule CanopyWeb.BoardController do
           osa_available: false,
           error: "OSA unavailable",
           reason: inspect(reason),
-          hint: "Ensure OSA is running at #{@osa_url}"
+          hint: "Ensure OSA is running at #{osa_url()}"
         })
     end
   end
@@ -124,7 +123,7 @@ defmodule CanopyWeb.BoardController do
           "notes" => notes
         }
 
-        case Req.post("#{@osa_url}/api/v1/board/decision",
+        case Req.post("#{osa_url()}/api/v1/board/decision",
                json: body,
                receive_timeout: @decision_timeout_ms
              ) do
@@ -172,7 +171,7 @@ defmodule CanopyWeb.BoardController do
   Returns empty list if OSA is unavailable (degraded, not error).
   """
   def list_decisions(conn, _params) do
-    case Req.get("#{@osa_url}/api/v1/board/decisions",
+    case Req.get("#{osa_url()}/api/v1/board/decisions",
            receive_timeout: @decisions_timeout_ms
          ) do
       {:ok, %{status: 200, body: decisions}} when is_list(decisions) ->
@@ -218,4 +217,8 @@ defmodule CanopyWeb.BoardController do
         })
     end
   end
+
+  # ── Private Helpers ──────────────────────────────────────────────────────────
+
+  defp osa_url, do: Application.get_env(:canopy, :osa_url, "http://127.0.0.1:8089")
 end

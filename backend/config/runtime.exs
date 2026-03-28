@@ -23,6 +23,8 @@ end
 config :canopy, CanopyWeb.Endpoint,
   http: [port: String.to_integer(System.get_env("PORT", "9089"))]
 
+config :canopy, :osa_url, System.get_env("OSA_URL", "http://127.0.0.1:8089")
+
 if config_env() == :prod do
   database_url =
     System.get_env("DATABASE_URL") ||

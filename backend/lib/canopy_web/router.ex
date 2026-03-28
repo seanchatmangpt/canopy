@@ -184,6 +184,7 @@ defmodule CanopyWeb.Router do
     # Integrations
     get "/integrations", IntegrationController, :index
     post "/integrations/pull-all", IntegrationController, :pull_all
+    post "/integrations/osa/provider-key", IntegrationController, :relay_osa_provider_key
     post "/integrations/:slug/connect", IntegrationController, :connect
     delete "/integrations/:slug", IntegrationController, :disconnect
     get "/integrations/:slug/status", IntegrationController, :status

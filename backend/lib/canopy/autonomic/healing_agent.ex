@@ -197,7 +197,7 @@ defmodule Canopy.Autonomic.HealingAgent do
   end
 
   defp osa_url(path) do
-    base = System.get_env("OSA_API_URL", "http://localhost:8089")
+    base = Application.get_env(:canopy, :osa_url, "http://127.0.0.1:8089")
     base <> path
   end
 

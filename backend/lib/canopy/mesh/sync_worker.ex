@@ -17,7 +17,6 @@ defmodule Canopy.Mesh.SyncWorker do
   # 5 minutes
   @sync_interval_ms 5 * 60 * 1000
   @osa_timeout_ms 30_000
-  @osa_base_url System.get_env("OSA_API_URL", "http://127.0.0.1:8089")
 
   # ── Public API ──────────────────────────────────────────────────────
 
@@ -150,7 +149,7 @@ defmodule Canopy.Mesh.SyncWorker do
   end
 
   defp fetch_domains_from_osa do
-    url = "#{@osa_base_url}/api/v1/mesh/domains"
+    url = "#{osa_base_url()}/api/v1/mesh/domains"
     headers = build_headers()
 
     Logger.debug("[Mesh.SyncWorker] Fetching domains from #{url}")
@@ -221,7 +220,7 @@ defmodule Canopy.Mesh.SyncWorker do
   end
 
   defp fetch_domain_entities(domain_name) do
-    url = "#{@osa_base_url}/api/v1/mesh/discover"
+    url = "#{osa_base_url()}/api/v1/mesh/discover"
     headers = build_headers()
 
     payload = %{
@@ -263,6 +262,8 @@ defmodule Canopy.Mesh.SyncWorker do
 
     :ok
   end
+
+  defp osa_base_url, do: Application.get_env(:canopy, :osa_url, "http://127.0.0.1:8089")
 
   defp build_headers do
     token = System.get_env("OSA_API_TOKEN", "")

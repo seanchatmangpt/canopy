@@ -77,7 +77,7 @@ defmodule Integration.OSAProtocolTest do
         "agent_name" => "Test Agent",
         "workspace_id" => workspace_id,
         "config" => %{
-          "model" => "llama-3.3-70b-versatile",
+          "model" => "openai/gpt-oss-20b",
           "provider" => "groq"
         }
       }
@@ -194,7 +194,7 @@ defmodule Integration.OSAProtocolTest do
         "agent_name" => "Temp Agent",
         "workspace_id" => Ecto.UUID.generate(),
         "config" => %{
-          "model" => "llama-3.3-70b-versatile",
+          "model" => "openai/gpt-oss-20b",
           "provider" => "groq"
         }
       }
@@ -473,7 +473,7 @@ defmodule Integration.OSAProtocolTest do
         "agent_id" => agent_id,
         "agent_name" => "Concurrent Test Agent",
         "workspace_id" => Ecto.UUID.generate(),
-        "config" => %{"model" => "llama-3.3-70b-versatile", "provider" => "groq"}
+        "config" => %{"model" => "openai/gpt-oss-20b", "provider" => "groq"}
       }
 
       {:ok, _} = call_osa("/api/v1/agents/spawn", spawn_payload)
@@ -526,7 +526,7 @@ defmodule Integration.OSAProtocolTest do
                 "agent_id" => generate_id("agent"),
                 "agent_name" => "Batch Agent #{i}",
                 "workspace_id" => Ecto.UUID.generate(),
-                "config" => %{"model" => "llama-3.3-70b-versatile", "provider" => "groq"}
+                "config" => %{"model" => "openai/gpt-oss-20b", "provider" => "groq"}
               }
 
               call_osa("/api/v1/agents/spawn", spawn_payload)
@@ -560,7 +560,7 @@ defmodule Integration.OSAProtocolTest do
         "agent_id" => generate_id("agent"),
         "agent_name" => "State Machine Test",
         "workspace_id" => Ecto.UUID.generate(),
-        "config" => %{"model" => "llama-3.3-70b-versatile", "provider" => "groq"}
+        "config" => %{"model" => "openai/gpt-oss-20b", "provider" => "groq"}
       }
 
       {:ok, spawn_resp} = call_osa("/api/v1/agents/spawn", spawn_payload)
@@ -671,7 +671,7 @@ defmodule Integration.OSAProtocolTest do
         "agent_id" => generate_id("agent"),
         "agent_name" => "Idempotent Test",
         "workspace_id" => Ecto.UUID.generate(),
-        "config" => %{"model" => "llama-3.3-70b-versatile", "provider" => "groq"}
+        "config" => %{"model" => "openai/gpt-oss-20b", "provider" => "groq"}
       }
 
       {:ok, spawn_resp} = call_osa("/api/v1/agents/spawn", spawn_payload)
@@ -774,7 +774,7 @@ defmodule Integration.OSAProtocolTest do
         "agent_name" => "Agent #{i} in #{workspace_id}",
         "workspace_id" => workspace_id,
         "config" => %{
-          "model" => "llama-3.3-70b-versatile",
+          "model" => "openai/gpt-oss-20b",
           "provider" => "groq"
         }
       }

@@ -8,13 +8,21 @@ defmodule Canopy.Adapters.OSA do
   @behaviour Canopy.Adapter
 
   require Logger
+  require OpenTelemetry.Tracer, as: Tracer
+
+  alias OpenTelemetry.SemConv.Incubating.CanopySpanNames
+  alias OpenTelemetry.SemConv.Incubating.CanopyAttributes
+  alias OpenTelemetry.SemConv.Incubating.LlmAttributes
 
   @default_url "http://127.0.0.1:8089"
   @default_provider "groq"
-  @default_model "llama-3.3-70b-versatile"
+  @default_model "openai/gpt-oss-20b"
 
   @impl true
   def type, do: "osa"
+
+  def default_model, do: @default_model
+  def default_provider, do: @default_provider
 
   @impl true
   def name, do: "OSA Agent"
@@ -37,37 +45,45 @@ defmodule Canopy.Adapters.OSA do
     model = config["model"] || @default_model
     user_id = config["user_id"] || "canopy-agent"
 
-    headers = build_headers(config)
+    Tracer.with_span CanopySpanNames.canopy_adapter_call(), %{
+      CanopyAttributes.canopy_adapter_name() => "osa",
+      CanopyAttributes.canopy_adapter_action() => "start",
+      CanopyAttributes.canopy_adapter_type() => "osa",
+      LlmAttributes.llm_provider() => provider,
+      LlmAttributes.llm_model() => model
+    } do
+      headers = build_headers(config)
 
-    body =
-      %{}
-      |> maybe_put("user_id", user_id)
-      |> maybe_put("provider", provider)
-      |> maybe_put("model", model)
+      body =
+        %{}
+        |> maybe_put("user_id", user_id)
+        |> maybe_put("provider", provider)
+        |> maybe_put("model", model)
 
-    case Req.post("#{base_url}/api/v1/sessions", json: body, headers: headers) do
-      {:ok, %{status: status, body: resp_body}} when status in 200..201 ->
-        session_id = resp_body["id"] || get_in(resp_body, ["session", "id"])
+      case Req.post("#{base_url}/api/v1/sessions", json: body, headers: headers) do
+        {:ok, %{status: status, body: resp_body}} when status in 200..201 ->
+          session_id = resp_body["id"] || get_in(resp_body, ["session", "id"])
 
-        if session_id do
-          Logger.info("[OSA Adapter] Session created: #{session_id} (#{provider}/#{model})")
+          if session_id do
+            Logger.info("[OSA Adapter] Session created: #{session_id} (#{provider}/#{model})")
 
-          {:ok,
-           %{
-             session_id: session_id,
-             base_url: base_url,
-             provider: provider,
-             model: model
-           }}
-        else
+            {:ok,
+             %{
+               session_id: session_id,
+               base_url: base_url,
+               provider: provider,
+               model: model
+             }}
+          else
+            {:error, {:osa_error, status, resp_body}}
+          end
+
+        {:ok, %{status: status, body: resp_body}} ->
           {:error, {:osa_error, status, resp_body}}
-        end
 
-      {:ok, %{status: status, body: resp_body}} ->
-        {:error, {:osa_error, status, resp_body}}
-
-      {:error, reason} ->
-        {:error, {:connection_failed, reason}}
+        {:error, reason} ->
+          {:error, {:connection_failed, reason}}
+      end
     end
   end
 
@@ -89,16 +105,23 @@ defmodule Canopy.Adapters.OSA do
     model = params["model"] || @default_model
     user_id = params["agent_id"] || "canopy-heartbeat"
 
-    headers = build_headers(params)
+    Tracer.with_span CanopySpanNames.canopy_adapter_call(), %{
+      CanopyAttributes.canopy_adapter_name() => "osa",
+      CanopyAttributes.canopy_adapter_action() => "execute_heartbeat",
+      CanopyAttributes.canopy_adapter_type() => "osa",
+      LlmAttributes.llm_provider() => provider,
+      LlmAttributes.llm_model() => model
+    } do
+      headers = build_headers(params)
 
-    body =
-      %{}
-      |> maybe_put("user_id", user_id)
-      |> maybe_put("message", agent_context)
-      |> maybe_put("provider", provider)
-      |> maybe_put("model", model)
+      body =
+        %{}
+        |> maybe_put("user_id", user_id)
+        |> maybe_put("message", agent_context)
+        |> maybe_put("provider", provider)
+        |> maybe_put("model", model)
 
-    Stream.resource(
+      Stream.resource(
       fn ->
         case Req.post("#{base_url}/api/v1/sessions", json: body, headers: headers) do
           {:ok, %{status: s, body: resp_body}} when s in 200..201 ->
@@ -140,31 +163,43 @@ defmodule Canopy.Adapters.OSA do
           :ok
       end
     )
+    end
   end
 
   @impl true
   def send_message(%{base_url: base_url, session_id: session_id} = session, message) do
-    headers = build_headers(session)
+    provider = session[:provider] || @default_provider
+    model = session[:model] || @default_model
 
-    Req.post("#{base_url}/api/v1/sessions/#{session_id}/message",
-      json: %{message: message},
-      headers: headers
-    )
+    Tracer.with_span CanopySpanNames.canopy_adapter_call(), %{
+      CanopyAttributes.canopy_adapter_name() => "osa",
+      CanopyAttributes.canopy_adapter_action() => "send_message",
+      CanopyAttributes.canopy_adapter_type() => "osa",
+      LlmAttributes.llm_provider() => provider,
+      LlmAttributes.llm_model() => model
+    } do
+      headers = build_headers(session)
 
-    Stream.resource(
-      fn ->
-        {:ok, task} = start_sse("#{base_url}/api/v1/sessions/#{session_id}/stream", headers)
-        task
-      end,
-      fn task ->
-        case receive_sse_event(task, 30_000) do
-          {:ok, event} -> {[event], task}
-          :done -> {:halt, task}
-          {:error, _} -> {:halt, task}
-        end
-      end,
-      fn _task -> :ok end
-    )
+      Req.post("#{base_url}/api/v1/sessions/#{session_id}/message",
+        json: %{message: message},
+        headers: headers
+      )
+
+      Stream.resource(
+        fn ->
+          {:ok, task} = start_sse("#{base_url}/api/v1/sessions/#{session_id}/stream", headers)
+          task
+        end,
+        fn task ->
+          case receive_sse_event(task, 30_000) do
+            {:ok, event} -> {[event], task}
+            :done -> {:halt, task}
+            {:error, _} -> {:halt, task}
+          end
+        end,
+        fn _task -> :ok end
+      )
+    end
   end
 
   # ── Temporal Workflow Support ────────────────────────────────────────

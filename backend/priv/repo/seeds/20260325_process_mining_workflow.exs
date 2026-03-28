@@ -51,7 +51,7 @@ agent_attrs = %{
   name: "Process Mining Monitor",
   role: "process_miner",
   adapter: "osa",
-  model: "llama-3.3-70b-versatile",
+  model: "openai/gpt-oss-20b",
   status: "idle",
   avatar_emoji: "⛏️",
   trigger: :manual,
