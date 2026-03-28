@@ -16,6 +16,7 @@ defmodule Canopy.Application do
       Canopy.BudgetEnforcer,
       {Phoenix.PubSub, name: Canopy.PubSub},
       Canopy.IssueDispatcher,
+      Canopy.Mesh.SyncWorker,
       Canopy.Scheduler,
       {DynamicSupervisor, name: Canopy.AdapterSupervisor, strategy: :one_for_one},
       {Task.Supervisor, name: Canopy.HeartbeatRunner},
@@ -47,7 +48,14 @@ defmodule Canopy.Application do
     children = children ++ [CanopyWeb.Endpoint]
 
     # Create ETS tables for caches and metrics before endpoint starts (avoids TOCTOU race)
+    Canopy.Mesh.Cache.init()
+    Canopy.Autonomic.CircuitBreaker.init()
+    Canopy.Autonomic.ExecutionLog.init()
+    Canopy.Autonomic.ScheduleGovernor.init()
     :ets.new(:canopy_idempotency_cache, [:named_table, :set, :public, read_concurrency: true])
+
+    # BOS intelligence cache: single-row overwrite, bounded memory.
+    :ets.new(:canopy_bos_intelligence, [:named_table, :set, :public, read_concurrency: true])
 
     # Wave 12 metrics table: bounded LRU cache for iteration metrics (WvdA soundness)
     :ets.new(:jtbd_wave12_metrics, [

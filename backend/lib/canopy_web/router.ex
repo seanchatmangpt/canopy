@@ -321,6 +321,10 @@ defmodule CanopyWeb.Router do
     get "/board/briefing", BoardController, :briefing
     post "/board/decision", BoardController, :record_decision
     get "/board/decisions", BoardController, :list_decisions
+
+    # BusinessOS → Canopy intelligence ingest
+    post "/bos/intelligence", BoardController, :ingest_intelligence
+    get  "/bos/intelligence", BoardController, :bos_intelligence_status
   end
 
   # SSE streaming endpoints (accept text/event-stream)
