@@ -524,6 +524,12 @@ defmodule Canopy.ArmstrongAGILiveValidationTest do
       # WvdA Liveness: no unbounded loops.
       # Armstrong: the task is supervised, so after it exits the supervisor can
       # restart it, effectively creating a bounded+restartable loop.
+
+      # Set a short agent_timeout so tick() completes quickly in test regardless
+      # of Req retry delays that can make the full suite much slower than isolation.
+      original_timeout = Canopy.Autonomic.Heartbeat.get_state().agent_timeout
+      Canopy.Autonomic.Heartbeat.set_agent_timeout(50)
+
       {:ok, sup} = Task.Supervisor.start_link([])
 
       {:ok, task_pid} =
@@ -539,9 +545,16 @@ defmodule Canopy.ArmstrongAGILiveValidationTest do
 
       ref = Process.monitor(task_pid)
 
-      # Task must complete (iterations exhausted) within bounded time
-      assert_receive {:DOWN, ^ref, :process, ^task_pid, _reason}, 2000,
-                     "Heartbeat loop must terminate after max_iterations — not run forever"
+      # Task must complete (iterations exhausted) within bounded time.
+      # Bound: 2 ticks × (10ms sleep + 6 agents × 50ms timeout) = ~620ms,
+      # well within 5000ms.
+      result =
+        assert_receive {:DOWN, ^ref, :process, ^task_pid, _reason}, 5000,
+                       "Heartbeat loop must terminate after max_iterations — not run forever"
+
+      # Restore previous agent timeout
+      Canopy.Autonomic.Heartbeat.set_agent_timeout(original_timeout)
+      result
     end
   end
 end
