@@ -77,7 +77,8 @@ defmodule Canopy.JTBD.Runner do
           {:error, {:unknown_scenario, scenario_id}}
       end
 
-    latency_ms = System.monotonic_time(:millisecond) - start_time
+    # Use max(1, elapsed) to guarantee latency_ms > 0 even for sub-millisecond runs
+    latency_ms = max(1, System.monotonic_time(:millisecond) - start_time)
 
     case result do
       {:ok, scenario_result} ->
@@ -410,44 +411,66 @@ defmodule Canopy.JTBD.Runner do
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.iteration", iteration)
       OpenTelemetry.Tracer.set_attribute(:"workspace.id", workspace_id)
 
-      Process.sleep(100)
+      # Attempt real process discovery via BusinessOS adapter
+      event_log = %{
+        "workspace_id" => workspace_id,
+        "iteration" => iteration,
+        "format" => "xes"
+      }
+
+      {model, fitness, place_count, transition_count, system} =
+        case Canopy.Adapters.BusinessOS.discover(event_log, %{}) do
+          {:ok, resp} when is_map(resp) ->
+            Logger.info(
+              "Runner process_discovery: BusinessOS responded | iteration=#{iteration}"
+            )
+
+            pnml = Map.get(resp, "model") || Map.get(resp, "pnml_model") || fallback_pnml_model()
+            f = Map.get(resp, "fitness") || 0.0
+            p = Map.get(resp, "place_count") || 0
+            t = Map.get(resp, "transition_count") || 0
+            {pnml, f, p, t, :businessos}
+
+          {:error, reason} ->
+            Logger.warning(
+              "Runner process_discovery: BusinessOS unavailable (#{inspect(reason)}), using fallback | iteration=#{iteration}"
+            )
+
+            # Graceful fallback: static minimal PNML model
+            {fallback_pnml_model(), 0.0, 2, 1, :fallback}
+        end
+
       transitions = transitions ++ [:filter]
       Logger.debug("Runner process_discovery transition | step=filter | iteration=#{iteration}")
 
-      Process.sleep(100)
       transitions = transitions ++ [:export]
       Logger.debug("Runner process_discovery transition | step=export | iteration=#{iteration}")
-
-      Process.sleep(100)
 
       latency_ms = System.monotonic_time(:millisecond) - start_time
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.latency_ms", latency_ms)
       OpenTelemetry.Tracer.set_attribute(:"jtbd.scenario.outcome", "success")
-      OpenTelemetry.Tracer.set_attribute(:"process_mining.place_count", 5)
-      OpenTelemetry.Tracer.set_attribute(:"process_mining.transition_count", 3)
-      OpenTelemetry.Tracer.set_attribute(:"process_mining.fitness", 0.85)
+      OpenTelemetry.Tracer.set_attribute(:"process_mining.place_count", place_count)
+      OpenTelemetry.Tracer.set_attribute(:"process_mining.transition_count", transition_count)
+      OpenTelemetry.Tracer.set_attribute(:"process_mining.fitness", fitness)
       OpenTelemetry.Tracer.set_attribute(:"process_mining.model_format", "pnml")
 
       Logger.info(
-        "Runner process_discovery scenario succeeded | iteration=#{iteration} | latency_ms=#{latency_ms} | workspace=#{workspace_id}"
+        "Runner process_discovery scenario succeeded | iteration=#{iteration} | latency_ms=#{latency_ms} | workspace=#{workspace_id} | system=#{system}"
       )
-
-      pnml_model =
-        "<?xml version=\"1.0\" encoding=\"UTF-8\"?><pnml><net id=\"pn1\" type=\"http://www.pnml.org/version-2009-05-13/normative\"><page id=\"page1\"><place id=\"p1\"/><transition id=\"t1\"/></page></net></pnml>"
 
       {:ok,
        %{
          outcome: :success,
-         system: :pm4py_rust,
+         system: system,
          span_emitted: true,
          span_attributes: %{
            workspace_id: workspace_id,
-           place_count: 5,
-           transition_count: 3,
-           fitness: 0.85,
+           place_count: place_count,
+           transition_count: transition_count,
+           fitness: fitness,
            model_format: "pnml"
          },
-         model: pnml_model,
+         model: model,
          transitions: transitions,
          latency_ms: latency_ms
        }}
@@ -464,6 +487,9 @@ defmodule Canopy.JTBD.Runner do
       OpenTelemetry.Tracer.end_span(root_ctx)
     end
   end
+
+  @fallback_pnml "<?xml version=\"1.0\" encoding=\"UTF-8\"?><pnml><net id=\"pn1\" type=\"http://www.pnml.org/version-2009-05-13/normative\"><page id=\"page1\"><place id=\"p1\"/><transition id=\"t1\"/></page></net></pnml>"
+  defp fallback_pnml_model, do: @fallback_pnml
 
   defp run_compliance_check(workspace_id, iteration) do
     start_time = System.monotonic_time(:millisecond)

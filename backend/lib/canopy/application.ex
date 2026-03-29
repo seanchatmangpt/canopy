@@ -51,26 +51,31 @@ defmodule Canopy.Application do
     children = children ++ [CanopyWeb.Endpoint]
 
     # Create ETS tables for caches and metrics before endpoint starts (avoids TOCTOU race)
+    # Guards prevent crash on restart (table already exists after supervisor restart)
     Canopy.Mesh.Cache.init()
     Canopy.Autonomic.CircuitBreaker.init()
     Canopy.Autonomic.ExecutionLog.init()
     Canopy.Autonomic.ScheduleGovernor.init()
-    :ets.new(:canopy_idempotency_cache, [:named_table, :set, :public, read_concurrency: true])
+
+    if :ets.whereis(:canopy_idempotency_cache) == :undefined do
+      :ets.new(:canopy_idempotency_cache, [:named_table, :set, :public, read_concurrency: true])
+    end
 
     # BOS intelligence cache: single-row overwrite, bounded memory.
-    :ets.new(:canopy_bos_intelligence, [:named_table, :set, :public, read_concurrency: true])
-
-    # A2A task store: tracks in-flight A2A tasks for cancel support (bounded by task TTL)
-    :ets.new(:canopy_a2a_tasks, [:named_table, :set, :public, read_concurrency: true])
+    if :ets.whereis(:canopy_bos_intelligence) == :undefined do
+      :ets.new(:canopy_bos_intelligence, [:named_table, :set, :public, read_concurrency: true])
+    end
 
     # Wave 12 metrics table: bounded LRU cache for iteration metrics (WvdA soundness)
-    :ets.new(:jtbd_wave12_metrics, [
-      :named_table,
-      :set,
-      :public,
-      {:write_concurrency, false},
-      {:read_concurrency, true}
-    ])
+    if :ets.whereis(:jtbd_wave12_metrics) == :undefined do
+      :ets.new(:jtbd_wave12_metrics, [
+        :named_table,
+        :set,
+        :public,
+        {:write_concurrency, false},
+        {:read_concurrency, true}
+      ])
+    end
 
     # YAWLv6 build tracker: store latest simulation/real build state
     Canopy.JTBD.YAWLv6BuildTracker.init()

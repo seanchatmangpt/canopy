@@ -142,9 +142,25 @@ defmodule Canopy.A2AAgent do
   end
 
   defp find_dispatch_agent do
-    # TODO: resolve active workspace agent from Canopy.AgentRepo
-    # Returns the first available coordinator agent
-    {:ok, nil}
+    # Resolve the first active or idle coordinator agent from the DB.
+    # Falls back to nil if none available (caller handles echo fallback).
+    import Ecto.Query
+
+    try do
+      agent =
+        Canopy.Repo.one(
+          from a in Canopy.Schemas.Agent,
+            where: a.status in ["active", "idle"] and a.role == "coordinator",
+            order_by: [asc: a.inserted_at],
+            limit: 1
+        )
+
+      {:ok, agent}
+    rescue
+      e ->
+        Logger.warning("[A2AAgent] Could not resolve dispatch agent: #{Exception.message(e)}")
+        {:ok, nil}
+    end
   end
 
   defp extract_text(%{parts: [%{text: text} | _]}), do: text

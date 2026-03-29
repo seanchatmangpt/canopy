@@ -151,9 +151,17 @@ defmodule Canopy.StubReplacementTest do
 
   describe "CAN-C3b: HealingAgent execute_healing/2 OSA wiring" do
     test "execute_healing returns error when OSA not running" do
-      session = %Canopy.Schemas.Session{id: "test-123"}
-      result = HealingAgent.execute_healing(session, :retry)
-      assert match?({:error, {:osa_unreachable, _}}, result)
+      # Force OSA URL to a guaranteed-refused port to simulate OSA being down
+      original_url = Application.get_env(:canopy, :osa_url)
+      Application.put_env(:canopy, :osa_url, "http://127.0.0.1:1")
+
+      try do
+        session = %Canopy.Schemas.Session{id: "test-123"}
+        result = HealingAgent.execute_healing(session, :retry)
+        assert match?({:error, {:osa_unreachable, _}}, result)
+      after
+        Application.put_env(:canopy, :osa_url, original_url)
+      end
     end
   end
 

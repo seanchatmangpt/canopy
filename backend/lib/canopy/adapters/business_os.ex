@@ -606,6 +606,9 @@ defmodule Canopy.Adapters.BusinessOS do
       {:ok, %{status: 500, body: resp_body}} ->
         {:error, {:scoring_failed, resp_body["error"]}}
 
+      {:ok, %{status: status, body: resp_body}} ->
+        {:error, {:unexpected_status, status, resp_body}}
+
       {:error, reason} ->
         Logger.error("[BusinessOS] ICP scoring failed: #{inspect(reason)}")
         {:error, {:connection_failed, reason}}
@@ -643,6 +646,9 @@ defmodule Canopy.Adapters.BusinessOS do
 
       {:ok, %{status: 500, body: resp_body}} ->
         {:error, {:enrollment_failed, resp_body["error"]}}
+
+      {:ok, %{status: status, body: resp_body}} ->
+        {:error, {:unexpected_status, status, resp_body}}
 
       {:error, reason} ->
         Logger.error("[BusinessOS] Outreach enrollment failed: #{inspect(reason)}")
