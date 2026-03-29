@@ -53,22 +53,26 @@ defmodule Canopy.A2AAgent do
         %{
           id: "workspace_coordination",
           name: "Workspace Coordination",
-          description: "Coordinate multi-agent workspaces and agent hiring"
+          description: "Coordinate multi-agent workspaces and agent hiring",
+          tags: []
         },
         %{
           id: "heartbeat_dispatch",
           name: "Heartbeat Dispatch",
-          description: "Agent heartbeat scheduling and task dispatch"
+          description: "Agent heartbeat scheduling and task dispatch",
+          tags: []
         },
         %{
           id: "process_mining",
           name: "Process Mining",
-          description: "Process mining via BusinessOS integration"
+          description: "Process mining via BusinessOS integration",
+          tags: []
         },
         %{
           id: "agent_orchestration",
           name: "Agent Orchestration",
-          description: "Orchestrate 160+ agents via heartbeat protocol"
+          description: "Orchestrate 160+ agents via heartbeat protocol",
+          tags: []
         }
       ]
     }
