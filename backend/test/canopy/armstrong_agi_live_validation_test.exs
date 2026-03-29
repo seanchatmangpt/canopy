@@ -527,7 +527,9 @@ defmodule Canopy.ArmstrongAGILiveValidationTest do
 
       # Set a short agent_timeout so tick() completes quickly in test regardless
       # of Req retry delays that can make the full suite much slower than isolation.
+      # Use on_exit to guarantee restoration even if the test fails.
       original_timeout = Canopy.Autonomic.Heartbeat.get_state().agent_timeout
+      on_exit(fn -> Canopy.Autonomic.Heartbeat.set_agent_timeout(original_timeout) end)
       Canopy.Autonomic.Heartbeat.set_agent_timeout(50)
 
       {:ok, sup} = Task.Supervisor.start_link([])
@@ -548,13 +550,8 @@ defmodule Canopy.ArmstrongAGILiveValidationTest do
       # Task must complete (iterations exhausted) within bounded time.
       # Bound: 2 ticks × (10ms sleep + 6 agents × 50ms timeout) = ~620ms,
       # well within 5000ms.
-      result =
-        assert_receive {:DOWN, ^ref, :process, ^task_pid, _reason}, 5000,
-                       "Heartbeat loop must terminate after max_iterations — not run forever"
-
-      # Restore previous agent timeout
-      Canopy.Autonomic.Heartbeat.set_agent_timeout(original_timeout)
-      result
+      assert_receive {:DOWN, ^ref, :process, ^task_pid, _reason}, 5000,
+                     "Heartbeat loop must terminate after max_iterations — not run forever"
     end
   end
 end
