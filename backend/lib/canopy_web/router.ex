@@ -342,6 +342,12 @@ defmodule CanopyWeb.Router do
     # BusinessOS → Canopy intelligence ingest
     post "/bos/intelligence", BoardController, :ingest_intelligence
     get  "/bos/intelligence", BoardController, :bos_intelligence_status
+
+    # OCPM (Object-Centric Process Mining) — event logs and process models
+    get  "/ocpm/events",  OcpmController, :index
+    post "/ocpm/events",  OcpmController, :create
+    get  "/ocpm/models",  OcpmController, :index_models
+    post "/ocpm/models",  OcpmController, :create_model
   end
 
   # SSE streaming endpoints (accept text/event-stream)
