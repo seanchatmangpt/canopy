@@ -382,6 +382,10 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aSpanNames do
   @spec a2a_trust_federate() :: String.t()
   def a2a_trust_federate, do: "a2a.trust.federate"
 
+  @doc "Cross-stack A2A call span (ChatmanGPT services). Span name: `a2a.cross_stack`"
+  @spec a2a_cross_stack() :: String.t()
+  def a2a_cross_stack, do: "a2a.cross_stack"
+
   @doc """
   All span names in this namespace.
   """
@@ -424,7 +428,8 @@ defmodule OpenTelemetry.SemConv.Incubating.A2aSpanNames do
       a2a_task_delegate(),
       a2a_task_update(),
       a2a_trust_evaluate(),
-      a2a_trust_federate()
+      a2a_trust_federate(),
+      a2a_cross_stack()
     ]
   end
 end
