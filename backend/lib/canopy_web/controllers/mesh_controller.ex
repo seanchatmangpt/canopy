@@ -11,7 +11,6 @@ defmodule CanopyWeb.MeshController do
 
   require Logger
 
-  @osa_base_url System.get_env("OSA_API_URL", "http://127.0.0.1:8089")
   @osa_timeout 30_000
 
   # ── Domain Registration ──────────────────────────────────────────────
@@ -319,7 +318,7 @@ defmodule CanopyWeb.MeshController do
       {"authorization", "Bearer #{System.get_env("OSA_API_TOKEN", "")}"}
     ]
 
-    url = "#{@osa_base_url}#{path}"
+    url = "#{Application.get_env(:canopy, :osa_url, "http://127.0.0.1:8089")}#{path}"
 
     case Req.post(url, json: payload, headers: headers, receive_timeout: @osa_timeout) do
       {:ok, %{status: status, body: body}} when status in 200..299 ->

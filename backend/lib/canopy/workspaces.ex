@@ -2,90 +2,99 @@ defmodule Canopy.Workspaces do
   @moduledoc """
   Context module for workspace operations.
 
-  Phase 2B Agent 1 deliverable: Workspace context module with ETS-backed operations.
-
-  Functions:
-  - list_workspaces/1: List all workspaces for a user
-  - get_workspace!/2: Get a specific workspace by ID or slug
-  - create_workspace/2: Create a new workspace
-  - add_user/3: Add a user to a workspace
+  Implements real Ecto queries for workspace management:
+  - list_workspaces/1: List all workspaces owned by a user
+  - get_workspace!/1: Get a workspace by ID (raises on missing)
+  - create_workspace/1: Create a new workspace
   - list_workspace_users/1: List all users in a workspace
-  - add_workspace_member/3: Add a member with role assignment
+  - add_workspace_member/2: Add a member to a workspace
   - remove_member/2: Remove a user from a workspace
+  - user_has_access?/2: Check membership
   """
 
-  def list_workspaces(_user_id) do
-    # TODO: Agent 1 - Implement workspace listing
-    # Query: workspaces where owner_id = user_id OR workspace_id in workspace_users
-    # Use ETS cache if available, fallback to DB
-    raise "Not yet implemented - Agent 1"
+  import Ecto.Query
+
+  alias Canopy.Repo
+  alias Canopy.Schemas.{Workspace, WorkspaceUser, User}
+
+  @doc """
+  List all workspaces owned by `user_id`.
+  """
+  def list_workspaces(user_id) do
+    Repo.all(from(w in Workspace, where: w.owner_id == ^user_id))
   end
 
   @doc """
-  Get a specific workspace by ID or slug.
-
-  Raises if workspace not found.
+  Get a workspace by ID. Raises `Ecto.NoResultsError` if not found.
   """
-  def get_workspace!(_id_or_slug, _user_id) do
-    # TODO: Agent 1 - Implement workspace retrieval
-    # Query by ID or slug, verify user has access
-    # Check ETS cache first, load from DB if needed
-    raise "Not yet implemented - Agent 1"
+  def get_workspace!(id) do
+    Repo.get!(Workspace, id)
   end
 
   @doc """
   Create a new workspace.
 
-  Only the owner can create a workspace.
+  Returns `{:ok, workspace}` on success or `{:error, changeset}` on failure.
   """
-  def create_workspace(_attrs, _owner_id) do
-    # TODO: Agent 1 - Implement workspace creation
-    # Create workspace with owner
-    # Add owner to workspace_users with "owner" role
-    # Cache in ETS
-    raise "Not yet implemented - Agent 1"
+  def create_workspace(attrs) do
+    %Workspace{}
+    |> Workspace.changeset(attrs)
+    |> Repo.insert()
   end
 
   @doc """
-  List all users in a workspace.
+  List all users who are members of `workspace_id`.
+
+  Returns a list of `%User{}` structs.
   """
-  def list_workspace_users(_workspace_id) do
-    # TODO: Agent 1 - Implement member listing
-    # Query workspace_users for this workspace
-    # Return with user details and roles
-    raise "Not yet implemented - Agent 1"
+  def list_workspace_users(workspace_id) do
+    Repo.all(
+      from(u in User,
+        join: wu in WorkspaceUser,
+        on: wu.user_id == u.id,
+        where: wu.workspace_id == ^workspace_id,
+        select: u
+      )
+    )
   end
 
   @doc """
-  Add a workspace member with role assignment.
+  Add a user as a member of a workspace (default role: "member").
 
-  Only workspace owner can add members.
+  Returns `{:ok, workspace_user}` or `{:error, changeset}`.
   """
-  def add_workspace_member(_workspace_id, _user_id, _role) do
-    # TODO: Agent 1 - Implement member addition
-    # Verify caller is owner
-    # Create workspace_user record
-    # Invalidate ETS cache
-    raise "Not yet implemented - Agent 1"
+  def add_workspace_member(workspace_id, user_id, role \\ "member") do
+    %WorkspaceUser{}
+    |> WorkspaceUser.changeset(%{workspace_id: workspace_id, user_id: user_id, role: role})
+    |> Repo.insert()
   end
 
   @doc """
   Remove a user from a workspace.
+
+  Returns the number of deleted rows.
   """
-  def remove_member(_workspace_id, _user_id) do
-    # TODO: Agent 1 - Implement member removal
-    # Delete workspace_user record
-    # Invalidate ETS cache
-    raise "Not yet implemented - Agent 1"
+  def remove_member(workspace_id, user_id) do
+    {count, _} =
+      Repo.delete_all(
+        from(wu in WorkspaceUser,
+          where: wu.workspace_id == ^workspace_id and wu.user_id == ^user_id
+        )
+      )
+
+    count
   end
 
   @doc """
-  Check if user has access to workspace.
+  Check whether `user_id` is a member of `workspace_id`.
+
+  Returns `true` or `false`.
   """
-  def user_has_access?(_workspace_id, _user_id) do
-    # TODO: Agent 1 - Implement access check
-    # Check ETS cache, then DB
-    # Return boolean
-    raise "Not yet implemented - Agent 1"
+  def user_has_access?(workspace_id, user_id) do
+    Repo.exists?(
+      from(wu in WorkspaceUser,
+        where: wu.workspace_id == ^workspace_id and wu.user_id == ^user_id
+      )
+    )
   end
 end

@@ -118,7 +118,8 @@ defmodule Canopy.JTBD.Scenarios.Scenario12 do
     try do
       :ets.update_counter(:handoff_concurrency, :count, {2, -1})
     rescue
-      _ -> :ok
+      e ->
+        Logger.error("Failed to release handoff slot: #{Exception.message(e)}")
     end
   end
 
@@ -129,7 +130,13 @@ defmodule Canopy.JTBD.Scenarios.Scenario12 do
           :ets.new(:handoff_concurrency, [:named_table, :public])
           :ets.insert(:handoff_concurrency, {:count, 0})
         rescue
-          _ -> :ok
+          e ->
+            # Table may have been created by concurrent process; verify
+            if :ets.whereis(:handoff_concurrency) == :undefined do
+              Logger.error("Failed to ensure handoff ETS table: #{Exception.message(e)}")
+            else
+              Logger.debug("Handoff ETS table created by concurrent process")
+            end
         end
 
       _ ->

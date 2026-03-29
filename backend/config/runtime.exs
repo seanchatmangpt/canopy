@@ -23,6 +23,17 @@ end
 config :canopy, CanopyWeb.Endpoint,
   http: [port: String.to_integer(System.get_env("PORT", "9089"))]
 
+config :canopy, :osa_url, System.get_env("OSA_URL", "http://127.0.0.1:8089")
+
+# Canopy base URL — used in A2A agent card and well-known endpoint
+config :canopy, :base_url,
+  System.get_env(
+    "BASE_URL",
+    "#{System.get_env("PHX_SCHEME", "http")}://#{System.get_env("PHX_HOST", "localhost")}:#{System.get_env("PORT", "9089")}"
+  )
+config :canopy, :bos_url, System.get_env("BOS_URL", "http://127.0.0.1:8001")
+config :canopy, :businessos_url, System.get_env("BUSINESSOS_URL", "http://127.0.0.1:8001")
+
 if config_env() == :prod do
   database_url =
     System.get_env("DATABASE_URL") ||

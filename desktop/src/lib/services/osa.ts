@@ -93,6 +93,26 @@ export async function installOsa(): Promise<{
 
 // ── Onboarding ───────────────────────────────────────────────────────────────
 
+/** Push a provider API key to OSA so it can use it for inference */
+export async function pushProviderKeyToOsa(slug: string, apiKey: string): Promise<boolean> {
+  const port = await findOsaPort();
+  const resolvedPort = port ?? 8089;
+  try {
+    const response = await fetch(
+      `http://127.0.0.1:${resolvedPort}/api/v1/providers/${slug}/connect`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ api_key: apiKey }),
+        signal: AbortSignal.timeout(5000)
+      }
+    );
+    return response.ok;
+  } catch {
+    return false; // OSA not running — non-fatal
+  }
+}
+
 /** Check what OSA's onboarding has detected */
 export async function getOsaOnboardingStatus(): Promise<unknown | null> {
   for (const port of [9090, 9089]) {

@@ -219,26 +219,14 @@ defmodule Canopy.Ontology.ToolRegistry do
   Clear tool cache for a specific ontology or all.
   """
   def clear_cache(ontology_id \\ :all) do
-    try do
-      GenServer.call(__MODULE__, {:clear_cache, ontology_id}, 5000)
-    catch
-      :exit, {:timeout, _} ->
-        Logger.error("[ToolRegistry] clear_cache timeout for #{inspect(ontology_id)}")
-        :timeout
-    end
+    GenServer.call(__MODULE__, {:clear_cache, ontology_id}, 5000)
   end
 
   @doc """
   Get cache statistics.
   """
   def cache_stats do
-    try do
-      GenServer.call(__MODULE__, :cache_stats, 5000)
-    catch
-      :exit, {:timeout, _} ->
-        Logger.error("[ToolRegistry] cache_stats timeout")
-        %{hits: 0, misses: 0, entries: 0}
-    end
+    GenServer.call(__MODULE__, :cache_stats, 5000)
   end
 
   # GenServer Callbacks
@@ -280,8 +268,18 @@ defmodule Canopy.Ontology.ToolRegistry do
 
   @impl GenServer
   def handle_call(:cache_stats, _from, state) do
-    hits = :ets.lookup_element(:tool_registry_stats, :cache_hits, 2) || 0
-    misses = :ets.lookup_element(:tool_registry_stats, :cache_misses, 2) || 0
+    hits =
+      case :ets.whereis(:tool_registry_stats) do
+        :undefined -> 0
+        _ -> :ets.lookup_element(:tool_registry_stats, :cache_hits, 2) || 0
+      end
+
+    misses =
+      case :ets.whereis(:tool_registry_stats) do
+        :undefined -> 0
+        _ -> :ets.lookup_element(:tool_registry_stats, :cache_misses, 2) || 0
+      end
+
     total = hits + misses
     hit_rate = if total > 0, do: hits / total, else: 0.0
 
@@ -296,7 +294,13 @@ defmodule Canopy.Ontology.ToolRegistry do
   end
 
   def handle_call({:clear_cache, :all}, _from, state) do
-    :ets.delete_all_objects(:tool_registry_cache)
+    case :ets.whereis(:tool_registry_cache) do
+      :undefined ->
+        :ok
+      _ ->
+        :ets.delete_all_objects(:tool_registry_cache)
+    end
+
     Logger.info("[ToolRegistry] Cleared all tool registry cache")
     {:reply, :ok, state}
   end
@@ -310,52 +314,84 @@ defmodule Canopy.Ontology.ToolRegistry do
   # Private Helpers
 
   defp delete_cache_for_ontology(ontology_id) do
-    all_keys = :ets.match_object(:tool_registry_cache, {:"$1", :_, :_})
+    case :ets.whereis(:tool_registry_cache) do
+      :undefined ->
+        :ok
 
-    Enum.each(all_keys, fn {key, _, _} ->
-      should_delete =
-        case key do
-          {:tools, {^ontology_id, _, _}} -> true
-          {:tools_by_capability, {^ontology_id, _}} -> true
-          {:capabilities_index, ^ontology_id} -> true
-          _ -> false
-        end
+      _ ->
+        all_keys = :ets.match_object(:tool_registry_cache, {:"$1", :_, :_})
 
-      if should_delete do
-        :ets.delete(:tool_registry_cache, key)
-      end
-    end)
+        Enum.each(all_keys, fn {key, _, _} ->
+          should_delete =
+            case key do
+              {:tools, {^ontology_id, _, _}} -> true
+              {:tools_by_capability, {^ontology_id, _}} -> true
+              {:capabilities_index, ^ontology_id} -> true
+              _ -> false
+            end
+
+          if should_delete do
+            :ets.delete(:tool_registry_cache, key)
+          end
+        end)
+    end
   end
 
   defp cached?(cache_key) do
-    case :ets.lookup(:tool_registry_cache, cache_key) do
-      [{^cache_key, _value, expires_at}] ->
-        DateTime.compare(DateTime.utc_now(), expires_at) == :lt
-
-      [] ->
+    case :ets.whereis(:tool_registry_cache) do
+      :undefined ->
         false
+      _ ->
+        case :ets.lookup(:tool_registry_cache, cache_key) do
+          [{^cache_key, _value, expires_at}] ->
+            DateTime.compare(DateTime.utc_now(), expires_at) == :lt
+
+          [] ->
+            false
+        end
     end
   end
 
   defp get_cached(cache_key) do
-    case :ets.lookup(:tool_registry_cache, cache_key) do
-      [{^cache_key, value, _expires_at}] -> value
-      [] -> :not_found
+    case :ets.whereis(:tool_registry_cache) do
+      :undefined ->
+        :not_found
+      _ ->
+        case :ets.lookup(:tool_registry_cache, cache_key) do
+          [{^cache_key, value, _expires_at}] -> value
+          [] -> :not_found
+        end
     end
   end
 
   defp cache_result(key, value, opts) do
     ttl_seconds = Keyword.get(opts, :ttl_seconds, 300)
     expires_at = DateTime.add(DateTime.utc_now(), ttl_seconds, :second)
-    :ets.insert(:tool_registry_cache, {key, value, expires_at})
+
+    case :ets.whereis(:tool_registry_cache) do
+      :undefined ->
+        :ok
+      _ ->
+        :ets.insert(:tool_registry_cache, {key, value, expires_at})
+    end
   end
 
   defp record_cache_hit do
-    :ets.update_counter(:tool_registry_stats, :cache_hits, {2, 1})
+    case :ets.whereis(:tool_registry_stats) do
+      :undefined ->
+        :ok
+      _ ->
+        :ets.update_counter(:tool_registry_stats, :cache_hits, {2, 1})
+    end
   end
 
   defp record_cache_miss do
-    :ets.update_counter(:tool_registry_stats, :cache_misses, {2, 1})
+    case :ets.whereis(:tool_registry_stats) do
+      :undefined ->
+        :ok
+      _ ->
+        :ets.update_counter(:tool_registry_stats, :cache_misses, {2, 1})
+    end
   end
 
   # Tool Discovery Logic

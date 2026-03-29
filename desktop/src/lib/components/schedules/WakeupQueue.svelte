@@ -3,6 +3,7 @@
   import type { HeartbeatRun } from '$api/types';
   import TimeAgo from '$lib/components/shared/TimeAgo.svelte';
   import EmptyState from '$lib/components/shared/EmptyState.svelte';
+  import { scheduleRuns } from '$lib/api/client';
 
   interface Props {
     runs: HeartbeatRun[];
@@ -14,11 +15,8 @@
     runs.filter((r) => r.status === 'pending'),
   );
 
-  // No per-run cancel endpoint exists in the current API surface,
-  // so the cancel button is a placeholder for future integration.
-  function handleCancel(run: HeartbeatRun) {
-    // TODO: wire up cancel API when available
-    console.warn('Cancel not yet implemented for run', run.id);
+  async function handleCancel(run: HeartbeatRun) {
+    await scheduleRuns.cancel(run.id);
   }
 </script>
 

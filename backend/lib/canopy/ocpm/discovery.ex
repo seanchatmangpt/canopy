@@ -1,101 +1,69 @@
 defmodule Canopy.OCPM.Discovery do
   @moduledoc """
-  Process discovery from event logs using OCPM algorithms via pm4py.
+  Process discovery from event logs using OCPM algorithms.
 
-  This module provides an Elixir interface to OCPM (Object-Centric Process Mining)
-  capabilities by wrapping the pm4py Python library. This leverages mature,
-  well-tested process mining algorithms.
+  Primary path: BusinessOS HTTP API (port 8001) — delegates to pm4py-rust.
+  Fallback path: local Pm4pyWrapper (Python subprocess) when BOS is unavailable.
 
-  ## Algorithms (via pm4py)
+  ## Strategy
 
-  ### Alpha Miner (discover_process_model/1)
-  Discovers a process model by analyzing direct succession relations between
-  activities in the event log. Implemented using pm4py's alpha miner.
+  - `discover_process_model/1` — BOS-primary, pm4py fallback
+  - `find_deviations/2`        — BOS-primary, pm4py fallback
+  - `detect_bottlenecks/2`     — pm4py only (no BOS endpoint)
 
-  ### Heuristic Miner (detect_bottlenecks/2)
-  Identifies bottlenecks by analyzing activity frequency and duration patterns.
-  Implemented using pm4py's heuristic miner.
+  ## WvdA Soundness
 
-  ### Conformance Checking (find_deviations/2)
-  Detects deviations by comparing event logs against the process model.
-  Implemented using pm4py's alignment algorithms.
+  All BOS calls are bounded by @bos_discovery_timeout_ms (30 s).
+  Fallback is synchronous (avoids always spawning a Python subprocess on success path).
 
-  ## Requirements
+  ## Armstrong Fault Tolerance
 
-  - Python 3.8+
-  - pm4py library: `pip install pm4py`
-
-  ## Input Format
-
-  Event logs should be a list of maps with:
-  - `case_id` - String: The case identifier
-  - `activity` - String: The activity performed
-  - `timestamp` - DateTime: When the event occurred
-  - `resource` - String: Who/what performed the activity
-  - `attributes` - Map: Additional event attributes
-
-  ## Output Format
-
-  Process models are returned as maps with:
-  - `nodes` - List of unique activity names
-  - `edges` - Map of transitions: `%{"transitions" => [[from, to], ...]}`
-  - `metadata` - Discovery metadata (algorithm, timestamp, event_count)
+  BOS failure is non-fatal: logs and falls back. pm4py failure propagates to caller.
   """
 
   require Logger
+
   alias Canopy.OCPM.Pm4pyWrapper
+  alias Canopy.Adapters.BusinessOS
+
+  # WvdA: hard timeout on BusinessOS discovery requests
+  @bos_discovery_timeout_ms 30_000
 
   @doc """
-  Discovers a process model from an event log using pm4py's Alpha miner.
+  Discovers a process model from an event log.
 
-  Delegates to Pm4pyWrapper which calls Python pm4py library.
+  Attempts BusinessOS first (pm4py-rust backed). Falls back to local Pm4pyWrapper
+  on any BOS connection error or timeout.
 
-  ## Parameters
-
-  - `event_log`: List of event maps with case_id, activity, timestamp
-
-  ## Returns
-
-  - `{:ok, process_model}` with nodes, edges, metadata
-  - `{:error, reason}` if discovery fails
-
-  ## Examples
-
-      iex> events = [
-      ...>   %{case_id: "1", activity: "create", timestamp: ~U[2026-03-12 00:00:00Z]},
-      ...>   %{case_id: "1", activity: "approve", timestamp: ~U[2026-03-13 00:00:00Z]}
-      ...> ]
-      iex> {:ok, model} = Discovery.discover_process_model(events)
-      iex> model.nodes
-      ["create", "approve"]
+  Returns `{:ok, process_model}` or `{:error, reason}`.
   """
   def discover_process_model(event_log) when is_list(event_log) do
     Logger.info(
-      "[Discovery] Discovering process model from #{length(event_log)} events via pm4py"
+      "[Discovery] Discovering process model from #{length(event_log)} events (BOS-primary)"
     )
 
-    Pm4pyWrapper.discover_process_model(event_log)
+    params = %{"timeout" => @bos_discovery_timeout_ms}
+
+    case BusinessOS.discover(event_log, params) do
+      {:ok, bos_result} ->
+        Logger.info("[Discovery] BOS discovery succeeded")
+        {:ok, normalize_bos_discover_result(bos_result)}
+
+      {:error, reason} ->
+        Logger.warning(
+          "[Discovery] BOS discovery failed (#{inspect(reason)}), falling back to pm4py"
+        )
+
+        Pm4pyWrapper.discover_process_model(event_log)
+    end
   end
 
   @doc """
   Detects bottlenecks using pm4py's heuristic miner.
 
-  Delegates to Pm4pyWrapper which calls Python pm4py library.
+  No BusinessOS endpoint exists for this — always uses local pm4py.
 
-  ## Parameters
-
-  - `process_model`: Process model (unused by pm4py, re-analyzes log)
-  - `event_log`: List of event maps
-
-  ## Returns
-
-  - `{:ok, bottlenecks}` - List of bottleneck maps
-  - `{:error, reason}` if detection fails
-
-  ## Examples
-
-      iex> {:ok, model} = Discovery.discover_process_model(events)
-      iex> {:ok, bottlenecks} = Discovery.detect_bottlenecks(model, events)
+  Returns `{:ok, bottlenecks}` or `{:error, reason}`.
   """
   def detect_bottlenecks(_process_model, event_log) when is_list(event_log) do
     Logger.info("[Discovery] Analyzing #{length(event_log)} events for bottlenecks via pm4py")
@@ -103,28 +71,83 @@ defmodule Canopy.OCPM.Discovery do
   end
 
   @doc """
-  Finds deviations between event log and process model using pm4py.
+  Finds deviations between an event log and a process model.
 
-  Delegates to Pm4pyWrapper which calls Python pm4py library.
+  Attempts BusinessOS conformance check first (returns fitness + violations).
+  Falls back to local Pm4pyWrapper alignment on any BOS failure.
 
-  ## Parameters
-
-  - `process_model`: Process model from discover_process_model/1
-  - `event_log`: List of event maps
-
-  ## Returns
-
-  - `{:ok, deviations}` - List of deviation maps
-  - `{:error, reason}` if checking fails
-
-  ## Examples
-
-      iex> {:ok, model} = Discovery.discover_process_model(events)
-      iex> {:ok, deviations} = Discovery.find_deviations(model, events)
+  Returns `{:ok, deviations}` or `{:error, reason}`.
   """
   def find_deviations(process_model, event_log)
       when is_map(process_model) and is_list(event_log) do
-    Logger.info("[Discovery] Checking conformance via pm4py")
-    Pm4pyWrapper.find_deviations(event_log, process_model)
+    Logger.info("[Discovery] Checking conformance (BOS-primary)")
+
+    params = %{"timeout" => @bos_discovery_timeout_ms}
+
+    case BusinessOS.conformance_check(process_model, event_log, params) do
+      {:ok, bos_result} ->
+        Logger.info("[Discovery] BOS conformance succeeded")
+        {:ok, normalize_bos_conformance_result(bos_result)}
+
+      {:error, reason} ->
+        Logger.warning(
+          "[Discovery] BOS conformance failed (#{inspect(reason)}), falling back to pm4py"
+        )
+
+        Pm4pyWrapper.find_deviations(event_log, process_model)
+    end
   end
+
+  # ── Private: BOS Result Normalization ───────────────────────────────
+
+  # Translate BusinessOS discover response → pm4py process model shape.
+  # Callers (OCPM, healing, conformance checks) stay unchanged.
+  defp normalize_bos_discover_result(bos_result) when is_map(bos_result) do
+    nodes = bos_result["activities"] || bos_result["nodes"] || []
+    transitions = bos_result["transitions"] || bos_result["edges"] || []
+
+    %{
+      nodes: nodes,
+      edges: %{"transitions" => transitions},
+      metadata: %{
+        algorithm: bos_result["algorithm"] || "bos",
+        fitness: bos_result["fitness"] || bos_result["fitness_score"],
+        model_id: bos_result["model_id"],
+        source: "businessos",
+        event_count: bos_result["traces_count"] || 0
+      }
+    }
+  end
+
+  defp normalize_bos_discover_result(other), do: other
+
+  # Translate BusinessOS conformance response → deviations list shape.
+  # BOS returns {fitness, precision, violations}; pm4py returns a list of deviation maps.
+  defp normalize_bos_conformance_result(bos_result) when is_map(bos_result) do
+    fitness = bos_result["fitness"] || 0.0
+    violations = bos_result["violations"] || []
+
+    if violations != [] do
+      Enum.map(violations, fn v ->
+        %{"deviation" => v, "type" => "violation", "source" => "businessos"}
+      end)
+    else
+      # Represent fitness gap as a synthetic deviation for compatibility
+      if fitness < 1.0 do
+        [
+          %{
+            "fitness" => fitness,
+            "precision" => bos_result["precision"] || 0.0,
+            "type" => "fitness_gap",
+            "severity" => Float.round(1.0 - fitness, 4),
+            "source" => "businessos"
+          }
+        ]
+      else
+        []
+      end
+    end
+  end
+
+  defp normalize_bos_conformance_result(_other), do: []
 end

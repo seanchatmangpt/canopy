@@ -19,6 +19,23 @@ defmodule CanopyWeb.Router do
     plug CanopyWeb.Plugs.CORS
   end
 
+  # A2A well-known agent card — no auth, standard discovery endpoint
+  scope "/.well-known", CanopyWeb do
+    pipe_through :api
+    get "/agent.json", WellKnownController, :agent_card
+    get "/agent-card.json", WellKnownController, :agent_card
+  end
+
+  # A2A protocol endpoint — no auth, receives incoming agent calls via A2A.Plug
+  # (No module alias — A2A.Plug must not be prefixed with CanopyWeb)
+  scope "/api/v1" do
+    pipe_through :api
+    forward "/a2a", A2A.Plug,
+      agent: Canopy.A2AAgent,
+      base_url:
+        Application.compile_env(:canopy, :base_url, "http://localhost:9089") <> "/api/v1/a2a"
+  end
+
   # Health check — no auth
   scope "/api/v1", CanopyWeb do
     pipe_through :api
@@ -42,6 +59,9 @@ defmodule CanopyWeb.Router do
       get "/agents", WorkspaceController, :agents, as: :agents
       get "/skills", WorkspaceController, :skills, as: :skills
       get "/config", WorkspaceController, :config, as: :config
+      get "/members", WorkspaceMemberController, :index, as: :members
+      post "/members", WorkspaceMemberController, :add_member, as: :add_member
+      delete "/members/:user_id", WorkspaceMemberController, :remove_member, as: :remove_member
     end
 
     # Agents
@@ -64,10 +84,16 @@ defmodule CanopyWeb.Router do
       post "/message", SessionController, :message, as: :message
     end
 
+    # Process Mining (BusinessOS integration)
+    get "/process-mining/kpis", ProcessMiningController, :kpis
+    post "/process-mining/discover", ProcessMiningController, :discover
+    get "/process-mining/status", ProcessMiningController, :status
+
     # Schedules
     get "/schedules/queue", ScheduleController, :queue
     post "/schedules/wake-all", ScheduleController, :wake_all
     post "/schedules/pause-all", ScheduleController, :pause_all
+    post "/schedules/runs/:run_id/cancel", ScheduleController, :cancel_run
 
     resources "/schedules", ScheduleController, except: [:new, :edit] do
       post "/trigger", ScheduleController, :trigger, as: :trigger
@@ -184,6 +210,7 @@ defmodule CanopyWeb.Router do
     # Integrations
     get "/integrations", IntegrationController, :index
     post "/integrations/pull-all", IntegrationController, :pull_all
+    post "/integrations/osa/provider-key", IntegrationController, :relay_osa_provider_key
     post "/integrations/:slug/connect", IntegrationController, :connect
     delete "/integrations/:slug", IntegrationController, :disconnect
     get "/integrations/:slug/status", IntegrationController, :status
@@ -311,6 +338,16 @@ defmodule CanopyWeb.Router do
     get "/board/briefing", BoardController, :briefing
     post "/board/decision", BoardController, :record_decision
     get "/board/decisions", BoardController, :list_decisions
+
+    # BusinessOS → Canopy intelligence ingest
+    post "/bos/intelligence", BoardController, :ingest_intelligence
+    get  "/bos/intelligence", BoardController, :bos_intelligence_status
+
+    # OCPM (Object-Centric Process Mining) — event logs and process models
+    get  "/ocpm/events",  OcpmController, :index
+    post "/ocpm/events",  OcpmController, :create
+    get  "/ocpm/models",  OcpmController, :index_models
+    post "/ocpm/models",  OcpmController, :create_model
   end
 
   # SSE streaming endpoints (accept text/event-stream)

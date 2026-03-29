@@ -181,11 +181,11 @@ autonomic_agents = [
     name: "Health Monitor",
     role: "health_monitor",
     adapter: "osa",
-    model: "llama-3.3-70b-versatile",
+    model: "openai/gpt-oss-20b",
     status: "idle",
     avatar_emoji: "💓",
     config: %{
-      "url" => "http://localhost:9089",
+      "url" => "http://localhost:8089",
       "provider" => "groq",
       "working_dir" => Path.expand("~/.canopy/default")
     },
@@ -193,9 +193,9 @@ autonomic_agents = [
     You monitor the health of all system components every 5 minutes.
 
     ## Systems to Monitor
-    - OSA: GET /health (port 9089)
+    - OSA: GET /api/v1/health (port 8089)
     - BusinessOS: GET /api/health (port 8001)
-    - Canopy: GET /health (port 5200)
+    - Canopy: GET /healthz (port 9089)
 
     ## Procedure
     1. Call each health endpoint
@@ -209,11 +209,11 @@ autonomic_agents = [
     name: "CRM Automation",
     role: "crm_automation",
     adapter: "osa",
-    model: "llama-3.3-70b-versatile",
+    model: "openai/gpt-oss-20b",
     status: "idle",
     avatar_emoji: "📊",
     config: %{
-      "url" => "http://localhost:9089",
+      "url" => "http://localhost:8089",
       "provider" => "groq",
       "working_dir" => Path.expand("~/.canopy/default")
     },
@@ -233,11 +233,11 @@ autonomic_agents = [
     name: "Project Coordinator",
     role: "project_coordinator",
     adapter: "osa",
-    model: "llama-3.3-70b-versatile",
+    model: "openai/gpt-oss-20b",
     status: "idle",
     avatar_emoji: "📋",
     config: %{
-      "url" => "http://localhost:9089",
+      "url" => "http://localhost:8089",
       "provider" => "groq",
       "working_dir" => Path.expand("~/.canopy/default")
     },
@@ -257,11 +257,11 @@ autonomic_agents = [
     name: "App Generator",
     role: "app_generator",
     adapter: "osa",
-    model: "llama-3.3-70b-versatile",
+    model: "openai/gpt-oss-20b",
     status: "sleeping",
     avatar_emoji: "🚀",
     config: %{
-      "url" => "http://localhost:9089",
+      "url" => "http://localhost:8089",
       "provider" => "groq",
       "working_dir" => Path.expand("~/.canopy/default")
     },
@@ -281,11 +281,11 @@ autonomic_agents = [
     name: "Process Healer",
     role: "process_healer",
     adapter: "osa",
-    model: "llama-3.3-70b-versatile",
+    model: "openai/gpt-oss-20b",
     status: "sleeping",
     avatar_emoji: "🔧",
     config: %{
-      "url" => "http://localhost:9089",
+      "url" => "http://localhost:8089",
       "provider" => "groq",
       "working_dir" => Path.expand("~/.canopy/default")
     },
@@ -305,11 +305,11 @@ autonomic_agents = [
     name: "Compliance Monitor",
     role: "compliance_monitor",
     adapter: "osa",
-    model: "llama-3.3-70b-versatile",
+    model: "openai/gpt-oss-20b",
     status: "idle",
     avatar_emoji: "✅",
     config: %{
-      "url" => "http://localhost:9089",
+      "url" => "http://localhost:8089",
       "provider" => "groq",
       "working_dir" => Path.expand("~/.canopy/default")
     },
@@ -944,6 +944,14 @@ secrets = [
     provider: "anthropic",
     workspace_id: workspace.id,
     created_by: admin.id
+  },
+  %{
+    name: "Groq API Key",
+    key: "GROQ_API_KEY",
+    encrypted_value: "enc_***_redacted",
+    provider: "groq",
+    workspace_id: workspace.id,
+    created_by: admin.id
   }
 ]
 
@@ -955,7 +963,7 @@ for attrs <- secrets do
   end
 end
 
-IO.puts("    3 secrets: OPENAI_API_KEY, GITHUB_TOKEN, ANTHROPIC_API_KEY")
+IO.puts("    4 secrets: OPENAI_API_KEY, GITHUB_TOKEN, ANTHROPIC_API_KEY, GROQ_API_KEY")
 
 # ---------------------------------------------------------------------------
 # SECTION 14: Labels
@@ -1173,7 +1181,7 @@ IO.puts("""
   Integrations  2  (anthropic connected, github disconnected)
   Orgs          2  (MIOSA Labs enterprise, Acme Corp pro)
   Memberships   2  (admin: owner of MIOSA Labs, admin of Acme Corp)
-  Secrets       3  (OPENAI_API_KEY, GITHUB_TOKEN, ANTHROPIC_API_KEY)
+  Secrets       4  (OPENAI_API_KEY, GITHUB_TOKEN, ANTHROPIC_API_KEY, GROQ_API_KEY)
   Labels        5  (bug, feature, urgent, documentation, enhancement)
   Approvals     2  (1 pending, 1 approved)
   Plugins       3  (github enabled, slack enabled, jira disabled)

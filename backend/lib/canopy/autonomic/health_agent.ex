@@ -15,14 +15,16 @@ defmodule Canopy.Autonomic.HealthAgent do
   require OpenTelemetry.Tracer
 
   @systems [
-    {:pm4py_rust, "http://localhost:8090/healthz"},
-    {:businessos, "http://localhost:8001/healthz"},
-    {:canopy, "http://localhost:9089/healthz"},
-    {:osa, "http://localhost:8089/healthz"}
+    {:pm4py_rust, "http://localhost:8090/api/health"},
+    {:businessos, "http://localhost:8001/health"},
+    {:canopy, "http://localhost:9089/health"},
+    {:osa, "http://localhost:8089/health"}
   ]
 
   @latency_threshold_ms 1000
-  @error_rate_threshold 0.05
+  # WvdA: explicit timeouts for each external system poll (deadlock freedom)
+  @businessos_timeout_ms 5_000
+  @osa_timeout_ms 5_000
 
   def run(opts \\ []) do
     Logger.info("[HealthAgent] Polling systems for anomalies...")
@@ -68,6 +70,9 @@ defmodule Canopy.Autonomic.HealthAgent do
         timestamp: DateTime.utc_now()
       }
 
+      # Update ScheduleGovernor skip flags from health results (non-blocking)
+      Canopy.Autonomic.ScheduleGovernor.update_flags(result)
+
       # Emit telemetry event for observability
       :telemetry.execute(
         [:agent, :run],
@@ -83,34 +88,69 @@ defmodule Canopy.Autonomic.HealthAgent do
     end
   end
 
-  defp poll_system(system_name) do
+  @doc """
+  Poll a named system and return its health data.
+
+  Returns `{system_name, %{latency_ms, error_rate, healthy, anomaly, status}}`.
+  `error_rate` is 0.0 when healthy, 1.0 when unreachable.
+  """
+  def poll_system(system_name) do
+    url = system_url(system_name)
     start = System.monotonic_time(:millisecond)
 
-    try do
-      # Simulate health check (would be real HTTP in production)
-      # Simulate network latency
-      :timer.sleep(10)
+    # BusinessOS polls go through the circuit breaker (Gap 6 — circuit protection)
+    timeout = if system_name == :businessos, do: @businessos_timeout_ms, else: @osa_timeout_ms
 
-      latency = System.monotonic_time(:millisecond) - start
-      error_rate = :rand.uniform()
+    req_result =
+      if system_name == :businessos do
+        Canopy.Autonomic.CircuitBreaker.call(
+          :businessos,
+          fn -> Req.get(url, receive_timeout: @businessos_timeout_ms, retry: false) end,
+          @businessos_timeout_ms + 500
+        )
+      else
+        Req.get(url, receive_timeout: timeout, retry: false)
+      end
 
-      anomaly =
-        latency > @latency_threshold_ms or error_rate > @error_rate_threshold
+    case req_result do
+      {:ok, %{status: status_code}} ->
+        latency = System.monotonic_time(:millisecond) - start
+        healthy = status_code in 200..299
+        error_rate = if healthy, do: 0.0, else: 1.0
+        anomaly = latency > @latency_threshold_ms or not healthy
 
-      {system_name,
-       %{
-         latency_ms: latency,
-         error_rate: error_rate,
-         anomaly: anomaly,
-         status: if(anomaly, do: "degraded", else: "healthy")
-       }}
-    rescue
-      e ->
-        Logger.error(
-          "[HealthAgent] Error polling #{inspect(system_name)}: #{Exception.message(e)}"
+        {system_name,
+         %{
+           latency_ms: latency,
+           error_rate: error_rate,
+           healthy: healthy,
+           anomaly: anomaly,
+           status: if(healthy, do: "healthy", else: "degraded")
+         }}
+
+      {:error, reason} ->
+        latency = System.monotonic_time(:millisecond) - start
+
+        Logger.warning(
+          "[HealthAgent] Error polling #{inspect(system_name)}: #{inspect(reason)}"
         )
 
-        {system_name, %{status: "unreachable", error: Exception.message(e), anomaly: true}}
+        {system_name,
+         %{
+           latency_ms: latency,
+           error_rate: 1.0,
+           healthy: false,
+           anomaly: true,
+           status: "unreachable"
+         }}
+    end
+  end
+
+  # Map system atom to URL
+  defp system_url(system_name) do
+    case Enum.find(@systems, fn {name, _url} -> name == system_name end) do
+      {_name, url} -> url
+      nil -> "http://localhost:9999/healthz"
     end
   end
 end

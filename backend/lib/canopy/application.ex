@@ -4,12 +4,19 @@ defmodule Canopy.Application do
 
   @impl true
   def start(_type, _args) do
+    # Start Finch only if not already started (Req may start it automatically)
+    finch_child = case Process.whereis(Req.Finch) do
+      nil -> {Finch, name: Req.Finch, pools: %{:default => [size: 32]}}
+      _pid -> nil
+    end
+
     children = [
       CanopyWeb.Telemetry,
       Canopy.Repo,
       Canopy.BudgetEnforcer,
       {Phoenix.PubSub, name: Canopy.PubSub},
       Canopy.IssueDispatcher,
+      Canopy.Mesh.SyncWorker,
       Canopy.Scheduler,
       {DynamicSupervisor, name: Canopy.AdapterSupervisor, strategy: :one_for_one},
       {Task.Supervisor, name: Canopy.HeartbeatRunner},
@@ -26,29 +33,63 @@ defmodule Canopy.Application do
       Canopy.Ontology.ToolRegistry,
       Canopy.JTBD.SelfPlayLoop,
       Canopy.Yawl.Client,
-      CanopyWeb.Endpoint
+      Canopy.Bridges.YawlValidatorSupervisor,
+      %{
+        id: :canopy_consent_agent,
+        start: {Agent, :start_link, [fn -> %{} end, [name: :canopy_consent_agent]]}
+      },
+      {Canopy.A2AAgent,
+       task_supervisor: Canopy.TaskSupervisor,
+       task_store: {A2A.TaskStore.ETS, :canopy_a2a_tasks}}
     ]
 
+    Application.put_env(:canopy, :consent_agent, :canopy_consent_agent)
+
+    # Add Finch to children only if not already started
+    children = if finch_child, do: children ++ [finch_child], else: children
+
+    children = children ++ [CanopyWeb.Endpoint]
+
     # Create ETS tables for caches and metrics before endpoint starts (avoids TOCTOU race)
-    :ets.new(:canopy_idempotency_cache, [:named_table, :set, :public, read_concurrency: true])
+    # Guards prevent crash on restart (table already exists after supervisor restart)
+    Canopy.Mesh.Cache.init()
+    Canopy.Autonomic.CircuitBreaker.init()
+    Canopy.Autonomic.ExecutionLog.init()
+    Canopy.Autonomic.ScheduleGovernor.init()
+
+    if :ets.whereis(:canopy_idempotency_cache) == :undefined do
+      :ets.new(:canopy_idempotency_cache, [:named_table, :set, :public, read_concurrency: true])
+    end
+
+    # BOS intelligence cache: single-row overwrite, bounded memory.
+    if :ets.whereis(:canopy_bos_intelligence) == :undefined do
+      :ets.new(:canopy_bos_intelligence, [:named_table, :set, :public, read_concurrency: true])
+    end
 
     # Wave 12 metrics table: bounded LRU cache for iteration metrics (WvdA soundness)
-    :ets.new(:jtbd_wave12_metrics, [
-      :named_table,
-      :set,
-      :public,
-      {:write_concurrency, false},
-      {:read_concurrency, true}
-    ])
+    if :ets.whereis(:jtbd_wave12_metrics) == :undefined do
+      :ets.new(:jtbd_wave12_metrics, [
+        :named_table,
+        :set,
+        :public,
+        {:write_concurrency, false},
+        {:read_concurrency, true}
+      ])
+    end
 
     # YAWLv6 build tracker: store latest simulation/real build state
     Canopy.JTBD.YAWLv6BuildTracker.init()
+
+    OpentelemetryPhoenix.setup()
 
     opts = [strategy: :one_for_one, name: Canopy.Supervisor]
     result = Supervisor.start_link(children, opts)
 
     case result do
       {:ok, _pid} ->
+        # Attach A2A telemetry handler after supervisor starts (Armstrong: supervised startup)
+        Canopy.Telemetry.A2AHandler.attach()
+
         # Load schedules asynchronously via supervised task (Armstrong: supervised startup)
         Task.Supervisor.start_child(
           Canopy.TaskSupervisor,

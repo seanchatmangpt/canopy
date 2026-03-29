@@ -166,6 +166,7 @@ defmodule Canopy.Healthcare.AuditTrail do
 
   defp validate_date_range(date_from, date_to) do
     cond do
+      !date_from and !date_to -> :ok
       !date_from or !date_to -> {:error, :invalid_date_range}
       parse_datetime(date_from) && parse_datetime(date_to) -> :ok
       true -> {:error, :invalid_date_range}

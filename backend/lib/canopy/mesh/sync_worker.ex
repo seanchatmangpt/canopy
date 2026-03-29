@@ -2,11 +2,20 @@ defmodule Canopy.Mesh.SyncWorker do
   @moduledoc """
   Background job for periodic data mesh synchronization.
 
-  Wakes every 5 minutes to sync mesh state from OSA, updating the local cache
-  with domain registrations, entity counts, and quality scores.
+  Wakes every 5 minutes to sync mesh state from both OSA and BusinessOS,
+  running both in parallel via Task.async.
 
-  Implements Armstrong supervision: crashes escalate to supervisor, no silent errors.
-  Implements WvdA soundness: all operations have timeout_ms, no infinite loops.
+  ## Armstrong Fault Tolerance
+
+  - OSA failures escalate to supervisor after 5 consecutive errors (let-it-crash)
+  - BOS failures are non-fatal: logged as :degraded, never crash the worker
+  - All Task.await timeouts are inner_timeout + 5000ms (WvdA deadlock freedom)
+
+  ## WvdA Soundness
+
+  - All blocking operations have explicit timeout_ms
+  - No infinite loops — all retries are bounded by @sync_interval_ms or 30s
+  - BOS Task.await ceiling = @bos_kpi_timeout_ms + 5_000 (longest BOS call)
   """
   use GenServer
 
@@ -15,9 +24,11 @@ defmodule Canopy.Mesh.SyncWorker do
   alias Canopy.Mesh.Cache
 
   # 5 minutes
-  @sync_interval_ms 5 * 60 * 1000
+  @sync_interval_ms 5 * 60 * 1_000
   @osa_timeout_ms 30_000
-  @osa_base_url System.get_env("OSA_API_URL", "http://127.0.0.1:8089")
+
+  # WvdA: BOS endpoint timeouts (per plan Gap 1)
+  @bos_kpi_timeout_ms 20_000
 
   # ── Public API ──────────────────────────────────────────────────────
 
@@ -26,11 +37,11 @@ defmodule Canopy.Mesh.SyncWorker do
   end
 
   def force_sync do
-    GenServer.call(__MODULE__, :sync_now, @osa_timeout_ms + 5000)
+    GenServer.call(__MODULE__, :sync_now, @osa_timeout_ms + @bos_kpi_timeout_ms + 5_000)
   end
 
   def sync_status do
-    GenServer.call(__MODULE__, :status, 5000)
+    GenServer.call(__MODULE__, :status, 5_000)
   end
 
   # ── GenServer Callbacks ─────────────────────────────────────────────
@@ -44,7 +55,10 @@ defmodule Canopy.Mesh.SyncWorker do
       domains_synced: 0,
       entities_synced: 0,
       sync_errors: 0,
-      next_sync_ms: @sync_interval_ms
+      next_sync_ms: @sync_interval_ms,
+      last_bos_sync_at: nil,
+      bos_sync_errors: 0,
+      bos_status: :unknown
     }
 
     # Schedule first sync immediately
@@ -55,12 +69,22 @@ defmodule Canopy.Mesh.SyncWorker do
 
   @impl true
   def handle_info(:perform_sync, state) do
-    Logger.debug("[Mesh.SyncWorker] Performing scheduled sync")
+    Logger.debug("[Mesh.SyncWorker] Performing scheduled sync (OSA + BOS in parallel)")
 
-    case sync_from_osa() do
+    # Armstrong: BOS failure is non-fatal; OSA failure escalates after 5 errors
+    osa_task = Task.async(fn -> sync_from_osa() end)
+    bos_task = Task.async(fn -> sync_from_bos() end)
+
+    # WvdA: outer await = inner timeout + 5000ms (deadlock freedom guarantee)
+    osa_result = Task.await(osa_task, @osa_timeout_ms + 5_000)
+    bos_result = Task.await(bos_task, @bos_kpi_timeout_ms + 5_000)
+
+    new_state = apply_bos_result(state, bos_result)
+
+    case osa_result do
       {:ok, result} ->
         new_state = %{
-          state
+          new_state
           | last_sync_at: DateTime.utc_now(),
             domains_synced: result[:domains_synced] || 0,
             entities_synced: result[:entities_synced] || 0,
@@ -69,25 +93,22 @@ defmodule Canopy.Mesh.SyncWorker do
 
         Logger.info(
           "[Mesh.SyncWorker] Sync completed: #{result[:domains_synced]} domains, " <>
-            "#{result[:entities_synced]} entities"
+            "#{result[:entities_synced]} entities, bos=#{new_state.bos_status}"
         )
 
-        # Schedule next sync
         Process.send_after(self(), :perform_sync, @sync_interval_ms)
         {:noreply, new_state}
 
       {:error, reason} ->
-        # Let-it-crash: log and escalate to supervisor
-        Logger.error("[Mesh.SyncWorker] Sync failed: #{inspect(reason)}")
+        Logger.error("[Mesh.SyncWorker] OSA sync failed: #{inspect(reason)}")
 
-        new_state = %{state | sync_errors: state.sync_errors + 1}
+        new_state = %{new_state | sync_errors: new_state.sync_errors + 1}
 
-        # Retry after shorter interval on error
         Process.send_after(self(), :perform_sync, 30_000)
 
-        # If too many errors, raise to trigger supervisor restart
+        # Armstrong: let-it-crash after 5 consecutive OSA failures
         if new_state.sync_errors >= 5 do
-          raise "[Mesh.SyncWorker] Too many sync failures (#{new_state.sync_errors}), escalating"
+          raise "[Mesh.SyncWorker] Too many OSA sync failures (#{new_state.sync_errors}), escalating"
         end
 
         {:noreply, new_state}
@@ -98,21 +119,29 @@ defmodule Canopy.Mesh.SyncWorker do
   def handle_call(:sync_now, _from, state) do
     Logger.info("[Mesh.SyncWorker] Manual sync requested")
 
-    case sync_from_osa() do
+    osa_task = Task.async(fn -> sync_from_osa() end)
+    bos_task = Task.async(fn -> sync_from_bos() end)
+
+    osa_result = Task.await(osa_task, @osa_timeout_ms + 5_000)
+    bos_result = Task.await(bos_task, @bos_kpi_timeout_ms + 5_000)
+
+    new_state = apply_bos_result(state, bos_result)
+
+    case osa_result do
       {:ok, result} ->
         new_state = %{
-          state
+          new_state
           | last_sync_at: DateTime.utc_now(),
             domains_synced: result[:domains_synced] || 0,
             entities_synced: result[:entities_synced] || 0,
             sync_errors: 0
         }
 
-        {:reply, {:ok, result}, new_state}
+        {:reply, {:ok, Map.put(result, :bos_result, bos_result)}, new_state}
 
       {:error, reason} ->
-        Logger.error("[Mesh.SyncWorker] Manual sync failed: #{inspect(reason)}")
-        {:reply, {:error, reason}, state}
+        Logger.error("[Mesh.SyncWorker] Manual OSA sync failed: #{inspect(reason)}")
+        {:reply, {:error, reason}, new_state}
     end
   end
 
@@ -123,13 +152,16 @@ defmodule Canopy.Mesh.SyncWorker do
       domains_synced: state[:domains_synced],
       entities_synced: state[:entities_synced],
       sync_errors: state[:sync_errors],
-      next_sync_in_ms: @sync_interval_ms
+      next_sync_in_ms: @sync_interval_ms,
+      last_bos_sync_at: state[:last_bos_sync_at],
+      bos_sync_errors: state[:bos_sync_errors],
+      bos_status: state[:bos_status]
     }
 
     {:reply, status, state}
   end
 
-  # ── Private Helpers ─────────────────────────────────────────────────
+  # ── Private: OSA Sync ───────────────────────────────────────────────
 
   defp sync_from_osa do
     Logger.debug("[Mesh.SyncWorker] Starting OSA sync")
@@ -150,7 +182,7 @@ defmodule Canopy.Mesh.SyncWorker do
   end
 
   defp fetch_domains_from_osa do
-    url = "#{@osa_base_url}/api/v1/mesh/domains"
+    url = "#{osa_base_url()}/api/v1/mesh/domains"
     headers = build_headers()
 
     Logger.debug("[Mesh.SyncWorker] Fetching domains from #{url}")
@@ -221,7 +253,7 @@ defmodule Canopy.Mesh.SyncWorker do
   end
 
   defp fetch_domain_entities(domain_name) do
-    url = "#{@osa_base_url}/api/v1/mesh/discover"
+    url = "#{osa_base_url()}/api/v1/mesh/discover"
     headers = build_headers()
 
     payload = %{
@@ -263,6 +295,66 @@ defmodule Canopy.Mesh.SyncWorker do
 
     :ok
   end
+
+  # ── Private: BOS Sync (non-fatal) ──────────────────────────────────
+
+  # Armstrong: BOS failure is non-fatal — returns {:ok, _} with degraded status
+  # or {:error, _} to trigger apply_bos_result degraded path.
+  # All three endpoints are tried independently; partial success is acceptable.
+  defp sync_from_bos do
+    Logger.debug("[Mesh.SyncWorker] Starting BOS sync")
+
+    alias Canopy.Adapters.BusinessOS
+
+    status_result = BusinessOS.get_status()
+    compliance_result = BusinessOS.get_compliance_status()
+    kpis_result = BusinessOS.get_kpis()
+
+    case status_result do
+      {:ok, data} -> Cache.put_bos_status(data)
+      {:error, _} -> :ok
+    end
+
+    case compliance_result do
+      {:ok, data} -> Cache.put_compliance_status(data)
+      {:error, _} -> :ok
+    end
+
+    case kpis_result do
+      {:ok, data} -> Cache.put_kpis(data)
+      {:error, _} -> :ok
+    end
+
+    bos_healthy = match?({:ok, _}, status_result)
+
+    if bos_healthy do
+      Logger.info("[Mesh.SyncWorker] BOS sync complete (healthy)")
+      {:ok, %{bos_status: :healthy}}
+    else
+      Logger.warning(
+        "[Mesh.SyncWorker] BOS sync degraded: #{inspect(status_result)}"
+      )
+
+      {:error, :bos_degraded}
+    end
+  end
+
+  defp apply_bos_result(state, {:ok, result}) do
+    %{
+      state
+      | last_bos_sync_at: DateTime.utc_now(),
+        bos_sync_errors: 0,
+        bos_status: result[:bos_status] || :healthy
+    }
+  end
+
+  defp apply_bos_result(state, {:error, _reason}) do
+    %{state | bos_sync_errors: state.bos_sync_errors + 1, bos_status: :degraded}
+  end
+
+  # ── Private: Common Helpers ─────────────────────────────────────────
+
+  defp osa_base_url, do: Application.get_env(:canopy, :osa_url, "http://127.0.0.1:8089")
 
   defp build_headers do
     token = System.get_env("OSA_API_TOKEN", "")

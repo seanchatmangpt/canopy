@@ -11,6 +11,16 @@ defmodule OpenTelemetry.SemConv.Incubating.JtbdSpanNames do
   """
 
   @doc """
+  DMAIC phase transition in a JTBD Wave 12 scenario — tracks each step through the Define/Measure/Analyze/Improve/Control cycle.
+
+  Span: `span.jtbd.dmaic.phase`
+  Kind: `internal`
+  Stability: `development`
+  """
+  @spec jtbd_dmaic_phase() :: String.t()
+  def jtbd_dmaic_phase, do: "jtbd.dmaic.phase"
+
+  @doc """
   A complete iteration of a 10-scenario JTBD loop execution across ChatmanGPT integration chain.
 
   Span: `span.jtbd.loop`
@@ -96,6 +106,7 @@ defmodule OpenTelemetry.SemConv.Incubating.JtbdSpanNames do
   @spec all() :: [String.t()]
   def all do
     [
+      jtbd_dmaic_phase(),
       jtbd_loop(),
       jtbd_scenario(),
       jtbd_scenario_contract_closure(),

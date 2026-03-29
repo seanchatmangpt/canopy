@@ -1,6 +1,9 @@
 defmodule Canopy.Adapters.BusinessOSTest do
   use ExUnit.Case, async: true
 
+  # Tests make HTTP calls to BusinessOS service on port 8001
+  @moduletag :external_service
+
   alias Canopy.Adapters.BusinessOS
 
   doctest BusinessOS
@@ -459,6 +462,41 @@ defmodule Canopy.Adapters.BusinessOSTest do
     test "adapter can be resolved and instantiated" do
       {:ok, mod} = Canopy.Adapter.resolve("businessos")
       assert {:ok, _session} = mod.start(%{})
+    end
+  end
+
+  # ── YAWL Simulation API Tests ────────────────────────────────────────
+
+  test "capabilities includes :workflow_simulation" do
+    assert :workflow_simulation in BusinessOS.capabilities()
+  end
+
+  describe "simulate_workflows/2" do
+    test "returns error when BusinessOS server is unreachable" do
+      result = BusinessOS.simulate_workflows(%{}, %{"url" => "http://localhost:9999"})
+      assert {:error, {:connection_failed, _}} = result
+    end
+
+    test "send_message with yawl_simulate type dispatches simulation" do
+      # Without a live BusinessOS, the call should return a simulation_failed event
+      # (connection refused) rather than crashing.
+      msg = Jason.encode!(%{
+        "type" => "yawl_simulate",
+        "payload" => %{"spec_set" => "basic_wcp", "user_count" => 1}
+      })
+
+      events = BusinessOS.send_message(%{}, msg) |> Enum.to_list()
+      assert length(events) == 1
+      [event] = events
+      assert event["event_type"] in ["simulation_complete", "simulation_failed"]
+    end
+
+    test "parse unknown message type returns parse_error event" do
+      msg = Jason.encode!(%{"type" => "unknown_op", "payload" => %{}})
+      events = BusinessOS.send_message(%{}, msg) |> Enum.to_list()
+      assert length(events) == 1
+      [event] = events
+      assert event["event_type"] == "parse_error"
     end
   end
 end

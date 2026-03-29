@@ -25,6 +25,9 @@ defmodule Canopy.JTBD.Wave12ChaosTest do
 
   use ExUnit.Case, async: true
 
+  # These tests require Docker (Jaeger container) and an external Wave12Loop module
+  @moduletag :external_service
+
   require Logger
 
   alias Canopy.JTBD.Wave12Loop

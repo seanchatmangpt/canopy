@@ -12,7 +12,9 @@ defmodule Canopy.Autonomic.HeartbeatOntologyIntegrationTest do
   NOTE: Tests requiring OSA/Oxigraph connectivity are marked @skip.
   Run with OSA service running on http://localhost:8001 to execute integration tests.
   """
+
   use ExUnit.Case, async: false
+  @moduletag :integration
 
   alias Canopy.Autonomic.HeartbeatOntologyService
   alias Canopy.Ontology.Service

@@ -1804,6 +1804,39 @@ export function isMockEnabled(): boolean {
   return useMock;
 }
 
+// ── Process Mining (BusinessOS integration) ───────────────────────────────────
+
+export const processMining = {
+  kpis: (params?: { workspace_id?: string; department?: string; time_range?: string }) =>
+    request<import("./types").ProcessMiningKPIs>(
+      `/process-mining/kpis${params ? "?" + new URLSearchParams(params as Record<string, string>).toString() : ""}`,
+    ),
+  discover: (body: import("./types").ProcessDiscoveryParams) =>
+    request<import("./types").ProcessDiscoveryResult>("/process-mining/discover", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+  status: () => request<import("./types").ProcessMiningStatus>("/process-mining/status"),
+};
+
+// ── Compliance Dashboard (BusinessOS integration) ─────────────────────────────
+
+export const compliance = {
+  status: (params?: { workspace_id?: string }) =>
+    request<import("./types").ComplianceDashboardStatus>(
+      `/compliance/status${params ? "?" + new URLSearchParams(params as Record<string, string>).toString() : ""}`,
+    ),
+};
+
+// ── Schedule Run Management ───────────────────────────────────────────────────
+
+export const scheduleRuns = {
+  cancel: (runId: string) =>
+    request<{ status: string; run_id: string }>(`/schedules/runs/${runId}/cancel`, {
+      method: "POST",
+    }),
+};
+
 /**
  * Reset the singleton initializeAuth() promise so that the next call to
  * initializeAuth() re-probes the backend and re-reads the token.

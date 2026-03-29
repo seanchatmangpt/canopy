@@ -21,6 +21,7 @@ defmodule CanopyWeb.Plugs.WorkspaceContext do
   def init(opts), do: opts
 
   def call(conn, _opts) do
+    conn = fetch_query_params(conn)
     user = conn.assigns[:current_user]
 
     # Extract workspace_id from multiple sources (in priority order)

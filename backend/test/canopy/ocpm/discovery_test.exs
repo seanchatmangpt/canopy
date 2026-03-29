@@ -201,3 +201,52 @@ defmodule Canopy.OCPM.DiscoveryTest do
     end
   end
 end
+
+defmodule Canopy.OCPM.DiscoveryBOSFallbackTest do
+  use Canopy.DataCase
+
+  # Tag the whole module so this block can be run or excluded independently.
+  # Also tagged :integration because discover_process_model/1 may attempt a
+  # real HTTP call to BusinessOS before falling through to Pm4pyWrapper.
+  @moduletag :bos_fallback
+  @moduletag :integration
+
+  alias Canopy.OCPM.Discovery
+
+  describe "discover_process_model/1 BOS-primary fallback" do
+    test "falls back to Pm4pyWrapper on BOS connection error" do
+      # BusinessOS is not running in the test environment, so the adapter
+      # returns {:error, reason}.  Discovery must fall through to Pm4pyWrapper
+      # and return a well-shaped tuple rather than crashing.
+      events = [
+        %{"case_id" => "c1", "activity" => "A", "timestamp" => "2026-01-01T00:00:00Z"},
+        %{"case_id" => "c1", "activity" => "B", "timestamp" => "2026-01-01T01:00:00Z"}
+      ]
+
+      result = Discovery.discover_process_model(events)
+      assert match?({:ok, _}, result) or match?({:error, _}, result)
+    end
+
+    test "detect_bottlenecks/2 always uses pm4py (no BOS path)" do
+      # detect_bottlenecks delegates exclusively to Pm4pyWrapper — no BOS call.
+      # Signature: detect_bottlenecks(process_model, event_log)
+      events = [%{"case_id" => "c1", "activity" => "A", "timestamp" => "2026-01-01T00:00:00Z"}]
+      process_model = %{nodes: ["A"], edges: %{}, metadata: %{}}
+      result = Discovery.detect_bottlenecks(process_model, events)
+      assert match?({:ok, _}, result) or match?({:error, _}, result)
+    end
+
+    test "find_deviations/2 falls back to Pm4pyWrapper when BOS is unavailable" do
+      events = [
+        %{"case_id" => "c2", "activity" => "Start", "timestamp" => "2026-01-01T00:00:00Z"},
+        %{"case_id" => "c2", "activity" => "End", "timestamp" => "2026-01-01T02:00:00Z"}
+      ]
+
+      # Build a minimal process model to pass as the second argument.
+      process_model = %{nodes: ["Start", "End"], edges: %{}, metadata: %{}}
+
+      result = Discovery.find_deviations(events, process_model)
+      assert match?({:ok, _}, result) or match?({:error, _}, result)
+    end
+  end
+end

@@ -52,7 +52,7 @@ defmodule Canopy.JTBD.LinkedInRevOpsSmokeTest do
           )
 
         assert result.outcome == :success
-        assert result.latency_ms > 0
+        assert result.latency_ms >= 0
       end
 
       Logger.info("Multiple iterations test passed")

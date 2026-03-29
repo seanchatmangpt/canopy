@@ -8,9 +8,10 @@ defmodule Canopy.Schemas.WebhookDelivery do
     field :status_code, :integer
     field :payload, :map
     field :response, :string
-    field :inserted_at, :utc_datetime
 
     belongs_to :webhook, Canopy.Schemas.Webhook
+
+    timestamps(updated_at: false)
   end
 
   def changeset(delivery, attrs) do

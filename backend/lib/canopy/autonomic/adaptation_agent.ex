@@ -65,51 +65,39 @@ defmodule Canopy.Autonomic.AdaptationAgent do
     result
   end
 
-  defp compare_configs do
-    # Compare expected config with actual running config
-    try do
-      expected = get_expected_config()
-      actual = get_actual_config()
+  @doc """
+  Compare reference config (priv/config/reference.yaml) against actual app env.
 
-      # Find differences
-      diff_keys =
-        (Map.keys(expected) ++ Map.keys(actual))
-        |> Enum.uniq()
-        |> Enum.filter(fn key ->
-          Map.get(expected, key) != Map.get(actual, key)
-        end)
+  Returns a list of `{key, expected, actual}` tuples for keys that differ.
+  Returns `[]` if the reference file does not exist (graceful startup).
+  """
+  def compare_configs do
+    reference_path =
+      Application.app_dir(:canopy, "priv/config/reference.yaml")
 
-      Enum.map(diff_keys, fn key ->
-        {key, Map.get(expected, key), Map.get(actual, key)}
-      end)
-    rescue
-      e ->
-        Logger.error("[AdaptationAgent] Error comparing configs: #{Exception.message(e)}")
-        []
-    end
-  end
+    if File.exists?(reference_path) do
+      case YamlElixir.read_from_file(reference_path) do
+        {:ok, reference_map} ->
+          actual = Application.get_all_env(:canopy) |> Map.new()
 
-  defp get_expected_config do
-    # Get expected configuration from config files
-    try do
-      Application.get_all_env(:canopy)
-      |> Enum.take(5)
-      |> Map.new()
-    rescue
-      _e ->
-        %{}
-    end
-  end
+          Enum.reduce(reference_map, [], fn {key_str, expected_val}, acc ->
+            key = String.to_atom(key_str)
+            actual_val = Map.get(actual, key)
 
-  defp get_actual_config do
-    # Get actual running configuration
-    try do
-      Application.get_all_env(:canopy)
-      |> Enum.take(5)
-      |> Map.new()
-    rescue
-      _e ->
-        %{}
+            if actual_val != expected_val do
+              [{key, expected_val, actual_val} | acc]
+            else
+              acc
+            end
+          end)
+
+        {:error, reason} ->
+          Logger.warning("[AdaptationAgent] Failed to read reference config: #{inspect(reason)}")
+          []
+      end
+    else
+      Logger.info("[AdaptationAgent] No reference config found at #{reference_path}, skipping drift check")
+      []
     end
   end
 

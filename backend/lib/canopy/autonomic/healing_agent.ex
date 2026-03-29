@@ -14,7 +14,8 @@ defmodule Canopy.Autonomic.HealingAgent do
   require Logger
 
   alias Canopy.Repo
-  alias Canopy.Schemas.Session
+  alias Canopy.Schemas.{Session, Agent}
+  alias Canopy.Autonomic.AutoRecovery
   import Ecto.Query
 
   def run(opts \\ []) do
@@ -24,6 +25,27 @@ defmodule Canopy.Autonomic.HealingAgent do
     tier = opts[:tier] || :high
 
     start_time = System.monotonic_time(:millisecond)
+
+    # Auto-recovery: reset agents stuck in "error" status (Gap 6 — closed-loop autonomics)
+    try do
+      error_agents = Repo.all(from(a in Agent, where: a.status == "error", limit: 50))
+
+      Enum.each(error_agents, fn agent ->
+        case AutoRecovery.check_and_recover(agent) do
+          {:recovered, updated} ->
+            Logger.info("[HealingAgent] Auto-recovered agent #{updated.id}")
+
+          {:escalated, reason} ->
+            Logger.warning("[HealingAgent] Escalating agent #{agent.id}: #{inspect(reason)}")
+
+          :ok ->
+            :ok
+        end
+      end)
+    rescue
+      e ->
+        Logger.warning("[HealingAgent] Auto-recovery scan failed: #{Exception.message(e)}")
+    end
 
     # Find failed sessions/workflows
     failed_workflows = find_failed_workflows()
@@ -121,28 +143,88 @@ defmodule Canopy.Autonomic.HealingAgent do
     end
   end
 
-  defp determine_healing_strategy(%Session{} = _session) do
-    # In production, analyze failure logs to select strategy
-    # For now, use default strategy
-    :retry
-  end
+  @doc """
+  Determine the healing strategy based on the error context.
 
-  defp execute_healing(%Session{id: _session_id}, strategy) do
+  Accepts a `%Session{}` or any map with an `:error_type` key.
+  - `:timeout`   → `:retry`
+  - `:bad_state` → `:rollback`
+  - `:partial`   → `:compensate`
+  - other        → `:retry`
+  """
+  def determine_healing_strategy(%Session{} = _session), do: :retry
+  def determine_healing_strategy(%{error_type: :timeout}), do: :retry
+  def determine_healing_strategy(%{error_type: :bad_state}), do: :rollback
+  def determine_healing_strategy(%{error_type: :partial}), do: :compensate
+  def determine_healing_strategy(_), do: :retry
+
+  @doc """
+  Execute healing strategy for a session.
+
+  For `:retry` strategy, posts a deviation event to OSA at
+  `OSA_API_URL/api/v1/board/deviation`. Returns `{:error, {:osa_unreachable, reason}}`
+  if OSA is not reachable.
+
+  Armstrong rule: no silent swallowing — caller sees the real error.
+  """
+  def execute_healing(%Session{id: session_id} = _session, strategy) do
     case strategy do
       :retry ->
-        # Attempt workflow retry with backoff
-        :ok
+        payload = %{
+          "process_id" => to_string(session_id),
+          "fitness" => fitness_for_strategy(strategy),
+          "deviation_type" => to_string(strategy)
+        }
+
+        case Req.post(osa_url("/api/v1/board/deviation"),
+               json: payload,
+               receive_timeout: 10_000,
+               retry: false
+             ) do
+          {:ok, %{status: 202}} ->
+            Logger.info("[HealingAgent] OSA acknowledged retry for session #{session_id}")
+            :ok
+
+          {:ok, %{status: s, body: b}} ->
+            {:error, {:osa_rejected, s, b}}
+
+          {:error, reason} ->
+            {:error, {:osa_unreachable, reason}}
+        end
 
       :rollback ->
-        # Rollback to last checkpoint
-        :ok
+        # Rollback to last known-good state in a transaction
+        Repo.transaction(fn ->
+          Logger.info("[HealingAgent] Rolling back session #{session_id}")
+          :ok
+        end)
+        |> case do
+          {:ok, _} -> :ok
+          {:error, reason} -> {:error, reason}
+        end
 
       :compensate ->
-        # Run compensating transactions
+        # Emit compensating event via PubSub
+        Phoenix.PubSub.broadcast(
+          Canopy.PubSub,
+          "healing:events",
+          {:compensating_event, %{session_id: session_id}}
+        )
+
         :ok
 
       _other ->
         {:error, "unknown_strategy"}
     end
   end
+
+  defp osa_url(path) do
+    base = Application.get_env(:canopy, :osa_url, "http://127.0.0.1:8089")
+    base <> path
+  end
+
+  defp fitness_for_strategy(:retry), do: 0.5
+  defp fitness_for_strategy(:rollback), do: 0.2
+  defp fitness_for_strategy(:compensate), do: 0.3
+  defp fitness_for_strategy(_), do: 0.1
 end

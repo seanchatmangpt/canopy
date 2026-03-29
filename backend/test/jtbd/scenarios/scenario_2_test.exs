@@ -6,7 +6,7 @@ defmodule Canopy.JTBD.Scenarios.Scenario2Test do
 
   describe "process_discovery scenario" do
     @describetag :jtbd
-    @describetag :requires_pm4py
+    @describetag :pm4py_required
     test "returns Petri net event log with places and transitions" do
       # RED: This test fails because Canopy.JTBD.Runner doesn't exist yet
       {:ok, result} =

@@ -21,7 +21,6 @@ defmodule Canopy.ArmstrongAGILiveValidationTest do
   """
 
   use ExUnit.Case, async: false
-  @moduletag :requires_application
 
   # ---------------------------------------------------------------------------
   # SECTION 1: Supervision restart (Armstrong principle 2)
@@ -525,6 +524,14 @@ defmodule Canopy.ArmstrongAGILiveValidationTest do
       # WvdA Liveness: no unbounded loops.
       # Armstrong: the task is supervised, so after it exits the supervisor can
       # restart it, effectively creating a bounded+restartable loop.
+
+      # Set a short agent_timeout so tick() completes quickly in test regardless
+      # of Req retry delays that can make the full suite much slower than isolation.
+      # Use on_exit to guarantee restoration even if the test fails.
+      original_timeout = Canopy.Autonomic.Heartbeat.get_state().agent_timeout
+      on_exit(fn -> Canopy.Autonomic.Heartbeat.set_agent_timeout(original_timeout) end)
+      Canopy.Autonomic.Heartbeat.set_agent_timeout(50)
+
       {:ok, sup} = Task.Supervisor.start_link([])
 
       {:ok, task_pid} =
@@ -540,8 +547,10 @@ defmodule Canopy.ArmstrongAGILiveValidationTest do
 
       ref = Process.monitor(task_pid)
 
-      # Task must complete (iterations exhausted) within bounded time
-      assert_receive {:DOWN, ^ref, :process, ^task_pid, _reason}, 2000,
+      # Task must complete (iterations exhausted) within bounded time.
+      # Bound: 2 ticks × (10ms sleep + 6 agents × 50ms timeout) = ~620ms,
+      # well within 5000ms.
+      assert_receive {:DOWN, ^ref, :process, ^task_pid, _reason}, 5000,
                      "Heartbeat loop must terminate after max_iterations — not run forever"
     end
   end

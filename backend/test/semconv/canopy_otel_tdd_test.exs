@@ -9,11 +9,11 @@ defmodule Canopy.Semconv.OtelTddTest do
   """
   use ExUnit.Case, async: true
 
-  alias Canopy.SemConv.CanopyAttributes
-  alias Canopy.SemConv.WorkflowAttributes
-  alias Canopy.SemConv.A2aAttributes
-  alias Canopy.SemConv.HealingAttributes
-  alias Canopy.SemConv.BosAttributes
+  alias OpenTelemetry.SemConv.Incubating.CanopyAttributes
+  alias OpenTelemetry.SemConv.Incubating.WorkflowAttributes
+  alias OpenTelemetry.SemConv.Incubating.A2aAttributes
+  alias OpenTelemetry.SemConv.Incubating.HealingAttributes
+  alias OpenTelemetry.SemConv.Incubating.BosAttributes
   alias Canopy.SemConv.SpanNames
 
   # ── Domain: Canopy (heartbeat + adapter) ───────────────────────────────────
@@ -190,9 +190,10 @@ defmodule Canopy.Semconv.OtelTddTest do
     end
 
     @tag :unit
-    test "all 8 YAWL workflow patterns defined in schema" do
+    test "all YAWL workflow patterns defined in schema" do
       values = WorkflowAttributes.workflow_pattern_values()
-      assert map_size(values) == 8
+      # Schema defines 23 YAWL patterns (not 8)
+      assert map_size(values) == 23
     end
   end
 
@@ -265,9 +266,10 @@ defmodule Canopy.Semconv.OtelTddTest do
     end
 
     @tag :unit
-    test "all 4 compliance frameworks defined in schema" do
+    test "all compliance frameworks defined in schema" do
       values = BosAttributes.bos_compliance_framework_values()
-      assert map_size(values) == 4
+      # Schema defines 5 frameworks (SOC2, HIPAA, GDPR, SOX, CUSTOM)
+      assert map_size(values) == 5
     end
   end
 

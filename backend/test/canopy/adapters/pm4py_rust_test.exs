@@ -1,6 +1,9 @@
 defmodule Canopy.Adapters.PM4pyRustTest do
   use ExUnit.Case, async: true
 
+  # Tests make HTTP calls to pm4py-rust service on port 8000
+  @moduletag :external_service
+
   alias Canopy.Adapters.PM4pyRust
 
   doctest PM4pyRust

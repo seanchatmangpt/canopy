@@ -710,6 +710,55 @@ const routes: Array<{ pattern: RegExp; handler: RouteHandler }> = [
     handler: () => ({ signals: mockSignals() }),
   },
 
+  // ── Process Mining ────────────────────────────────────────────────────────────
+  {
+    pattern: /^\/process-mining\/kpis$/,
+    handler: () => ({
+      businessos_available: false,
+      avg_cycle_time_hours: null,
+      conformance_score: null,
+      active_cases: null,
+      bottleneck_activity: null,
+      error: "BusinessOS offline (mock)",
+    }),
+  },
+  {
+    pattern: /^\/process-mining\/status$/,
+    handler: () => ({
+      businessos_available: false,
+      status: "unavailable",
+    }),
+  },
+  {
+    pattern: /^\/process-mining\/discover$/,
+    handler: () => ({
+      businessos_available: false,
+      error: "BusinessOS offline (mock)",
+    }),
+  },
+
+  // ── Compliance ────────────────────────────────────────────────────────────────
+  {
+    pattern: /^\/compliance\/status$/,
+    handler: () => ({
+      businessos_available: false,
+      overall_score: 0,
+      status: "unavailable",
+      frameworks: [],
+      last_checked_at: null,
+      error: "BusinessOS offline (mock)",
+    }),
+  },
+
+  // ── Schedule run cancel ───────────────────────────────────────────────────────
+  {
+    pattern: /^\/schedules\/runs\/([^/]+)\/cancel$/,
+    handler: (path) => {
+      const runId = path.split("/")[3];
+      return { status: "cancelled", run_id: runId };
+    },
+  },
+
   // ── Spawn ─────────────────────────────────────────────────────────────────────
   {
     pattern: /^\/spawn\/active$/,

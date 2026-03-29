@@ -13,6 +13,7 @@ defmodule Canopy.Integration.ConsistencyTest do
   """
 
   use ExUnit.Case
+  @moduletag :integration
   alias Canopy.Adapters.OSA
   alias Canopy.IssueDispatcher
   require Logger
@@ -29,7 +30,7 @@ defmodule Canopy.Integration.ConsistencyTest do
       "type" => "osa",
       "url" => "http://127.0.0.1:8089",
       "provider" => "groq",
-      "model" => "llama-3.3-70b-versatile",
+      "model" => "openai/gpt-oss-20b",
       "shared_secret" => System.get_env("OSA_SHARED_SECRET", "test-secret-key")
     }
 

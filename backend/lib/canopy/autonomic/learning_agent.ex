@@ -38,7 +38,12 @@ defmodule Canopy.Autonomic.LearningAgent do
     retrained_count = Enum.count(retraining_results, fn r -> r[:status] == "success" end)
 
     # Calculate accuracy metrics
-    accuracy = if data_pulled > 0, do: :rand.uniform(), else: 0.0
+    accuracy =
+      if retrained_count > 0 and data_pulled > 0 do
+        Float.round(min(1.0, retrained_count / max(data_pulled, 1)), 4)
+      else
+        0.0
+      end
 
     elapsed = System.monotonic_time(:millisecond) - start_time
 

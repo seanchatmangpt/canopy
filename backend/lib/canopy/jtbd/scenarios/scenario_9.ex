@@ -73,18 +73,26 @@ defmodule Canopy.JTBD.Scenarios.Scenario9 do
 
       _count ->
         # Exceeded limit, decrement and return error
-        :ets.update_counter(:mcp_concurrency, :count, {2, -1})
+        try do
+          :ets.update_counter(:mcp_concurrency, :count, {2, -1})
+        rescue
+          e ->
+            Logger.error("Failed to decrement ETS counter: #{Exception.message(e)}")
+        end
         :error
     end
   catch
-    _ -> :ok
+    kind, reason ->
+      Logger.error("ETS acquire_slot failed (#{kind}): #{inspect(reason)}")
+      :error
   end
 
   defp release_slot do
     try do
       :ets.update_counter(:mcp_concurrency, :count, {2, -1})
     rescue
-      _ -> :ok
+      e ->
+        Logger.error("Failed to release ETS slot: #{Exception.message(e)}")
     end
   end
 
@@ -95,7 +103,13 @@ defmodule Canopy.JTBD.Scenarios.Scenario9 do
           :ets.new(:mcp_concurrency, [:named_table, :public])
           :ets.insert(:mcp_concurrency, {:count, 0})
         rescue
-          _ -> :ok
+          e ->
+            # Table may have been created by concurrent process; verify
+            if :ets.whereis(:mcp_concurrency) == :undefined do
+              Logger.error("Failed to ensure ETS table exists: #{Exception.message(e)}")
+            else
+              Logger.debug("ETS table created by concurrent process")
+            end
         end
 
       _ ->

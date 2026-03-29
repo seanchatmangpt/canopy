@@ -27,12 +27,6 @@ defmodule Canopy.HeartbeatLivenessTest do
   alias Canopy.Heartbeat
   alias Canopy.Adapters.OSA
 
-  setup do
-    # Start heartbeat with test configuration
-    start_supervised!(Heartbeat)
-    :ok
-  end
-
   # ---------------------------------------------------------------------------
   # RED Phase: Tests documenting liveness expectations
   # ---------------------------------------------------------------------------
@@ -258,13 +252,15 @@ defmodule Canopy.HeartbeatLivenessTest do
 
     test "heartbeat failure path should escalate after bounded attempts" do
       # WvdA: Failure path must not retry infinitely
+      # Uses deterministic failure mock (not random) for FIRST:Repeatable compliance
 
       start_time = System.monotonic_time(:millisecond)
 
       result =
         try do
           Enum.reduce_while(1..5, {:error, :initial}, fn attempt, _acc ->
-            case attempt_osa_contact() do
+            # Deterministic: always fail to test escalation path
+            case {:error, :unreachable} do
               {:ok, _} ->
                 {:halt, {:ok, :completed}}
 

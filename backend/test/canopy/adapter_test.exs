@@ -24,20 +24,20 @@ defmodule Canopy.AdapterTest do
       assert {:ok, Canopy.Adapters.HTTP} = Adapter.resolve("http")
     end
 
-    test "resolves 'openclaw' to Canopy.Adapters.OpenClaw" do
-      assert {:ok, Canopy.Adapters.OpenClaw} = Adapter.resolve("openclaw")
+    test "resolves 'pm4py-rust' to Canopy.Adapters.PM4pyRust" do
+      assert {:ok, Canopy.Adapters.PM4pyRust} = Adapter.resolve("pm4py-rust")
     end
 
-    test "resolves 'cursor' to Canopy.Adapters.Cursor" do
-      assert {:ok, Canopy.Adapters.Cursor} = Adapter.resolve("cursor")
-    end
-
-    test "resolves 'gemini' to Canopy.Adapters.Gemini" do
-      assert {:ok, Canopy.Adapters.Gemini} = Adapter.resolve("gemini")
+    test "resolves 'businessos' to Canopy.Adapters.BusinessOS" do
+      assert {:ok, Canopy.Adapters.BusinessOS} = Adapter.resolve("businessos")
     end
 
     test "resolves 'mcp' to Canopy.Adapters.MCP" do
       assert {:ok, Canopy.Adapters.MCP} = Adapter.resolve("mcp")
+    end
+
+    test "resolves 'a2a' to Canopy.Adapters.A2A" do
+      assert {:ok, Canopy.Adapters.A2A} = Adapter.resolve("a2a")
     end
 
     test "returns error for unknown adapter type" do

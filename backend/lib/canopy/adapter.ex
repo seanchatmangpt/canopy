@@ -31,12 +31,10 @@ defmodule Canopy.Adapter do
   def resolve("codex"), do: {:ok, Canopy.Adapters.Codex}
   def resolve("bash"), do: {:ok, Canopy.Adapters.Bash}
   def resolve("http"), do: {:ok, Canopy.Adapters.HTTP}
-  def resolve("openclaw"), do: {:ok, Canopy.Adapters.OpenClaw}
-  def resolve("cursor"), do: {:ok, Canopy.Adapters.Cursor}
-  def resolve("gemini"), do: {:ok, Canopy.Adapters.Gemini}
   def resolve("mcp"), do: {:ok, Canopy.Adapters.MCP}
   def resolve("pm4py-rust"), do: {:ok, Canopy.Adapters.PM4pyRust}
   def resolve("businessos"), do: {:ok, Canopy.Adapters.BusinessOS}
+  def resolve("a2a"), do: {:ok, Canopy.Adapters.A2A}
   def resolve(type), do: {:error, {:unknown_adapter, type}}
 
   @doc "List all registered adapters with metadata."
@@ -47,12 +45,10 @@ defmodule Canopy.Adapter do
       Canopy.Adapters.Codex,
       Canopy.Adapters.Bash,
       Canopy.Adapters.HTTP,
-      Canopy.Adapters.OpenClaw,
-      Canopy.Adapters.Cursor,
-      Canopy.Adapters.Gemini,
       Canopy.Adapters.MCP,
       Canopy.Adapters.PM4pyRust,
-      Canopy.Adapters.BusinessOS
+      Canopy.Adapters.BusinessOS,
+      Canopy.Adapters.A2A
     ]
     |> Enum.map(fn mod ->
       %{
