@@ -264,7 +264,7 @@ defmodule CanopyWeb.WebhookControllerReceiveTest do
     workspace
   end
 
-  defp insert_webhook(workspace_id, attrs \\ %{}) do
+  defp insert_webhook(workspace_id, attrs) do
     base = %{
       name: "Webhook #{System.unique_integer([:positive])}",
       webhook_type: "incoming",
